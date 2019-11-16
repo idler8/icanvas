@@ -1,0 +1,52 @@
+{
+	"name": "@icanvas/core",
+	"version": "2.3.6",
+	"description": "这是icanvas的核心包",
+	"scripts": {
+		"build": "rollup -c"
+	},
+	"homepage": "https://github.com/idler8/icanvas",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/idler8/icanvas"
+	},
+	"keywords": [
+		"canvas",
+		"游戏",
+		"中文",
+		"国产",
+		"核心",
+		"多平台",
+		"2d",
+		"webgl"
+	],
+	"author": "潘丽敏",
+	"license": "MIT",
+	"dependencies": {
+		"axios": "^0.19.0",
+		"eventemitter3": "^4.0.0"
+	},
+	"main": "dist/icanvas.umd.js",
+	"module": "dist/icanvas.es.js",
+	"sideEffects": false,
+	"devDependencies": {
+		"@babel/core": "^7.6.4",
+		"@babel/plugin-proposal-class-properties": "^7.5.5",
+		"@babel/plugin-transform-runtime": "^7.6.2",
+		"@babel/preset-env": "^7.6.3",
+		"@babel/runtime": "^7.6.3",
+		"rollup": "^1.20.3",
+		"rollup-plugin-babel": "^4.3.3",
+		"rollup-plugin-commonjs": "^10.1.0",
+		"rollup-plugin-json": "^4.0.0",
+		"rollup-plugin-node-resolve": "^5.2.0",
+		"rollup-plugin-terser": "^5.1.1"
+	},
+	"prettier": {
+		"printWidth": 160,
+		"useTabs": true,
+		"singleQuote": true,
+		"trailingComma": "all",
+		"tabWidth": 4
+	}
+}
