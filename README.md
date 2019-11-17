@@ -68,7 +68,7 @@
 #### [Canvas2D上下文扩展方法](src/utils/lib/canvas.js)`ICanvas.UtilCanvas`
 #### [界面组件渲染类](src/utils/lib/render.js)`ICanvas.UtilRender`
 #### [触摸事件统一处理类](src/utils/lib/touch.js)`ICanvas.UtilTouch`
-#### [界面组件碰撞检测类](src/utils/lib/collision.js)`ICanvas.UtilCollsion`
+#### [界面组件碰撞检测类](src/utils/lib/collision.js)`ICanvas.UtilCollsion`
 #### [文件夹资源结构JSON转键值对](src/utils/index.js)`ICanvas.UtilLoaderMap`
 #### [Object属性递归获取方法](src/utils/index.js)`ICanvas.UtilRecursiveMap`
 #### [微信方法变种工厂](src/utils/index.js)`ICanvas.UtilWxgameVary`
