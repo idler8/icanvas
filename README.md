@@ -11,15 +11,16 @@
 ## 调用
 ### cjs
 ```html
-    <script src="@icnavas/core/dist/icanvas/web.js">//window.ICanvas
+    <script src="@icanvas/core/dist/icanvas.web.js">//window.ICanvas
 ```
-### umd
+### 微信
+```javascript
+   const ICanvas = require('@icanvas/core/dist/icanvas.wxgame.js');
+```
+### umd/es6
+es6调用完整支持Tree Shake
 ```javascript
     const ICanvas = require('@icanvas/core')
-```
-### es6
-```javascript
-    const ICanvas = require('@icanvas/core/dist/icanvas.es.js')
 ```
 
 ## API列表
