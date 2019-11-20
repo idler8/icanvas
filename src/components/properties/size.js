@@ -1,5 +1,5 @@
 import { MathVector2 } from '../../maths/index.js';
-export default (superClass = null) => {
+export default superClass => {
 	return class Size extends superClass {
 		/**
 		 * 大小控制
@@ -43,7 +43,7 @@ export default (superClass = null) => {
 			return this;
 		}
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.size) Object.assign(this.size, options.size);
 			return this;
 		}

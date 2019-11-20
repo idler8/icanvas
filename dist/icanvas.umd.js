@@ -1957,7 +1957,7 @@
   var Position$1 = (function () {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Object;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -1990,7 +1990,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Position.prototype), "setOptions", this)) get(getPrototypeOf(Position.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Position.prototype), "setOptions", this).call(this, options);
+
           if (options.position) Object.assign(this.position, options.position);
           return this;
         }
@@ -2016,10 +2017,9 @@
     }(superClass), _temp;
   });
 
-  var Angle = (function () {
+  var Angle = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2058,7 +2058,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Angle.prototype), "setOptions", this)) get(getPrototypeOf(Angle.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Angle.prototype), "setOptions", this).call(this, options);
+
           if (options.radian) this.radian = options.radian;
           if (options.angle) this.angle = options.angle;
           return this;
@@ -2078,10 +2079,9 @@
     }(superClass), _temp;
   });
 
-  var Scale = (function () {
+  var Scale = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2115,7 +2115,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Scale.prototype), "setOptions", this)) get(getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
+
           if (options.scale) Object.assign(this.scale, options.scale);
           return this;
         }
@@ -2141,10 +2142,9 @@
     }(superClass), _temp;
   });
 
-  var Anchor = (function () {
+  var Anchor = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2188,7 +2188,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Anchor.prototype), "setOptions", this)) get(getPrototypeOf(Anchor.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Anchor.prototype), "setOptions", this).call(this, options);
+
           if (options.anchor) Object.assign(this.anchor, options.anchor);
           return this;
         }
@@ -2225,10 +2226,9 @@
     }(superClass), _temp;
   });
 
-  var Alpha = (function () {
+  var Alpha = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2261,7 +2261,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Alpha.prototype), "setOptions", this)) get(getPrototypeOf(Alpha.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Alpha.prototype), "setOptions", this).call(this, options);
+
           if (options.alpha) this.alpha = options.alpha;
           return this;
         }
@@ -2280,10 +2281,9 @@
     }(superClass), _temp;
   });
 
-  var Visible = (function () {
+  var Visible = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2316,7 +2316,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Visible.prototype), "setOptions", this)) get(getPrototypeOf(Visible.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Visible.prototype), "setOptions", this).call(this, options);
+
           if (options.visible) this.visible = options.visible;
           return this;
         }
@@ -2337,10 +2338,9 @@
     }(superClass), _temp;
   });
 
-  var Size = (function () {
+  var Size = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2401,7 +2401,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Size.prototype), "setOptions", this)) get(getPrototypeOf(Size.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Size.prototype), "setOptions", this).call(this, options);
+
           if (options.size) Object.assign(this.size, options.size);
           return this;
         }
@@ -2436,10 +2437,9 @@
     }(superClass), _temp;
   });
 
-  var Clip = (function () {
+  var Clip = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2484,7 +2484,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Clip.prototype), "setOptions", this)) get(getPrototypeOf(Clip.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Clip.prototype), "setOptions", this).call(this, options);
+
           if (options.clip) this.setClip.apply(this, options.clip);
           return this;
         }
@@ -2494,10 +2495,9 @@
     }(superClass), _temp;
   });
 
-  var Padding = (function () {
+  var Padding = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2530,7 +2530,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Padding.prototype), "setOptions", this)) get(getPrototypeOf(Padding.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Padding.prototype), "setOptions", this).call(this, options);
+
           if (options.padding) Object.assign(this.padding, options.padding);
           return this;
         }
@@ -2560,10 +2561,9 @@
     }(superClass), _temp;
   });
 
-  var Style = (function () {
+  var Style = (function (superClass) {
     var _class, _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp = _class =
     /*#__PURE__*/
     function (_superClass) {
@@ -2591,13 +2591,14 @@
         key: "setStyle",
         value: function setStyle(options) {
           if (!options.cacheFont) this.style.cacheFont = '';
-          Object.assign(this.style.options, options);
+          Object.assign(this.style, options);
           return this;
         }
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          if (get(getPrototypeOf(Style.prototype), "setOptions", this)) get(getPrototypeOf(Style.prototype), "setOptions", this).call(this, options);
+          get(getPrototypeOf(Style.prototype), "setOptions", this).call(this, options);
+
           if (options.style) this.setStyle(options.style);
           return this;
         }
@@ -2613,9 +2614,9 @@
 
       return Style;
     }(superClass), defineProperty(_class, "defaultStyle", {
-      color: '#000000',
+      color: '#FFFFFF',
       //填充色
-      stroke: 1,
+      stroke: 0,
       //线宽
       strokeColor: '#FFFFFF',
       //线框色
@@ -2636,10 +2637,9 @@
 
   var CID = 0; //全局递增组件id
 
-  var Text = (function () {
+  var Base = (function (superClass) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2668,8 +2668,7 @@
 
         defineProperty(assertThisInitialized(_this), "matrix", new Matrix3());
 
-        _this.setOptions(options);
-
+        if (options) _this.setOptions(options);
         return _this;
       }
 
@@ -2792,10 +2791,502 @@
 
           return this;
         }
+      }, {
+        key: "setOptions",
+        value: function setOptions(options) {
+          get(getPrototypeOf(ComponentBase.prototype), "setOptions", this).call(this, options);
+
+          return this;
+        }
       }]);
 
       return ComponentBase;
     }(superClass), _temp;
+  });
+
+  var Texture = (function (superClass) {
+    var _temp;
+
+    return _temp =
+    /*#__PURE__*/
+    function (_superClass) {
+      inherits(Texture, _superClass);
+
+      function Texture(options) {
+        var _this;
+
+        classCallCheck(this, Texture);
+
+        _this = possibleConstructorReturn(this, getPrototypeOf(Texture).call(this));
+
+        defineProperty(assertThisInitialized(_this), "texture", null);
+
+        if (options) _this.setOptions(options);
+        return _this;
+      }
+
+      createClass(Texture, [{
+        key: "setTexture",
+        value: function setTexture(texture) {
+          this.texture = Texture.GetImage ? Texture.GetImage(texture) : texture;
+          if (!this.texture) return this;
+          if (this.size) this.size.setTo(this.texture.width, this.texture.height);
+          if (this.useFrame) this.useFrame = false;
+          return this;
+        }
+      }, {
+        key: "update",
+        value: function update(Context) {
+          if (!this.texture) return;
+
+          if (this.useClip) {
+            Context.drawImage(this.texture, this.clipPosition.x, this.clipPosition.y, this.clipSize.x, this.clipSize.y, -this.anchor.x, -this.anchor.y, this.size.x, this.size.y);
+          } else {
+            Context.drawImage(this.texture, -this.anchor.x, -this.anchor.y, this.size.x, this.size.y);
+          }
+        }
+      }]);
+
+      return Texture;
+    }(superClass), _temp;
+  });
+
+  var Scroll = (function (superClass) {
+    var _temp;
+
+    return _temp =
+    /*#__PURE__*/
+    function (_superClass) {
+      inherits(Scroll, _superClass);
+
+      function Scroll(options) {
+        var _this;
+
+        classCallCheck(this, Scroll);
+
+        _this = possibleConstructorReturn(this, getPrototypeOf(Scroll).call(this));
+
+        defineProperty(assertThisInitialized(_this), "context", null);
+
+        if (options) _this.setOptions(options);
+        return _this;
+      }
+      /**
+       * 真实场地大小
+       */
+
+
+      createClass(Scroll, [{
+        key: "setRealSize",
+        value: function setRealSize(x, y) {
+          this.context.SetSize(x, y);
+          return this;
+        }
+      }, {
+        key: "touchMoveX",
+
+        /**
+         * 横向移动
+         * @param {Number} mx 轴X移动量
+         */
+        value: function touchMoveX(mx) {
+          var X = this.clipPosition.x;
+          var Max = this.scrollWidth;
+          this.clipPosition.x -= mx;
+          if (this.clipPosition.x > Max) this.clipPosition.x = Max;
+          if (this.clipPosition.x < 0) this.clipPosition.x = 0;
+          return this.clipPosition.x != X;
+        }
+        /**
+         * 纵向移动
+         * @param {Number} my 轴Y移动量
+         */
+
+      }, {
+        key: "touchMoveY",
+        value: function touchMoveY(my) {
+          var Y = this.clipPosition.y;
+          var Max = this.scrollHeight;
+          this.clipPosition.y -= my;
+          if (this.clipPosition.y > Max) this.clipPosition.y = Max;
+          if (this.clipPosition.y < 0) this.clipPosition.y = 0;
+          return this.clipPosition.y != Y;
+        }
+        /**
+         * @param {*} options
+         */
+
+      }, {
+        key: "setOptions",
+        value: function setOptions(options) {
+          get(getPrototypeOf(Scroll.prototype), "setOptions", this).call(this, options);
+
+          this.context = options.context;
+          this.setClip(0, 0, options.width || 1, options.height || 1);
+          this.setRealSize(options.realWidth || 1, options.realHeight || 1);
+          return this;
+        }
+        /**
+         * 绘制函数
+         * @param {*} Context
+         */
+
+      }, {
+        key: "update",
+        value: function update(Context) {
+          Context.drawImage(this.context.canvas, this.clipPosition.x, this.clipPosition.y, this.size.x, this.size.y, -this.anchor.x, -this.anchor.y, this.size.x, this.size.y);
+        }
+        /**
+         * 触摸事件位置偏移量
+         * @param {*} touch
+         */
+
+      }, {
+        key: "offsetTouch",
+        value: function offsetTouch(touch) {
+          if (get(getPrototypeOf(Scroll.prototype), "offsetTouch", this)) get(getPrototypeOf(Scroll.prototype), "offsetTouch", this).call(this, touch);
+          return touch.addToVector(this.clipPosition);
+        }
+        /**
+         * 检查触摸到自身
+         * @param {x} x
+         * @param {*} y
+         */
+
+      }, {
+        key: "hitMe",
+        value: function hitMe(x, y) {
+          x -= this.clipPosition.x;
+          y -= this.clipPosition.y;
+          return get(getPrototypeOf(Scroll.prototype), "hitMe", this).call(this, x, y);
+        }
+      }, {
+        key: "realWidth",
+        get: function get() {
+          return this.context.canvas.width;
+        }
+      }, {
+        key: "realHeight",
+        get: function get() {
+          return this.context.canvas.height;
+        } //滚动位置
+
+      }, {
+        key: "scrollHeight",
+        get: function get() {
+          return this.realHeight - this.height;
+        }
+      }, {
+        key: "scrollWidth",
+        get: function get() {
+          return this.realWidth - this.width;
+        }
+      }]);
+
+      return Scroll;
+    }(superClass), _temp;
+  });
+
+  var Text = (function (superClass) {
+    var _class, _temp;
+
+    return _temp = _class =
+    /*#__PURE__*/
+    function (_superClass) {
+      inherits(Text, _superClass);
+
+      function Text(options) {
+        var _this;
+
+        classCallCheck(this, Text);
+
+        _this = possibleConstructorReturn(this, getPrototypeOf(Text).call(this));
+
+        defineProperty(assertThisInitialized(_this), "_value", '');
+
+        defineProperty(assertThisInitialized(_this), "special", null);
+
+        defineProperty(assertThisInitialized(_this), "wrap", {
+          width: 0,
+          height: 0
+        });
+
+        defineProperty(assertThisInitialized(_this), "_LineWidth", []);
+
+        defineProperty(assertThisInitialized(_this), "_Lines", []);
+
+        defineProperty(assertThisInitialized(_this), "_Handle", Object.assign({}, Text.defaultHandle));
+
+        if (options) _this.setOptions(options);
+        return _this;
+      }
+      /**
+       * 当前内容字符串
+       */
+
+
+      createClass(Text, [{
+        key: "setValue",
+        value: function setValue(v) {
+          this.value = v;
+          return this;
+        }
+        /**
+         * 特殊插入对象
+         */
+
+      }, {
+        key: "setOptions",
+
+        /**
+         * @param {*} options
+         */
+        value: function setOptions(options) {
+          get(getPrototypeOf(Text.prototype), "setOptions", this).call(this, options);
+
+          if (options.wrapWidth > 0) this.wrapWidth = options.wrapWidth;
+          this.lineHeight = options.lineHeight || 0;
+          if (options.special) this.special = Object.assign(this.special || {}, options.special);
+          if (options.value) this.value = options.value;
+          return this;
+        }
+        /**
+         * 文本切割配置
+         */
+
+      }, {
+        key: "separate",
+        value: function separate(value) {
+          if (!Text.Context) return; //TODO 是否补充测试例
+
+          Text.Context.font = this.font;
+          this._Lines.length = 0;
+          this._LineWidth.length = 0;
+          this.size.setTo(0, this.lineHeight);
+
+          for (var i = 0; i <= value.length; i++) {
+            this.checkCurrentText(value[i]);
+          }
+
+          Object.assign(this._Handle, Text.defaultHandle);
+          return this.setAnchorSize(Text.AlignWidth[this.style.align], Text.AlignHeight[this.style.baseline]);
+        } //检查当前字符
+
+      }, {
+        key: "checkCurrentText",
+        value: function checkCurrentText(value) {
+          if (!Text.Context) return; //TODO 是否补充测试例
+
+          if (this.checkSpecial(value)) return;
+          this._Handle.currentText = value;
+
+          if (!this._Handle.currentText) {
+            this._Handle.currentWidth = 0;
+          } else {
+            var measureText = Text.Context.measureText(this._Handle.currentText);
+            this._Handle.currentWidth = measureText ? measureText.width : 0;
+          }
+
+          this._Handle.nextCursorX = this._Handle.cursorX + this._Handle.currentWidth;
+          if (this.wrapWidth > 0 && this._Handle.nextCursorX > this.wrapWidth) return this.newLine();
+          this._Handle.cursorX = this._Handle.nextCursorX;
+          this._Handle.currentString += this._Handle.currentText;
+        } //检查特殊对象
+
+      }, {
+        key: "checkSpecialObject",
+        value: function checkSpecialObject(special) {
+          var width = special.width || this.style.size;
+          this._Handle.nextCursorX = this._Handle.cursorX + width;
+
+          if (this.wrapWidth > 0 && this._Handle.nextCursorX > this.wrapWidth) {
+            this._Lines.push('\n', special, '\0', special.width);
+
+            this._LineWidth.push(this._Handle.cursorX);
+
+            if (this._Handle.cursorX > this.size.x) this.size.x = this._Handle.cursorX;
+            this.size.y += this.lineHeight;
+            this._Handle.cursorX = special.width;
+          } else {
+            if (this._Handle.cursorX) this._Lines.push('\0', this._Handle.cursorX);
+            this._Handle.cursorX = this._Handle.nextCursorX;
+
+            this._Lines.push(special, '\0', this._Handle.cursorX);
+          }
+
+          this._Handle.currentString = '';
+        } //检查特殊字符
+
+      }, {
+        key: "checkSpecial",
+        value: function checkSpecial(str) {
+          if (str === '\0') {
+            this._Handle.Special = !this._Handle.Special;
+
+            if (this._Handle.Special) {
+              if (this._Handle.currentString) {
+                this._Lines.push(this._Handle.currentString);
+
+                this._Handle.currentString = '';
+              }
+            } else {
+              this.checkSpecialObject(this.special[this._Handle.currentString]);
+            }
+
+            return true;
+          } else if (this._Handle.Special) {
+            this._Handle.currentString += str;
+            return true;
+          } else if (str === undefined) {
+            if (this._Handle.currentString) {
+              this._Lines.push(this._Handle.currentString);
+            }
+
+            this._LineWidth.push(this._Handle.cursorX);
+
+            if (this._Handle.cursorX > this.size.x) this.size.x = this._Handle.cursorX;
+            return true;
+          } else if (str === '\n') {
+            this.newLine();
+            this._Handle.currentString = '';
+            this._Handle.cursorX = 0;
+            return true;
+          }
+        } //换行
+
+      }, {
+        key: "newLine",
+        value: function newLine() {
+          //数据记录
+          this._Lines.push(this._Handle.currentString, '\n');
+
+          this._LineWidth.push(this._Handle.cursorX); //包围判断
+
+
+          if (this._Handle.cursorX > this.size.x) this.size.x = this._Handle.cursorX;
+          this.size.y += this.lineHeight; //游标重置
+
+          this._Handle.currentString = this._Handle.currentText;
+          this._Handle.cursorX = this._Handle.currentWidth;
+        }
+        /**
+         * 正式绘制
+         */
+
+      }, {
+        key: "_defineConfig",
+        value: function _defineConfig(Context) {
+          if (Context.font != this.font) Context.font = this.font;
+          if (Context.fillStyle != this.style.color) Context.fillStyle = this.style.color;
+          if (Context.textAlign != 'left') Context.textAlign = 'left';
+          if (Context.textBaseline != 'top') Context.textBaseline = 'top';
+
+          if (this.style.stroke > 0) {
+            if (Context.strokeStyle != this.style.strokeColor) Context.strokeStyle = this.style.strokeColor;
+            if (Context.lineWidth != this.style.stroke) Context.lineWidth = this.style.stroke;
+          }
+        }
+      }, {
+        key: "_offsetX",
+        value: function _offsetX(index) {
+          return (this.size.x - this._LineWidth[index]) * Text.AlignWidth[this.style.align] - this.anchor.x;
+        }
+      }, {
+        key: "_offsetY",
+        value: function _offsetY(index) {
+          return ((this._Lines[index].height || this.style.size) - this.style.size) / 2;
+        }
+      }, {
+        key: "update",
+        value: function update(Context) {
+          if (!this.value) return;
+
+          this._defineConfig(Context);
+
+          var lineIndex = 0;
+
+          var offsetX = this._offsetX(lineIndex++);
+
+          var x = offsetX;
+          var y = -this.anchor.y;
+
+          for (var i = 0; i < this._Lines.length; i++) {
+            if (this._Lines[i] === '\0') {
+              x = offsetX + this._Lines[i + 1];
+              i++;
+              continue;
+            }
+
+            if (this._Lines[i] === '\n') {
+              x = offsetX = this._offsetX(lineIndex++);
+              y += this.lineHeight;
+              continue;
+            }
+
+            if (_typeof_1(this._Lines[i]) === 'object') {
+              Context.drawImage(this._Lines[i], x, y - this._offsetY(i));
+            } else {
+              if (this.style.stroke > 0) Context.strokeText(this._Lines[i], x, y);
+              Context.fillText(this._Lines[i], x, y);
+            }
+          }
+        }
+      }, {
+        key: "value",
+        set: function set(v) {
+          if (this._value === v) return;
+
+          if (!v && v !== 0) {
+            v = '';
+          } else if (typeof v != 'string') {
+            v = v.toString();
+          }
+
+          this._value = v;
+          this.separate(v);
+        },
+        get: function get() {
+          return this._value;
+        }
+      }, {
+        key: "wrapWidth",
+        get: function get() {
+          return this.wrap.width;
+        },
+        set: function set(width) {
+          this.wrap.width = width;
+        }
+      }, {
+        key: "lineHeight",
+        get: function get() {
+          return this.wrap.height || (this.wrap.height = this.style ? this.style.size * 1.5 | 0 : 0);
+        },
+        set: function set(h) {
+          this.wrap.height = h;
+        }
+      }]);
+
+      return Text;
+    }(superClass), defineProperty(_class, "AlignWidth", {
+      left: 0,
+      center: 0.5,
+      right: 1
+    }), defineProperty(_class, "AlignHeight", {
+      top: 0,
+      middle: 0.5,
+      bottom: 1,
+      hanging: 0,
+      alphabetic: 1,
+      ideographic: 1
+    }), defineProperty(_class, "defaultHandle", {
+      cursorX: 0,
+      cursorY: 0,
+      nextCursorX: 0,
+      currentString: '',
+      currentText: '',
+      currentWidth: 0,
+      Special: false
+    }), _temp;
   });
 
   var ComponentBuild = {
@@ -2811,8 +3302,23 @@
     Style: Style
   };
 
+  var Options =
+  /*#__PURE__*/
+  function () {
+    function Options() {
+      classCallCheck(this, Options);
+    }
+
+    createClass(Options, [{
+      key: "setOptions",
+      value: function setOptions() {}
+    }]);
+
+    return Options;
+  }();
+
   ComponentBuild.Build = function () {
-    var subClass = null;
+    var subClass = Options;
 
     for (var i = 0; i < arguments.length; i++) {
       subClass = ComponentBuild[arguments[i]](subClass);
@@ -2821,10 +3327,10 @@
     return subClass;
   };
 
-  var ComponentBase = Text(ComponentBuild.Build('Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
-  var ComponentTexture = Text(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
-  var ComponentScroll = Text(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
-  var ComponentText = Text(ComponentBuild.Build('Style', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
+  var ComponentBase = Base(ComponentBuild.Build('Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
+  var ComponentTexture = Texture(Base(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));
+  var ComponentScroll = Scroll(Base(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));
+  var ComponentText = Text(Base(ComponentBuild.Build('Style', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));
 
   var eventemitter3 = createCommonjsModule(function (module) {
 
@@ -5460,7 +5966,7 @@
           if (Alpha > 1) Alpha = 1;
           if (Alpha != Context.globalAlpha) Context.globalAlpha = Alpha;
           Context.setTransform.apply(Context, Component.matrix);
-          Component.update(Context);
+          if (Component.update) Component.update(Context);
           if (Component.updated) Component.updated(Context);
         });
         Context.setTransform(1, 0, 0, 1, 0, 0);

@@ -55,7 +55,7 @@ export default class Render {
 			if (Alpha > 1) Alpha = 1;
 			if (Alpha != Context.globalAlpha) Context.globalAlpha = Alpha;
 			Context.setTransform.apply(Context, Component.matrix);
-			Component.update(Context);
+			if (Component.update) Component.update(Context);
 			if (Component.updated) Component.updated(Context);
 		});
 		Context.setTransform(1, 0, 0, 1, 0, 0);

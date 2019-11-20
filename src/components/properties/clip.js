@@ -1,5 +1,5 @@
 import { MathVector2 } from '../../maths/index.js';
-export default (superClass = null) => {
+export default superClass => {
 	return class Clip extends superClass {
 		/**
 		 * 裁剪控制
@@ -17,7 +17,7 @@ export default (superClass = null) => {
 		}
 
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.clip) this.setClip.apply(this, options.clip);
 			return this;
 		}

@@ -1,5 +1,5 @@
 import { MathVector2 } from '../../maths/index.js';
-export default (superClass = null) => {
+export default superClass => {
 	return class Scale extends superClass {
 		/**
 		 * 缩放控制
@@ -23,7 +23,7 @@ export default (superClass = null) => {
 			return this;
 		}
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.scale) Object.assign(this.scale, options.scale);
 			return this;
 		}

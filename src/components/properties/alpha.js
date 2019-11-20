@@ -1,4 +1,4 @@
-export default (superClass = null) => {
+export default superClass => {
 	return class Alpha extends superClass {
 		/**
 		 * 透明度控制
@@ -17,7 +17,7 @@ export default (superClass = null) => {
 			return this;
 		}
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.alpha) this.alpha = options.alpha;
 			return this;
 		}

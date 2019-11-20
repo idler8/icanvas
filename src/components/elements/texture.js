@@ -1,5 +1,9 @@
-export default (superClass = null) => {
+export default superClass => {
 	return class Texture extends superClass {
+		constructor(options) {
+			super();
+			if (options) this.setOptions(options);
+		}
 		texture = null;
 		setTexture(texture) {
 			this.texture = Texture.GetImage ? Texture.GetImage(texture) : texture;

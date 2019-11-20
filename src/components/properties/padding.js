@@ -1,5 +1,5 @@
 import { MathVector } from '../../maths/index.js';
-export default (superClass = null) => {
+export default superClass => {
 	return class Padding extends superClass {
 		/**
 		 * 边距控制
@@ -22,7 +22,7 @@ export default (superClass = null) => {
 			return this;
 		}
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.padding) Object.assign(this.padding, options.padding);
 			return this;
 		}

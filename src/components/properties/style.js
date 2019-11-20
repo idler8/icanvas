@@ -1,8 +1,8 @@
-export default (superClass = null) => {
+export default superClass => {
 	return class Style extends superClass {
 		static defaultStyle = {
-			color: '#000000', //填充色
-			stroke: 1, //线宽
+			color: '#FFFFFF', //填充色
+			stroke: 0, //线宽
 			strokeColor: '#FFFFFF', //线框色
 
 			family: '微软雅黑,黑体', //字体
@@ -18,11 +18,11 @@ export default (superClass = null) => {
 		style = Object.assign({}, Style.defaultStyle);
 		setStyle(options) {
 			if (!options.cacheFont) this.style.cacheFont = '';
-			Object.assign(this.style.options, options);
+			Object.assign(this.style, options);
 			return this;
 		}
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.style) this.setStyle(options.style);
 			return this;
 		}

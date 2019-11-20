@@ -1,6 +1,6 @@
 {
 	"name": "@icanvas/core",
-	"version": "2.4.0",
+	"version": "2.4.1",
 	"description": "这是icanvas的核心包",
 	"scripts": {
 		"build": "rollup -c"

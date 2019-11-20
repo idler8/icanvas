@@ -1,4 +1,4 @@
-export default  (superClass = null) => {
+export default superClass => {
 	return class Angle extends superClass {
 		/**
 		 * 角度控制
@@ -19,7 +19,7 @@ export default  (superClass = null) => {
 			return this;
 		}
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.radian) this.radian = options.radian;
 			if (options.angle) this.angle = options.angle;
 			return this;

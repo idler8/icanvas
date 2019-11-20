@@ -1,5 +1,9 @@
-export default (superClass = null) => {
+export default superClass => {
 	return class Scroll extends superClass {
+		constructor(options) {
+			super();
+			if (options) this.setOptions(options);
+		}
 		/**
 		 * 真实场地大小
 		 */
@@ -49,7 +53,7 @@ export default (superClass = null) => {
 		 * @param {*} options
 		 */
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			this.context = options.context;
 			this.setClip(0, 0, options.width || 1, options.height || 1);
 			this.setRealSize(options.realWidth || 1, options.realHeight || 1);

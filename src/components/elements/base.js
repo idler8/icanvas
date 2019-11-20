@@ -1,10 +1,10 @@
 import { MathMatrix3 } from '../../maths/index.js';
 let CID = 0; //全局递增组件id
-export default (superClass = null) => {
+export default superClass => {
 	return class ComponentBase extends superClass {
 		constructor(options) {
 			super();
-			this.setOptions(options);
+			if (options) this.setOptions(options);
 		}
 		id = ++CID;
 		zIndex = 0;
@@ -92,6 +92,10 @@ export default (superClass = null) => {
 			for (let i = this.children.length - 1; i >= 0; i--) {
 				this.removeChild(this.children[i]);
 			}
+			return this;
+		}
+		setOptions(options) {
+			super.setOptions(options);
 			return this;
 		}
 	};

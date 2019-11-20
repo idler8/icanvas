@@ -10,19 +10,22 @@ import Padding from './properties/padding.js';
 import Style from './properties/style.js';
 
 import Base from './elements/base.js';
-import Texture from './elements/base.js';
-import Scroll from './elements/base.js';
-import Text from './elements/base.js';
+import Texture from './elements/texture.js';
+import Scroll from './elements/scroll.js';
+import Text from './elements/text.js';
 
 export const ComponentBuild = { Position, Angle, Scale, Anchor, Alpha, Visible, Size, Clip, Padding, Style };
+class Options {
+	setOptions() {}
+}
 ComponentBuild.Build = function() {
-	let subClass = null;
+	let subClass = Options;
 	for (let i = 0; i < arguments.length; i++) {
 		subClass = ComponentBuild[arguments[i]](subClass);
 	}
 	return subClass;
 };
 export const ComponentBase = Base(ComponentBuild.Build('Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
-export const ComponentTexture = Texture(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
-export const ComponentScroll = Scroll(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
-export const ComponentText = Text(ComponentBuild.Build('Style', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
+export const ComponentTexture = Texture(Base(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));
+export const ComponentScroll = Scroll(Base(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));
+export const ComponentText = Text(Base(ComponentBuild.Build('Style', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));

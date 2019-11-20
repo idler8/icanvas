@@ -1,5 +1,5 @@
 import { MathVector2 } from '../../maths/index.js';
-export default (superClass = null) => {
+export default (superClass = Object) => {
 	return class Position extends superClass {
 		/**
 		 * 定位控制
@@ -22,7 +22,7 @@ export default (superClass = null) => {
 			return this;
 		}
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.position) Object.assign(this.position, options.position);
 			return this;
 		}

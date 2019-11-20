@@ -1,8 +1,12 @@
-export default (superClass = null) => {
+export default superClass => {
 	return class Text extends superClass {
 		static AlignWidth = { left: 0, center: 0.5, right: 1 };
 		static AlignHeight = { top: 0, middle: 0.5, bottom: 1, hanging: 0, alphabetic: 1, ideographic: 1 };
 		static defaultHandle = { cursorX: 0, cursorY: 0, nextCursorX: 0, currentString: '', currentText: '', currentWidth: 0, Special: false };
+		constructor(options) {
+			super();
+			if (options) this.setOptions(options);
+		}
 		/**
 		 * 当前内容字符串
 		 */
@@ -48,9 +52,9 @@ export default (superClass = null) => {
 		 * @param {*} options
 		 */
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
-			if (options.wrapWidth) this.wrapWidth = options.wrapWidth;
-			this.lineHeight = options.lineHeight;
+			super.setOptions(options);
+			if (options.wrapWidth > 0) this.wrapWidth = options.wrapWidth;
+			this.lineHeight = options.lineHeight || 0;
 			if (options.special) this.special = Object.assign(this.special || {}, options.special);
 			if (options.value) this.value = options.value;
 			return this;
@@ -83,7 +87,7 @@ export default (superClass = null) => {
 				this._Handle.currentWidth = measureText ? measureText.width : 0;
 			}
 			this._Handle.nextCursorX = this._Handle.cursorX + this._Handle.currentWidth;
-			if (this.wrapWidth >= 0 && this._Handle.nextCursorX > this.wrapWidth) return this.newLine();
+			if (this.wrapWidth > 0 && this._Handle.nextCursorX > this.wrapWidth) return this.newLine();
 			this._Handle.cursorX = this._Handle.nextCursorX;
 			this._Handle.currentString += this._Handle.currentText;
 		}
@@ -91,7 +95,7 @@ export default (superClass = null) => {
 		checkSpecialObject(special) {
 			let width = special.width || this.style.size;
 			this._Handle.nextCursorX = this._Handle.cursorX + width;
-			if (this.wrapWidth >= 0 && this._Handle.nextCursorX > this.wrapWidth) {
+			if (this.wrapWidth > 0 && this._Handle.nextCursorX > this.wrapWidth) {
 				this._Lines.push('\n', special, '\0', special.width);
 				this._LineWidth.push(this._Handle.cursorX);
 				if (this._Handle.cursorX > this.size.x) this.size.x = this._Handle.cursorX;

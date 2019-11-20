@@ -1,5 +1,5 @@
 import { MathVector2 } from '../../maths/index.js';
-export default (superClass = null) => {
+export default superClass => {
 	return class Anchor extends superClass {
 		/**
 		 * 锚点控制
@@ -29,7 +29,7 @@ export default (superClass = null) => {
 			return this;
 		}
 		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+			super.setOptions(options);
 			if (options.anchor) Object.assign(this.anchor, options.anchor);
 			return this;
 		}
