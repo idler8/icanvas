@@ -85,3 +85,15 @@ export function UtilWxgameVary(action, root = wx, mode = 0) {
 		};
 	}
 }
+/**
+ * 点是否在矩形范围内
+ * @param {Number} x 点x坐标
+ * @param {Number} y 点y坐标
+ * @param {Number} bx 矩形x坐标
+ * @param {Number} by 矩形y坐标
+ * @param {Number} bw 矩形宽度
+ * @param {Number} bh 矩形高度
+ */
+export function UtilPointInRect(x, y, bx, by, bw, bh) {
+	return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
+}

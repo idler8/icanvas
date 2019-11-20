@@ -7,6 +7,7 @@ import _inherits from '@babel/runtime/helpers/inherits';
 import _wrapNativeSuper from '@babel/runtime/helpers/wrapNativeSuper';
 import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import _typeof from '@babel/runtime/helpers/typeof';
+import _get from '@babel/runtime/helpers/get';
 import Event from 'eventemitter3';
 import axios from 'axios';
 
@@ -1719,937 +1720,877 @@ function () {
   return Clock;
 }();
 
+var Position$1 = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Position, _superClass);
+
+    function Position() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Position);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Position)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "position", new Vector2());
+
+      return _this;
+    }
+
+    _createClass(Position, [{
+      key: "setPosition",
+      value: function setPosition(x, y) {
+        this.position.setTo(x, y);
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Position.prototype), "setOptions", this)) _get(_getPrototypeOf(Position.prototype), "setOptions", this).call(this, options);
+        if (options.position) Object.assign(this.position, options.position);
+        return this;
+      }
+    }, {
+      key: "x",
+      get: function get() {
+        return this.position.x;
+      },
+      set: function set(x) {
+        this.position.x = x;
+      }
+    }, {
+      key: "y",
+      get: function get() {
+        return this.position.y;
+      },
+      set: function set(y) {
+        this.position.y = y;
+      }
+    }]);
+
+    return Position;
+  }(superClass), _temp;
+});
+
+var Angle = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Angle, _superClass);
+
+    function Angle() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Angle);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Angle)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "radian", 0);
+
+      return _this;
+    }
+
+    _createClass(Angle, [{
+      key: "setRadian",
+      value: function setRadian(r) {
+        this.radian = r;
+        return this;
+      }
+    }, {
+      key: "setAngle",
+      value: function setAngle(a) {
+        this.angle = a;
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Angle.prototype), "setOptions", this)) _get(_getPrototypeOf(Angle.prototype), "setOptions", this).call(this, options);
+        if (options.radian) this.radian = options.radian;
+        if (options.angle) this.angle = options.angle;
+        return this;
+      }
+    }, {
+      key: "angle",
+      //弧度
+      set: function set(a) {
+        this.radian = a * Math.PI / 180;
+      },
+      get: function get() {
+        return this.radian * 180 / Math.PI;
+      }
+    }]);
+
+    return Angle;
+  }(superClass), _temp;
+});
+
+var Scale = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Scale, _superClass);
+
+    function Scale() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Scale);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Scale)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "scale", new Vector2(1, 1));
+
+      return _this;
+    }
+
+    _createClass(Scale, [{
+      key: "setScale",
+      value: function setScale(x, y) {
+        this.scale.x = x;
+        this.scale.y = y;
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Scale.prototype), "setOptions", this)) _get(_getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
+        if (options.scale) Object.assign(this.scale, options.scale);
+        return this;
+      }
+    }, {
+      key: "scaleX",
+      get: function get() {
+        return this.scale.x;
+      },
+      set: function set(x) {
+        this.scale.x = x;
+      }
+    }, {
+      key: "scaleY",
+      get: function get() {
+        return this.scale.y;
+      },
+      set: function set(y) {
+        this.scale.y = y;
+      }
+    }]);
+
+    return Scale;
+  }(superClass), _temp;
+});
+
+var Anchor = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Anchor, _superClass);
+
+    function Anchor() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Anchor);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Anchor)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "anchor", new Vector2());
+
+      return _this;
+    }
+
+    _createClass(Anchor, [{
+      key: "setAnchor",
+      value: function setAnchor(x, y) {
+        this.anchor.x = x;
+        this.anchor.y = y;
+        return this;
+      }
+    }, {
+      key: "setAnchorSize",
+      value: function setAnchorSize() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
+        if (!this.size) return this;
+        this.anchor.x = this.width * x;
+        this.anchor.y = this.height * y;
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Anchor.prototype), "setOptions", this)) _get(_getPrototypeOf(Anchor.prototype), "setOptions", this).call(this, options);
+        if (options.anchor) Object.assign(this.anchor, options.anchor);
+        return this;
+      }
+      /**
+       * 触摸事件位置偏移量
+       * @param {*} touch
+       */
+
+    }, {
+      key: "offsetTouch",
+      value: function offsetTouch(touch) {
+        if (_get(_getPrototypeOf(Anchor.prototype), "offsetTouch", this)) _get(_getPrototypeOf(Anchor.prototype), "offsetTouch", this).call(this, touch);
+        return touch.addToVector(this.anchor);
+      }
+    }, {
+      key: "anchorX",
+      get: function get() {
+        return this.anchor.x;
+      },
+      set: function set(x) {
+        this.anchor.x = x;
+      }
+    }, {
+      key: "anchorY",
+      get: function get() {
+        return this.anchor.y;
+      },
+      set: function set(y) {
+        this.anchor.y = y;
+      }
+    }]);
+
+    return Anchor;
+  }(superClass), _temp;
+});
+
+var Alpha = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Alpha, _superClass);
+
+    function Alpha() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Alpha);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Alpha)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "_alpha", 1);
+
+      return _this;
+    }
+
+    _createClass(Alpha, [{
+      key: "setAlpha",
+      value: function setAlpha(n) {
+        this.alpha = n;
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Alpha.prototype), "setOptions", this)) _get(_getPrototypeOf(Alpha.prototype), "setOptions", this).call(this, options);
+        if (options.alpha) this.alpha = options.alpha;
+        return this;
+      }
+    }, {
+      key: "alpha",
+      set: function set(a) {
+        this._alpha = a;
+      },
+      get: function get() {
+        if (this._alpha < 0 && this.parent) return this.parent.alpha;
+        return this._alpha;
+      }
+    }]);
+
+    return Alpha;
+  }(superClass), _temp;
+});
+
+var Visible = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Visible, _superClass);
+
+    function Visible() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Visible);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Visible)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "_visible", true);
+
+      return _this;
+    }
+
+    _createClass(Visible, [{
+      key: "setVisible",
+      value: function setVisible(n) {
+        this.visible = n;
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Visible.prototype), "setOptions", this)) _get(_getPrototypeOf(Visible.prototype), "setOptions", this).call(this, options);
+        if (options.visible) this.visible = options.visible;
+        return this;
+      }
+    }, {
+      key: "visible",
+      get: function get() {
+        if (!this.parent) return this._visible;
+        return this._visible && this.parent.visible;
+      },
+      set: function set(v) {
+        if (this._visible == v) return;
+        this._visible = v;
+        v ? this.show && this.show() : this.hide && this.hide();
+      }
+    }]);
+
+    return Visible;
+  }(superClass), _temp;
+});
+
+var Size = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Size, _superClass);
+
+    function Size() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Size);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Size)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "size", new Vector2());
+
+      return _this;
+    }
+
+    _createClass(Size, [{
+      key: "setSize",
+      value: function setSize(x, y) {
+        this.size.setTo(x, y);
+        return this;
+      }
+    }, {
+      key: "setSizeLimit",
+      value: function setSizeLimit(maxX, maxY, minX, minY) {
+        if (!this.size.y) return this;
+        var lv = this.size.x / this.size.y;
+
+        if (maxX && this.size.x > maxX) {
+          this.size.x = maxX;
+          this.size.y = maxX / lv;
+        }
+
+        if (maxY && this.size.y > maxY) {
+          this.size.y = maxY;
+          this.size.x = maxY * lv;
+        }
+
+        if (minX && this.size.x < minX) {
+          this.size.x = minX;
+          this.size.y = maxX / lv;
+        }
+
+        if (minY && this.size.y < minY) {
+          this.size.y = maxY;
+          this.size.x = maxY * lv;
+        }
+
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Size.prototype), "setOptions", this)) _get(_getPrototypeOf(Size.prototype), "setOptions", this).call(this, options);
+        if (options.size) Object.assign(this.size, options.size);
+        return this;
+      }
+    }, {
+      key: "hitMe",
+      value: function hitMe(x, y) {
+        if (this.padding) {
+          return x >= -this.paddingLeft && x <= this.width + this.paddingRight && y >= -this.paddingTop && y <= this.height + this.paddingBottom;
+        } else {
+          return x >= 0 && x <= this.width && y >= 0 && y <= this.height;
+        }
+      }
+    }, {
+      key: "width",
+      get: function get() {
+        return this.size.x;
+      },
+      set: function set(x) {
+        this.size.x = x;
+      }
+    }, {
+      key: "height",
+      get: function get() {
+        return this.size.y;
+      },
+      set: function set(y) {
+        this.size.y = y;
+      }
+    }]);
+
+    return Size;
+  }(superClass), _temp;
+});
+
+var Clip = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Clip, _superClass);
+
+    function Clip() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Clip);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Clip)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "useClip", false);
+
+      _defineProperty(_assertThisInitialized(_this), "clipPosition", new Vector2());
+
+      _defineProperty(_assertThisInitialized(_this), "clipSize", new Vector2());
+
+      return _this;
+    }
+
+    _createClass(Clip, [{
+      key: "setClip",
+      //切割大小
+      value: function setClip() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        var width = arguments.length > 2 ? arguments[2] : undefined;
+        var height = arguments.length > 3 ? arguments[3] : undefined;
+        this.useClip = true;
+        this.clipPosition.setTo(x, y);
+        this.clipSize.setTo(width, height);
+        if (this.size) this.size.setTo(width, height);
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Clip.prototype), "setOptions", this)) _get(_getPrototypeOf(Clip.prototype), "setOptions", this).call(this, options);
+        if (options.clip) this.setClip.apply(this, options.clip);
+        return this;
+      }
+    }]);
+
+    return Clip;
+  }(superClass), _temp;
+});
+
+var Padding = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Padding, _superClass);
+
+    function Padding() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Padding);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Padding)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "padding", new Vector(0, 0, 0, 0));
+
+      return _this;
+    }
+
+    _createClass(Padding, [{
+      key: "setPadding",
+      value: function setPadding(top, right, botton, left) {
+        this.padding.setTo(top, right, botton, left);
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Padding.prototype), "setOptions", this)) _get(_getPrototypeOf(Padding.prototype), "setOptions", this).call(this, options);
+        if (options.padding) Object.assign(this.padding, options.padding);
+        return this;
+      }
+    }, {
+      key: "paddingTop",
+      get: function get() {
+        return this.padding[0];
+      }
+    }, {
+      key: "paddingRight",
+      get: function get() {
+        return this.padding[1];
+      }
+    }, {
+      key: "paddingBottom",
+      get: function get() {
+        return this.padding[2];
+      }
+    }, {
+      key: "paddingLeft",
+      get: function get() {
+        return this.padding[3];
+      }
+    }]);
+
+    return Padding;
+  }(superClass), _temp;
+});
+
+var Style = (function () {
+  var _class, _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp = _class =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Style, _superClass);
+
+    function Style() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Style);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Style)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "style", Object.assign({}, Style.defaultStyle));
+
+      return _this;
+    }
+
+    _createClass(Style, [{
+      key: "setStyle",
+      value: function setStyle(options) {
+        if (!options.cacheFont) this.style.cacheFont = '';
+        Object.assign(this.style.options, options);
+        return this;
+      }
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Style.prototype), "setOptions", this)) _get(_getPrototypeOf(Style.prototype), "setOptions", this).call(this, options);
+        if (options.style) this.setStyle(options.style);
+        return this;
+      }
+    }, {
+      key: "font",
+      set: function set(font) {
+        this.style.cacheFont = font;
+      },
+      get: function get() {
+        return this.style.cacheFont || (this._cacheFont = "".concat(this.style.weight, " ").concat(this.style.size, "px ").concat(this.style.family));
+      }
+    }]);
+
+    return Style;
+  }(superClass), _defineProperty(_class, "defaultStyle", {
+    color: '#000000',
+    //填充色
+    stroke: 1,
+    //线宽
+    strokeColor: '#FFFFFF',
+    //线框色
+    family: '微软雅黑,黑体',
+    //字体
+    size: 26,
+    //字号px
+    weight: '',
+    //字宽
+    align: 'center',
+    //横向对齐方式
+    baseline: 'middle',
+    //纵向对齐方式
+    cacheFont: '' //组合字体
+
+  }), _temp;
+});
+
 var CID = 0; //全局递增组件id
 
-var Component =
-/*#__PURE__*/
-function () {
-  function Component(options) {
-    _classCallCheck(this, Component);
+var Text = (function () {
+  var _temp;
 
-    _defineProperty(this, "id", ++CID);
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(ComponentBase, _superClass);
 
-    _defineProperty(this, "zIndex", 0);
+    function ComponentBase(options) {
+      var _this;
 
-    _defineProperty(this, "children", []);
+      _classCallCheck(this, ComponentBase);
 
-    _defineProperty(this, "parent", null);
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(ComponentBase).call(this));
 
-    _defineProperty(this, "position", new Vector2());
+      _defineProperty(_assertThisInitialized(_this), "id", ++CID);
 
-    _defineProperty(this, "anchor", new Vector2());
+      _defineProperty(_assertThisInitialized(_this), "zIndex", 0);
 
-    _defineProperty(this, "scale", new Vector2(1, 1));
+      _defineProperty(_assertThisInitialized(_this), "children", []);
 
-    _defineProperty(this, "matrix", new Matrix3());
+      _defineProperty(_assertThisInitialized(_this), "parent", null);
 
-    _defineProperty(this, "radian", 0);
+      _defineProperty(_assertThisInitialized(_this), "lockChild", false);
 
-    _defineProperty(this, "lockChild", false);
+      _defineProperty(_assertThisInitialized(_this), "touchChildren", true);
 
-    _defineProperty(this, "touchChildren", true);
+      _defineProperty(_assertThisInitialized(_this), "touchStop", false);
 
-    _defineProperty(this, "touchStop", false);
+      _defineProperty(_assertThisInitialized(_this), "matrix", new Matrix3());
 
-    _defineProperty(this, "_visible", true);
+      _this.setOptions(options);
 
-    _defineProperty(this, "_alpha", 1);
-
-    return this.setOptions(options);
-  }
-
-  _createClass(Component, [{
-    key: "setOptions",
-    value: function setOptions(options) {
-      if (!options) return this;
-      if (options.position) Object.assign(this.position, options.position);
-      if (options.anchor) Object.assign(this.anchor, options.anchor);
-      if (options.scale) Object.assign(this.scale, options.scale);
-      if (options.zIndex) this.zIndex = options.zIndex;
-      if (options.radian) this.radian = options.radian;
-      if (options.angle) this.angle = options.angle;
-      return this;
+      return _this;
     }
-  }, {
-    key: "offsetTouch",
-    //点击是否不冒泡到父元素
 
-    /**
-     * 触摸事件位置偏移量
-     * @param {*} touch
-     */
-    value: function offsetTouch(touch) {
-      return touch.addToVector(this.anchor);
-    }
-    /**
-     * 将本组件加入某个组件下面
-     * @param {Component} Component 父级
-     * @param {Number} index 位置
-     * Component为空时，相当于从父组件卸载本组件
-     */
+    _createClass(ComponentBase, [{
+      key: "setParent",
+      //计算矩阵
 
-  }, {
-    key: "setParent",
-    value: function setParent(Component) {
-      var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
-      if (!Component) return this.parent ? this.parent.removeChild(this) : this;
-      if (this.parent == Component) return this;
-      if (!this.parent) Component.addChildAt(this, index);
-      return this;
-    }
-    /**
-     * 在固定位置增加子组件
-     * @param {Component} Component 组件
-     * @param {Number} index 位置
-     */
-
-  }, {
-    key: "addChildAt",
-    value: function addChildAt(Component) {
-      var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      if (!Component) return this;
-      if (Component.create) Component.create();
-      Component.parent = this;
-
-      if (index == -1) {
-        this.children.push(Component);
-      } else if (index == 0) {
-        this.children.unshift(Component);
-      } else {
-        this.children.splice(index, 0, Component);
-      }
-
-      if (Component.created) Component.created();
-      return this;
-    }
-    /**
-     * 增加子组件
-     * @param {Component} Component 组件
-     */
-
-  }, {
-    key: "addChild",
-    value: function addChild(Component) {
-      if (!Component) return this;
-
-      if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-          this.addChild(arguments[i]);
-        }
-
+      /**
+       * 将本组件加入某个组件下面
+       * @param {Component} Component 父级
+       * @param {Number} index 位置
+       * Component为空时，相当于从父组件卸载本组件
+       */
+      value: function setParent(Component) {
+        var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
+        if (!Component) return this.parent ? this.parent.removeChild(this) : this;
+        if (this.parent == Component) return this;
+        if (!this.parent) Component.addChildAt(this, index);
         return this;
       }
+      /**
+       * 在固定位置增加子组件
+       * @param {Component} Component 组件
+       * @param {Number} index 位置
+       */
 
-      if (Component instanceof Array) {
-        for (var _i = 0; _i < Component.length; _i++) {
-          this.addChild(Component[_i]);
+    }, {
+      key: "addChildAt",
+      value: function addChildAt(Component) {
+        var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        if (!Component) return this;
+        if (Component.create) Component.create();
+        Component.parent = this;
+
+        if (index == -1) {
+          this.children.push(Component);
+        } else if (index == 0) {
+          this.children.unshift(Component);
+        } else {
+          this.children.splice(index, 0, Component);
         }
 
+        if (Component.created) Component.created();
         return this;
       }
+      /**
+       * 增加子组件
+       * @param {Component} Component 组件
+       */
 
-      return this.addChildAt(Component, -1);
-    }
-    /**
-     * 移除子组件
-     * @param {Component} Component 组件
-     */
+    }, {
+      key: "addChild",
+      value: function addChild(Component) {
+        if (!Component) return this;
 
-  }, {
-    key: "removeChild",
-    value: function removeChild(Component) {
-      if (!Component) return this;
-
-      if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-          this.removeChild(arguments[i]);
-        }
-
-        return this;
-      }
-
-      if (Component instanceof Array) {
-        for (var _i2 = 0; _i2 < Component.length; _i2++) {
-          this.removeChild(Component[_i2]);
-        }
-
-        return this;
-      }
-
-      if (Component.parent != this) return this;
-      if (!Component.lockChild) Component.removeChildren();
-      if (Component.destroy) Component.destroy();
-      var index = this.children.indexOf(Component);
-      if (index >= 0) this.children.splice(index, 1); // if (this.children.length == 1) this.children = this.children[0];
-
-      Component.parent = null;
-      if (Component.destroyed) Component.destroyed();
-      return this;
-    }
-    /**
-     * 逐个移除所有子组件
-     */
-
-  }, {
-    key: "removeChildren",
-    value: function removeChildren() {
-      for (var i = this.children.length - 1; i >= 0; i--) {
-        this.removeChild(this.children[i]);
-      }
-
-      return this;
-    }
-  }, {
-    key: "setVisible",
-    value: function setVisible(n) {
-      this.visible = n;
-      return this;
-    }
-    /**
-     * 组件透明度
-     * 当透明度小于0时，使用上级透明度
-     */
-
-  }, {
-    key: "setAlpha",
-    value: function setAlpha(n) {
-      this.alpha = n;
-      return this;
-    }
-  }, {
-    key: "setPosition",
-    value: function setPosition(x, y) {
-      this.position.x = x;
-      this.position.y = y;
-      return this;
-    }
-  }, {
-    key: "setScale",
-    value: function setScale(x, y) {
-      this.scale.x = x;
-      this.scale.y = y;
-      return this;
-    }
-  }, {
-    key: "setAnchor",
-    value: function setAnchor(x, y) {
-      this.anchor.x = x;
-      this.anchor.y = y;
-      return this;
-    }
-  }, {
-    key: "setAngle",
-    value: function setAngle(a) {
-      this.angle = a;
-      return this;
-    }
-  }, {
-    key: "setRadian",
-    value: function setRadian(r) {
-      this.radian = r;
-      return this;
-    }
-    /**
-     * 点是否在矩形范围内
-     * @param {Number} x 点x坐标
-     * @param {Number} y 点y坐标
-     * @param {Number} bx 矩形x坐标
-     * @param {Number} by 矩形y坐标
-     * @param {Number} bw 矩形宽度
-     * @param {Number} bh 矩形高度
-     */
-
-  }, {
-    key: "hitPoint",
-    value: function hitPoint(x, y, bx, by, bw, bh) {
-      return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
-    }
-  }, {
-    key: "visible",
-    //是否显示
-    get: function get() {
-      if (!this.parent) return this._visible;
-      return this._visible && this.parent.visible;
-    },
-    set: function set(v) {
-      if (this._visible == v) return;
-      this._visible = v;
-      v ? this.show && this.show() : this.hide && this.hide();
-    }
-  }, {
-    key: "alpha",
-    set: function set(a) {
-      this._alpha = a;
-    },
-    get: function get() {
-      if (this._alpha < 0 && this.parent) return this.parent.alpha;
-      return this._alpha;
-    }
-  }, {
-    key: "angle",
-    set: function set(a) {
-      this.radian = a * Math.PI / 180;
-    },
-    get: function get() {
-      return this.radian * 180 / Math.PI;
-    }
-  }, {
-    key: "x",
-    get: function get() {
-      return this.position.x;
-    },
-    set: function set(x) {
-      this.position.x = x;
-    }
-  }, {
-    key: "y",
-    get: function get() {
-      return this.position.y;
-    },
-    set: function set(y) {
-      this.position.y = y;
-    }
-  }, {
-    key: "scaleX",
-    get: function get() {
-      return this.scale.x;
-    },
-    set: function set(x) {
-      this.scale.x = x;
-    }
-  }, {
-    key: "scaleY",
-    get: function get() {
-      return this.scale.y;
-    },
-    set: function set(y) {
-      this.scale.y = y;
-    }
-  }, {
-    key: "anchorX",
-    get: function get() {
-      return this.anchor.x;
-    },
-    set: function set(x) {
-      this.anchor.x = x;
-    }
-  }, {
-    key: "anchorY",
-    get: function get() {
-      return this.anchor.y;
-    },
-    set: function set(y) {
-      this.anchor.y = y;
-    }
-  }]);
-
-  return Component;
-}();
-
-var Texture =
-/*#__PURE__*/
-function (_Component) {
-  _inherits(Texture, _Component);
-
-  _createClass(Texture, null, [{
-    key: "GetImage",
-    value: function GetImage(image) {
-      return image;
-    }
-  }]);
-
-  //切割大小
-  function Texture(texture, baseOptions) {
-    var _temp, _this;
-
-    _classCallCheck(this, Texture);
-
-    (_temp = _this = _possibleConstructorReturn(this, _getPrototypeOf(Texture).call(this, baseOptions)), _defineProperty(_assertThisInitialized(_this), "texture", null), _defineProperty(_assertThisInitialized(_this), "size", new Vector2()), _defineProperty(_assertThisInitialized(_this), "useFrame", false), _defineProperty(_assertThisInitialized(_this), "framePosition", new Vector2()), _defineProperty(_assertThisInitialized(_this), "frameSize", new Vector2()), _temp).setTexture(texture);
-    return _this;
-  }
-
-  _createClass(Texture, [{
-    key: "setTexture",
-    value: function setTexture(texture) {
-      this.texture = Texture.GetImage(texture);
-      if (!this.texture) return this;
-      this.size.setTo(this.texture.width, this.texture.height);
-      if (this.useFrame) this.useFrame = false;
-      return this;
-    }
-  }, {
-    key: "setFrame",
-    value: function setFrame(frameX, frameY, frameWidth, frameHeight) {
-      this.useFrame = true;
-      this.framePosition.setTo(frameX || 0, frameY || 0);
-      this.frameSize.setTo(frameWidth, frameHeight);
-      this.size.setTo(frameWidth, frameHeight);
-      return this;
-    }
-  }, {
-    key: "setAnchorSize",
-    value: function setAnchorSize() {
-      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
-      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
-      this.anchor.x = this.width * x;
-      this.anchor.y = this.height * y;
-      return this;
-    }
-  }, {
-    key: "setSize",
-    value: function setSize(x, y) {
-      this.size.setTo(x, y);
-      return this;
-    }
-  }, {
-    key: "setSizeLimit",
-    value: function setSizeLimit(maxX, maxY, minX, minY) {
-      if (!this.size.y) return this;
-      var lv = this.size.x / this.size.y;
-
-      if (maxX && this.size.x > maxX) {
-        this.size.x = maxX;
-        this.size.y = maxX / lv;
-      }
-
-      if (maxY && this.size.y > maxY) {
-        this.size.y = maxY;
-        this.size.x = maxY * lv;
-      }
-
-      if (minX && this.size.x < minX) {
-        this.size.x = minX;
-        this.size.y = maxX / lv;
-      }
-
-      if (minY && this.size.y < minY) {
-        this.size.y = maxY;
-        this.size.x = maxY * lv;
-      }
-
-      return this;
-    }
-  }, {
-    key: "update",
-    value: function update(Context) {
-      if (!this.texture) return;
-
-      if (this.useFrame) {
-        Context.drawImage(this.texture, this.framePosition.x, this.framePosition.y, this.frameSize.x, this.frameSize.y, -this.anchor.x, -this.anchor.y, this.size.x, this.size.y);
-      } else {
-        Context.drawImage(this.texture, -this.anchor.x, -this.anchor.y, this.size.x, this.size.y);
-      }
-    }
-  }, {
-    key: "hitMe",
-    value: function hitMe(x, y) {
-      return x >= 0 && x <= this.width && y >= 0 && y <= this.height;
-    }
-  }, {
-    key: "width",
-    get: function get() {
-      return this.size.x;
-    },
-    set: function set(width) {
-      this.size.x = width;
-    }
-  }, {
-    key: "height",
-    get: function get() {
-      return this.size.y;
-    },
-    set: function set(height) {
-      this.size.y = height;
-    }
-  }]);
-
-  return Texture;
-}(Component);
-
-var Text =
-/*#__PURE__*/
-function (_Component) {
-  _inherits(Text, _Component);
-
-  _createClass(Text, [{
-    key: "cacheFont",
-    value: function cacheFont() {
-      this._cacheFont = "".concat(this.options.weight, " ").concat(this.options.size, "px ").concat(this.options.family);
-      return this;
-    }
-  }, {
-    key: "lineHeight",
-    get: function get() {
-      return this.options.lineHeight || (this.options.lineHeight = this.options.size * 1.5 | 0);
-    },
-    set: function set(h) {
-      this.options.lineHeight = h;
-    }
-  }, {
-    key: "font",
-    set: function set(font) {
-      this._cacheFont = font;
-    },
-    get: function get() {
-      return this._cacheFont || this.cacheFont()._cacheFont;
-    }
-  }]);
-
-  function Text(options, baseOptions) {
-    var _temp, _this;
-
-    _classCallCheck(this, Text);
-
-    (_temp = _this = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, baseOptions)), _defineProperty(_assertThisInitialized(_this), "options", Object.assign({}, Text.defaultOptions)), _defineProperty(_assertThisInitialized(_this), "_cacheFont", ''), _defineProperty(_assertThisInitialized(_this), "size", new Vector2()), _defineProperty(_assertThisInitialized(_this), "special", Object.assign({}, Text.defaultSpecial)), _defineProperty(_assertThisInitialized(_this), "_LineWidth", []), _defineProperty(_assertThisInitialized(_this), "_Lines", []), _defineProperty(_assertThisInitialized(_this), "_Handle", Object.assign({}, Text.defaultHandle)), _temp).setStyle(options);
-    return _this;
-  }
-
-  _createClass(Text, [{
-    key: "setStyle",
-    value: function setStyle(options) {
-      if (!options) return this;
-      Object.assign(this.options, options);
-      if (this.options.value) this.separate(this.options.value);
-      return this;
-    }
-  }, {
-    key: "setSpecial",
-    value: function setSpecial(special) {
-      Object.assign(this.special, special);
-      return this;
-    } //绘制行结构
-
-  }, {
-    key: "separate",
-    value: function separate(value) {
-      if (!Text.Context) return; //TODO 是否补充测试例
-
-      Text.Context.font = this.font;
-      this._Lines.length = 0;
-      this._LineWidth.length = 0;
-      this.size.setTo(0, this.options.size);
-
-      for (var i = 0; i <= value.length; i++) {
-        this.checkCurrentText(value[i]);
-      }
-
-      Object.assign(this._Handle, Text.defaultHandle);
-      return this.setAnchorSize(Text.AlignWidth[this.options.align], Text.AlignHeight[this.options.baseline]);
-    } //检查当前字符
-
-  }, {
-    key: "checkCurrentText",
-    value: function checkCurrentText(value) {
-      if (!Text.Context) return; //TODO 是否补充测试例
-
-      if (this.checkSpecial(value)) return;
-      this._Handle.currentText = value;
-
-      if (!this._Handle.currentText) {
-        this._Handle.currentWidth = 0;
-      } else {
-        var measureText = Text.Context.measureText(this._Handle.currentText);
-        this._Handle.currentWidth = measureText ? measureText.width : 0;
-      }
-
-      this._Handle.nextCursorX = this._Handle.cursorX + this._Handle.currentWidth;
-      if (this.options.wrap >= 0 && this._Handle.nextCursorX > this.options.wrap) return this.newLine();
-      this._Handle.cursorX = this._Handle.nextCursorX;
-      this._Handle.currentString += this._Handle.currentText;
-    } //检查特殊对象
-
-  }, {
-    key: "checkSpecialObject",
-    value: function checkSpecialObject(special) {
-      var width = special.width || this.options.size;
-      this._Handle.nextCursorX = this._Handle.cursorX + width;
-
-      if (this.options.wrap >= 0 && this._Handle.nextCursorX > this.options.wrap) {
-        this._Lines.push('\n', special, '\0', special.width);
-
-        this._LineWidth.push(this._Handle.cursorX);
-
-        if (this._Handle.cursorX > this.size.x) this.size.x = this._Handle.cursorX;
-        this.size.y += this.lineHeight;
-        this._Handle.cursorX = special.width;
-      } else {
-        if (this._Handle.cursorX) this._Lines.push('\0', this._Handle.cursorX);
-        this._Handle.cursorX = this._Handle.nextCursorX;
-
-        this._Lines.push(special, '\0', this._Handle.cursorX);
-      }
-
-      this._Handle.currentString = '';
-    } //检查特殊字符
-
-  }, {
-    key: "checkSpecial",
-    value: function checkSpecial(str) {
-      if (str === '\0') {
-        this._Handle.Special = !this._Handle.Special;
-
-        if (this._Handle.Special) {
-          if (this._Handle.currentString) {
-            this._Lines.push(this._Handle.currentString);
-
-            this._Handle.currentString = '';
+        if (arguments.length > 1) {
+          for (var i = 0; i < arguments.length; i++) {
+            this.addChild(arguments[i]);
           }
-        } else {
-          this.checkSpecialObject(this.special[this._Handle.currentString]);
+
+          return this;
         }
 
-        return true;
-      } else if (this._Handle.Special) {
-        this._Handle.currentString += str;
-        return true;
-      } else if (str === undefined) {
-        if (this._Handle.currentString) {
-          this._Lines.push(this._Handle.currentString);
+        if (Component instanceof Array) {
+          for (var _i = 0; _i < Component.length; _i++) {
+            this.addChild(Component[_i]);
+          }
+
+          return this;
         }
 
-        this._LineWidth.push(this._Handle.cursorX);
-
-        if (this._Handle.cursorX > this.size.x) this.size.x = this._Handle.cursorX;
-        return true;
-      } else if (str === '\n') {
-        this.newLine();
-        this._Handle.currentString = '';
-        this._Handle.cursorX = 0;
-        return true;
+        return this.addChildAt(Component, -1);
       }
-    } //换行
+      /**
+       * 移除子组件
+       * @param {Component} Component 组件
+       */
 
-  }, {
-    key: "newLine",
-    value: function newLine() {
-      //数据记录
-      this._Lines.push(this._Handle.currentString, '\n');
+    }, {
+      key: "removeChild",
+      value: function removeChild(Component) {
+        if (!Component) return this;
 
-      this._LineWidth.push(this._Handle.cursorX); //包围判断
+        if (arguments.length > 1) {
+          for (var i = 0; i < arguments.length; i++) {
+            this.removeChild(arguments[i]);
+          }
 
-
-      if (this._Handle.cursorX > this.size.x) this.size.x = this._Handle.cursorX;
-      this.size.y += this.lineHeight; //游标重置
-
-      this._Handle.currentString = this._Handle.currentText;
-      this._Handle.cursorX = this._Handle.currentWidth;
-    }
-  }, {
-    key: "setValue",
-    value: function setValue(v) {
-      this.value = v;
-      return this;
-    }
-  }, {
-    key: "setAnchorSize",
-    value: function setAnchorSize() {
-      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
-      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
-      this.anchor.x = this.size.x * x;
-      this.anchor.y = this.size.y * y;
-      return this;
-    }
-  }, {
-    key: "_defineConfig",
-    value: function _defineConfig(Context) {
-      if (Context.font != this.font) Context.font = this.font;
-      if (Context.fillStyle != this.options.color) Context.fillStyle = this.options.color;
-      if (Context.textAlign != 'left') Context.textAlign = 'left';
-      if (Context.textBaseline != 'top') Context.textBaseline = 'top';
-
-      if (this.options.stroke > 0) {
-        if (Context.strokeStyle != this.options.strokeColor) Context.strokeStyle = this.options.strokeColor;
-        if (Context.lineWidth != this.options.stroke) Context.lineWidth = this.options.stroke;
-      }
-    }
-  }, {
-    key: "_offsetX",
-    value: function _offsetX(index) {
-      return (this.size.x - this._LineWidth[index]) * Text.AlignWidth[this.options.align] - this.anchor.x;
-    }
-  }, {
-    key: "_offsetY",
-    value: function _offsetY(index) {
-      return ((this._Lines[index].height || this.options.size) - this.options.size) / 2;
-    }
-  }, {
-    key: "update",
-    value: function update(Context) {
-      if (!this.options.value) return;
-
-      this._defineConfig(Context);
-
-      var lineIndex = 0;
-
-      var offsetX = this._offsetX(lineIndex++);
-
-      var x = offsetX;
-      var y = -this.anchor.y;
-
-      for (var i = 0; i < this._Lines.length; i++) {
-        if (this._Lines[i] === '\0') {
-          x = offsetX + this._Lines[i + 1];
-          i++;
-          continue;
+          return this;
         }
 
-        if (this._Lines[i] === '\n') {
-          x = offsetX = this._offsetX(lineIndex++);
-          y += this.lineHeight;
-          continue;
+        if (Component instanceof Array) {
+          for (var _i2 = 0; _i2 < Component.length; _i2++) {
+            this.removeChild(Component[_i2]);
+          }
+
+          return this;
         }
 
-        if (_typeof(this._Lines[i]) === 'object') {
-          Context.drawImage(this._Lines[i], x, y - this._offsetY(i));
-        } else {
-          if (this.options.stroke > 0) Context.strokeText(this._Lines[i], x, y);
-          Context.fillText(this._Lines[i], x, y);
+        if (Component.parent != this) return this;
+        if (!Component.lockChild) Component.removeChildren();
+        if (Component.destroy) Component.destroy();
+        var index = this.children.indexOf(Component);
+        if (index >= 0) this.children.splice(index, 1); // if (this.children.length == 1) this.children = this.children[0];
+
+        Component.parent = null;
+        if (Component.destroyed) Component.destroyed();
+        return this;
+      }
+      /**
+       * 逐个移除所有子组件
+       */
+
+    }, {
+      key: "removeChildren",
+      value: function removeChildren() {
+        for (var i = this.children.length - 1; i >= 0; i--) {
+          this.removeChild(this.children[i]);
         }
+
+        return this;
       }
-    }
-  }, {
-    key: "hitMe",
-    value: function hitMe(x, y) {
-      return x >= -this.options.paddingLeft && x <= this.width + this.options.paddingRight && y >= -this.options.paddingTop && y <= this.height + this.options.paddingBottom;
-    }
-  }, {
-    key: "width",
-    get: function get() {
-      return this.size.x;
-    }
-  }, {
-    key: "height",
-    get: function get() {
-      return this.size.y;
-    }
-  }, {
-    key: "value",
-    set: function set(v) {
-      if (this.options.value === v) return;
+    }]);
 
-      if (!v && v !== 0) {
-        v = '';
-      } else if (typeof v != 'string') {
-        v = v.toString();
-      }
-
-      this.options.value = v;
-      this.separate(v);
-    },
-    get: function get() {
-      return this.options.value;
-    } //设置特殊字符表
-
-  }]);
-
-  return Text;
-}(Component);
-
-_defineProperty(Text, "Context", null);
-
-_defineProperty(Text, "AlignWidth", {
-  left: 0,
-  center: 0.5,
-  right: 1
+    return ComponentBase;
+  }(superClass), _temp;
 });
 
-_defineProperty(Text, "AlignHeight", {
-  top: 0,
-  middle: 0.5,
-  bottom: 1,
-  hanging: 0,
-  alphabetic: 1,
-  ideographic: 1
-});
+var ComponentBuild = {
+  Position: Position$1,
+  Angle: Angle,
+  Scale: Scale,
+  Anchor: Anchor,
+  Alpha: Alpha,
+  Visible: Visible,
+  Size: Size,
+  Clip: Clip,
+  Padding: Padding,
+  Style: Style
+};
 
-_defineProperty(Text, "defaultHandle", {
-  cursorX: 0,
-  cursorY: 0,
-  nextCursorX: 0,
-  currentString: '',
-  currentText: '',
-  currentWidth: 0,
-  Special: false
-});
+ComponentBuild.Build = function () {
+  var subClass = null;
 
-_defineProperty(Text, "defaultSpecial", {});
-
-_defineProperty(Text, "defaultOptions", {
-  family: '微软雅黑,黑体',
-  //字体
-  size: 26,
-  //字号px
-  weight: '',
-  //字宽
-  color: '#FFFFFF',
-  //字色
-  align: 'center',
-  //横向对齐方式
-  baseline: 'middle',
-  //纵向对齐方式
-  stroke: 0,
-  //描边
-  strokeColor: '#000000',
-  //描边颜色
-  wrap: -1,
-  //换行宽度
-  lineHeight: 0,
-  //行高
-  paddingTop: 10,
-  paddingLeft: 10,
-  paddingRight: 10,
-  paddingBottom: 10,
-  value: ''
-});
-
-var Scroll =
-/*#__PURE__*/
-function (_Component) {
-  _inherits(Scroll, _Component);
-
-  function Scroll() {
-    var _temp, _this;
-
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var baseOptions = arguments.length > 1 ? arguments[1] : undefined;
-
-    _classCallCheck(this, Scroll);
-
-    (_temp = _this = _possibleConstructorReturn(this, _getPrototypeOf(Scroll).call(this, baseOptions)), _defineProperty(_assertThisInitialized(_this), "size", new Vector2()), _defineProperty(_assertThisInitialized(_this), "context", null), _defineProperty(_assertThisInitialized(_this), "scrollAt", new Vector2()), _temp).setContext(options);
-    return _this;
+  for (var i = 0; i < arguments.length; i++) {
+    subClass = ComponentBuild[arguments[i]](subClass);
   }
 
-  _createClass(Scroll, [{
-    key: "setContext",
-    value: function setContext(options) {
-      this.context = options.context || Scroll.GetCanvas().getContext('2d');
-      this.setSize(options.width || 1, options.height || 1);
-      this.setRealSize(options.realWidth || 1, options.realHeight || 1);
-      return this;
-    }
-  }, {
-    key: "setSize",
-    value: function setSize(x, y) {
-      this.size.setTo(x, y);
-      return this;
-    }
-  }, {
-    key: "setAnchorSize",
-    value: function setAnchorSize() {
-      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
-      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
-      this.anchor.x = this.width * x;
-      this.anchor.y = this.height * y;
-      return this;
-    }
-  }, {
-    key: "setRealSize",
-    value: function setRealSize(x, y) {
-      this.context.SetSize(x, y);
-      return this;
-    }
-  }, {
-    key: "setStatic",
-    value: function setStatic(callback) {
-      callback(this.context);
-      return this;
-    }
-  }, {
-    key: "touchMoveX",
+  return subClass;
+};
 
-    /**
-     * 横向移动
-     * @param {Number} mx 轴X移动量
-     */
-    value: function touchMoveX(mx) {
-      var X = this.scrollAt.x;
-      var Max = this.scrollWidth;
-      this.scrollAt.x -= mx;
-      if (this.scrollAt.x > Max) this.scrollAt.x = Max;
-      if (this.scrollAt.x < 0) this.scrollAt.x = 0;
-      return this.scrollAt.x != X;
-    }
-    /**
-     * 纵向移动
-     * @param {Number} my 轴Y移动量
-     */
-
-  }, {
-    key: "touchMoveY",
-    value: function touchMoveY(my) {
-      var Y = this.scrollAt.y;
-      var Max = this.scrollHeight;
-      this.scrollAt.y -= my;
-      if (this.scrollAt.y > Max) this.scrollAt.y = Max;
-      if (this.scrollAt.y < 0) this.scrollAt.y = 0;
-      return this.scrollAt.y != Y;
-    }
-  }, {
-    key: "update",
-    value: function update(Context) {
-      Context.drawImage(this.context.canvas, this.scrollAt.x, this.scrollAt.y, this.size.x, this.size.y, -this.anchor.x, -this.anchor.y, this.size.x, this.size.y);
-    }
-    /**
-     * 触摸事件位置偏移量
-     * @param {*} touch
-     */
-
-  }, {
-    key: "offsetTouch",
-    value: function offsetTouch(touch) {
-      return touch.addToVector(this.anchor).addToVector(this.scrollAt);
-    }
-  }, {
-    key: "hitMe",
-    value: function hitMe(x, y) {
-      x -= this.scrollAt.x;
-      y -= this.scrollAt.y;
-      return x >= 0 && x <= this.width && y >= 0 && y <= this.height;
-    }
-  }, {
-    key: "width",
-    //绘制、切割大小
-    get: function get() {
-      return this.size.x;
-    },
-    set: function set(width) {
-      this.size.x = width;
-    }
-  }, {
-    key: "height",
-    get: function get() {
-      return this.size.y;
-    },
-    set: function set(height) {
-      this.size.y = height;
-    }
-  }, {
-    key: "realWidth",
-    get: function get() {
-      return this.context.canvas.width;
-    }
-  }, {
-    key: "realHeight",
-    get: function get() {
-      return this.context.canvas.height;
-    }
-  }, {
-    key: "scrollHeight",
-    //切割位置
-    get: function get() {
-      return this.realHeight - this.height;
-    }
-  }, {
-    key: "scrollWidth",
-    get: function get() {
-      return this.realWidth - this.width;
-    }
-  }]);
-
-  return Scroll;
-}(Component);
-
-_defineProperty(Scroll, "GetCanvas", null);
+var ComponentBase = Text(ComponentBuild.Build('Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
+var ComponentTexture = Text(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
+var ComponentScroll = Text(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
+var ComponentText = Text(ComponentBuild.Build('Style', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
 
 var Load =
 /*#__PURE__*/
@@ -3859,6 +3800,19 @@ function UtilWxgameVary(action) {
     };
   }
 }
+/**
+ * 点是否在矩形范围内
+ * @param {Number} x 点x坐标
+ * @param {Number} y 点y坐标
+ * @param {Number} bx 矩形x坐标
+ * @param {Number} by 矩形y坐标
+ * @param {Number} bw 矩形宽度
+ * @param {Number} bh 矩形高度
+ */
+
+function UtilPointInRect(x, y, bx, by, bw, bh) {
+  return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
+}
 
 function LoginFactory() {
   var defaultStyle = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
@@ -3953,4 +3907,4 @@ function LoginFactory() {
   return Login;
 }
 
-export { GetCanvas as ApiWebCanvas, loadFont as ApiWebFont, Request as ApiWebRequest, Storage as ApiWebStorage, System as ApiWebSystem, GetCanvas$1 as ApiWxgameCanvas, LoginFactory as ApiWxgameLogin, Request$1 as ApiWxgameRequest, Storage$1 as ApiWxgameStorage, System$1 as ApiWxgameSystem, Component as ComponentBase, Scroll as ComponentScroll, Text as ComponentText, Texture as ComponentTexture, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Matrix4 as MathMatrix4, Position as MathPosition, Random as MathRandom, time as MathTime, Vector as MathVector, Vector2 as MathVector2, Vector3 as MathVector3, Vector4 as MathVector4, AudioControl as ResourceAudio, ImageControl as ResourceImage, Load as ResourceLoad, WebAudio as ResourceWebAudio, WebImage as ResourceWebImage, WxgameAudio as ResourceWxgameAudio, WxgameImage as ResourceWxgameImage, Canvas as UtilCanvas, Collision as UtilCollsion, Loader as UtilLoaderMap, UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch, UtilWebMouseListen, UtilWebTouchListen, UtilWxgameTouchListen, UtilWxgameVary };
+export { GetCanvas as ApiWebCanvas, loadFont as ApiWebFont, Request as ApiWebRequest, Storage as ApiWebStorage, System as ApiWebSystem, GetCanvas$1 as ApiWxgameCanvas, LoginFactory as ApiWxgameLogin, Request$1 as ApiWxgameRequest, Storage$1 as ApiWxgameStorage, System$1 as ApiWxgameSystem, ComponentBase, ComponentBuild, ComponentScroll, ComponentText, ComponentTexture, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Matrix4 as MathMatrix4, Position as MathPosition, Random as MathRandom, time as MathTime, Vector as MathVector, Vector2 as MathVector2, Vector3 as MathVector3, Vector4 as MathVector4, AudioControl as ResourceAudio, ImageControl as ResourceImage, Load as ResourceLoad, WebAudio as ResourceWebAudio, WebImage as ResourceWebImage, WxgameAudio as ResourceWxgameAudio, WxgameImage as ResourceWxgameImage, Canvas as UtilCanvas, Collision as UtilCollsion, Loader as UtilLoaderMap, UtilPointInRect, UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch, UtilWebMouseListen, UtilWebTouchListen, UtilWxgameTouchListen, UtilWxgameVary };

@@ -1,4 +1,14 @@
-export { UtilWxgameTouchListen, UtilWxgameVary, UtilCanvas, UtilRender, UtilTouch, UtilCollsion, UtilLoaderMap, UtilRecursiveMap } from './utils/';
+export {
+	UtilWxgameTouchListen,
+	UtilWxgameVary,
+	UtilCanvas,
+	UtilRender,
+	UtilTouch,
+	UtilCollsion,
+	UtilLoaderMap,
+	UtilRecursiveMap,
+	UtilPointInRect,
+} from './utils/';
 export { ResourceImage, ResourceWxgameImage, ResourceAudio, ResourceWxgameAudio } from './resources/';
 export * from './maths/';
 export * from './components/';
