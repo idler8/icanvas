@@ -1,7 +1,8 @@
 export default superClass => {
 	return class Texture extends superClass {
-		constructor(options) {
+		constructor(texture, options) {
 			super();
+			this.setTexture(texture);
 			if (options) this.setOptions(options);
 		}
 		texture = null;
@@ -10,6 +11,14 @@ export default superClass => {
 			if (!this.texture) return this;
 			if (this.size) this.size.setTo(this.texture.width, this.texture.height);
 			if (this.useFrame) this.useFrame = false;
+			return this;
+		}
+		/**
+		 * @param {*} options
+		 */
+		setOptions(options) {
+			if (super.setOptions) super.setOptions(options);
+			if (options.texture) this.setTexture(options.texture);
 			return this;
 		}
 		update(Context) {

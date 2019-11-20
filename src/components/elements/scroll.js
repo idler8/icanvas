@@ -53,7 +53,7 @@ export default superClass => {
 		 * @param {*} options
 		 */
 		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
+			if (super.setOptions) super.setOptions(options);
 			this.context = options.context;
 			this.setClip(0, 0, options.width || 1, options.height || 1);
 			this.setRealSize(options.realWidth || 1, options.realHeight || 1);

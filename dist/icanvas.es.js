@@ -2575,7 +2575,7 @@ var Texture = (function (superClass) {
   function (_superClass) {
     _inherits(Texture, _superClass);
 
-    function Texture(options) {
+    function Texture(texture, options) {
       var _this;
 
       _classCallCheck(this, Texture);
@@ -2583,6 +2583,8 @@ var Texture = (function (superClass) {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Texture).call(this));
 
       _defineProperty(_assertThisInitialized(_this), "texture", null);
+
+      _this.setTexture(texture);
 
       if (options) _this.setOptions(options);
       return _this;
@@ -2595,6 +2597,17 @@ var Texture = (function (superClass) {
         if (!this.texture) return this;
         if (this.size) this.size.setTo(this.texture.width, this.texture.height);
         if (this.useFrame) this.useFrame = false;
+        return this;
+      }
+      /**
+       * @param {*} options
+       */
+
+    }, {
+      key: "setOptions",
+      value: function setOptions(options) {
+        if (_get(_getPrototypeOf(Texture.prototype), "setOptions", this)) _get(_getPrototypeOf(Texture.prototype), "setOptions", this).call(this, options);
+        if (options.texture) this.setTexture(options.texture);
         return this;
       }
     }, {
