@@ -3070,7 +3070,7 @@
           Text.Context.font = this.font;
           this._Lines.length = 0;
           this._LineWidth.length = 0;
-          this.size.setTo(0, this.lineHeight);
+          this.size.setTo(0, this.style ? this.style.size : this.lineHeight);
 
           for (var i = 0; i <= value.length; i++) {
             this.checkCurrentText(value[i]);
