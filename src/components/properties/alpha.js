@@ -17,8 +17,8 @@ export default superClass => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
-			if (options.alpha) this.alpha = options.alpha;
+			if(super.setOptions) super.setOptions(options);
+			if (options.alpha !== undefined) this.alpha = options.alpha;
 			return this;
 		}
 	};

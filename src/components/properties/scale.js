@@ -23,8 +23,10 @@ export default superClass => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
-			if (options.scale) Object.assign(this.scale, options.scale);
+			if(super.setOptions) super.setOptions(options);
+			if (options.scale !== undefined) this.scale.set(scale);
+			if (options.scaleX !== undefined) this.scale.x = options.scaleX;
+			if (options.scaleY !== undefined) this.scale.y = options.scaleY;
 			return this;
 		}
 	};

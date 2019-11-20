@@ -22,7 +22,7 @@ export default superClass => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
+			if (super.setOptions) super.setOptions(options);
 			if (options.style) this.setStyle(options.style);
 			return this;
 		}

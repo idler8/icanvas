@@ -95,7 +95,7 @@ export default superClass => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
+			if(super.setOptions) super.setOptions(options);
 			return this;
 		}
 	};

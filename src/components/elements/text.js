@@ -52,7 +52,7 @@ export default superClass => {
 		 * @param {*} options
 		 */
 		setOptions(options) {
-			super.setOptions(options);
+			if(super.setOptions) super.setOptions(options);
 			if (options.wrapWidth > 0) this.wrapWidth = options.wrapWidth;
 			this.lineHeight = options.lineHeight || 0;
 			if (options.special) this.special = Object.assign(this.special || {}, options.special);

@@ -43,8 +43,10 @@ export default superClass => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
+			if(super.setOptions) super.setOptions(options);
 			if (options.size) Object.assign(this.size, options.size);
+			if (options.width !== undefined) this.size.x = options.width;
+			if (options.height !== undefined) this.size.y = options.height;
 			return this;
 		}
 		hitMe(x, y) {

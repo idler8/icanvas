@@ -17,7 +17,7 @@ export default superClass => {
 		}
 
 		setOptions(options) {
-			super.setOptions(options);
+			if(super.setOptions) super.setOptions(options);
 			if (options.clip) this.setClip.apply(this, options.clip);
 			return this;
 		}

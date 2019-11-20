@@ -18,8 +18,8 @@ export default superClass => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
-			if (options.visible) this.visible = options.visible;
+			if(super.setOptions) super.setOptions(options);
+			if (options.visible !== undefined) this.visible = options.visible;
 			return this;
 		}
 	};

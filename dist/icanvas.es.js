@@ -1756,9 +1756,10 @@ var Position$1 = (function () {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Position.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(Position.prototype), "setOptions", this)) _get(_getPrototypeOf(Position.prototype), "setOptions", this).call(this, options);
         if (options.position) Object.assign(this.position, options.position);
+        if (options.x !== undefined) this.position.x = options.x;
+        if (options.y !== undefined) this.position.y = options.y;
         return this;
       }
     }, {
@@ -1824,10 +1825,9 @@ var Angle = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Angle.prototype), "setOptions", this).call(this, options);
-
-        if (options.radian) this.radian = options.radian;
-        if (options.angle) this.angle = options.angle;
+        if (_get(_getPrototypeOf(Angle.prototype), "setOptions", this)) _get(_getPrototypeOf(Angle.prototype), "setOptions", this).call(this, options);
+        if (options.radian !== undefined) this.radian = options.radian;
+        if (options.angle !== undefined) this.angle = options.angle;
         return this;
       }
     }, {
@@ -1881,9 +1881,10 @@ var Scale = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
-
-        if (options.scale) Object.assign(this.scale, options.scale);
+        if (_get(_getPrototypeOf(Scale.prototype), "setOptions", this)) _get(_getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
+        if (options.scale !== undefined) this.scale.set(scale);
+        if (options.scaleX !== undefined) this.scale.x = options.scaleX;
+        if (options.scaleY !== undefined) this.scale.y = options.scaleY;
         return this;
       }
     }, {
@@ -1954,9 +1955,10 @@ var Anchor = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Anchor.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(Anchor.prototype), "setOptions", this)) _get(_getPrototypeOf(Anchor.prototype), "setOptions", this).call(this, options);
         if (options.anchor) Object.assign(this.anchor, options.anchor);
+        if (options.anchorX) this.anchor.x = options.anchorX;
+        if (options.anchorY) this.anchor.y = options.anchorY;
         return this;
       }
       /**
@@ -2027,9 +2029,8 @@ var Alpha = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Alpha.prototype), "setOptions", this).call(this, options);
-
-        if (options.alpha) this.alpha = options.alpha;
+        if (_get(_getPrototypeOf(Alpha.prototype), "setOptions", this)) _get(_getPrototypeOf(Alpha.prototype), "setOptions", this).call(this, options);
+        if (options.alpha !== undefined) this.alpha = options.alpha;
         return this;
       }
     }, {
@@ -2082,9 +2083,8 @@ var Visible = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Visible.prototype), "setOptions", this).call(this, options);
-
-        if (options.visible) this.visible = options.visible;
+        if (_get(_getPrototypeOf(Visible.prototype), "setOptions", this)) _get(_getPrototypeOf(Visible.prototype), "setOptions", this).call(this, options);
+        if (options.visible !== undefined) this.visible = options.visible;
         return this;
       }
     }, {
@@ -2167,9 +2167,10 @@ var Size = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Size.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(Size.prototype), "setOptions", this)) _get(_getPrototypeOf(Size.prototype), "setOptions", this).call(this, options);
         if (options.size) Object.assign(this.size, options.size);
+        if (options.width !== undefined) this.size.x = options.width;
+        if (options.height !== undefined) this.size.y = options.height;
         return this;
       }
     }, {
@@ -2250,8 +2251,7 @@ var Clip = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Clip.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(Clip.prototype), "setOptions", this)) _get(_getPrototypeOf(Clip.prototype), "setOptions", this).call(this, options);
         if (options.clip) this.setClip.apply(this, options.clip);
         return this;
       }
@@ -2296,8 +2296,7 @@ var Padding = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Padding.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(Padding.prototype), "setOptions", this)) _get(_getPrototypeOf(Padding.prototype), "setOptions", this).call(this, options);
         if (options.padding) Object.assign(this.padding, options.padding);
         return this;
       }
@@ -2363,8 +2362,7 @@ var Style = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Style.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(Style.prototype), "setOptions", this)) _get(_getPrototypeOf(Style.prototype), "setOptions", this).call(this, options);
         if (options.style) this.setStyle(options.style);
         return this;
       }
@@ -2560,8 +2558,7 @@ var Base = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(ComponentBase.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(ComponentBase.prototype), "setOptions", this)) _get(_getPrototypeOf(ComponentBase.prototype), "setOptions", this).call(this, options);
         return this;
       }
     }]);
@@ -2685,8 +2682,7 @@ var Scroll = (function (superClass) {
     }, {
       key: "setOptions",
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Scroll.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(Scroll.prototype), "setOptions", this)) _get(_getPrototypeOf(Scroll.prototype), "setOptions", this).call(this, options);
         this.context = options.context;
         this.setClip(0, 0, options.width || 1, options.height || 1);
         this.setRealSize(options.realWidth || 1, options.realHeight || 1);
@@ -2808,8 +2804,7 @@ var Text = (function (superClass) {
        * @param {*} options
        */
       value: function setOptions(options) {
-        _get(_getPrototypeOf(Text.prototype), "setOptions", this).call(this, options);
-
+        if (_get(_getPrototypeOf(Text.prototype), "setOptions", this)) _get(_getPrototypeOf(Text.prototype), "setOptions", this).call(this, options);
         if (options.wrapWidth > 0) this.wrapWidth = options.wrapWidth;
         this.lineHeight = options.lineHeight || 0;
         if (options.special) this.special = Object.assign(this.special || {}, options.special);

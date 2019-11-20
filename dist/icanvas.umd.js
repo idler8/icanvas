@@ -1990,9 +1990,10 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Position.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(Position.prototype), "setOptions", this)) get(getPrototypeOf(Position.prototype), "setOptions", this).call(this, options);
           if (options.position) Object.assign(this.position, options.position);
+          if (options.x !== undefined) this.position.x = options.x;
+          if (options.y !== undefined) this.position.y = options.y;
           return this;
         }
       }, {
@@ -2058,10 +2059,9 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Angle.prototype), "setOptions", this).call(this, options);
-
-          if (options.radian) this.radian = options.radian;
-          if (options.angle) this.angle = options.angle;
+          if (get(getPrototypeOf(Angle.prototype), "setOptions", this)) get(getPrototypeOf(Angle.prototype), "setOptions", this).call(this, options);
+          if (options.radian !== undefined) this.radian = options.radian;
+          if (options.angle !== undefined) this.angle = options.angle;
           return this;
         }
       }, {
@@ -2115,9 +2115,10 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
-
-          if (options.scale) Object.assign(this.scale, options.scale);
+          if (get(getPrototypeOf(Scale.prototype), "setOptions", this)) get(getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
+          if (options.scale !== undefined) this.scale.set(scale);
+          if (options.scaleX !== undefined) this.scale.x = options.scaleX;
+          if (options.scaleY !== undefined) this.scale.y = options.scaleY;
           return this;
         }
       }, {
@@ -2188,9 +2189,10 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Anchor.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(Anchor.prototype), "setOptions", this)) get(getPrototypeOf(Anchor.prototype), "setOptions", this).call(this, options);
           if (options.anchor) Object.assign(this.anchor, options.anchor);
+          if (options.anchorX) this.anchor.x = options.anchorX;
+          if (options.anchorY) this.anchor.y = options.anchorY;
           return this;
         }
         /**
@@ -2261,9 +2263,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Alpha.prototype), "setOptions", this).call(this, options);
-
-          if (options.alpha) this.alpha = options.alpha;
+          if (get(getPrototypeOf(Alpha.prototype), "setOptions", this)) get(getPrototypeOf(Alpha.prototype), "setOptions", this).call(this, options);
+          if (options.alpha !== undefined) this.alpha = options.alpha;
           return this;
         }
       }, {
@@ -2316,9 +2317,8 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Visible.prototype), "setOptions", this).call(this, options);
-
-          if (options.visible) this.visible = options.visible;
+          if (get(getPrototypeOf(Visible.prototype), "setOptions", this)) get(getPrototypeOf(Visible.prototype), "setOptions", this).call(this, options);
+          if (options.visible !== undefined) this.visible = options.visible;
           return this;
         }
       }, {
@@ -2401,9 +2401,10 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Size.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(Size.prototype), "setOptions", this)) get(getPrototypeOf(Size.prototype), "setOptions", this).call(this, options);
           if (options.size) Object.assign(this.size, options.size);
+          if (options.width !== undefined) this.size.x = options.width;
+          if (options.height !== undefined) this.size.y = options.height;
           return this;
         }
       }, {
@@ -2484,8 +2485,7 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Clip.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(Clip.prototype), "setOptions", this)) get(getPrototypeOf(Clip.prototype), "setOptions", this).call(this, options);
           if (options.clip) this.setClip.apply(this, options.clip);
           return this;
         }
@@ -2530,8 +2530,7 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Padding.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(Padding.prototype), "setOptions", this)) get(getPrototypeOf(Padding.prototype), "setOptions", this).call(this, options);
           if (options.padding) Object.assign(this.padding, options.padding);
           return this;
         }
@@ -2597,8 +2596,7 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Style.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(Style.prototype), "setOptions", this)) get(getPrototypeOf(Style.prototype), "setOptions", this).call(this, options);
           if (options.style) this.setStyle(options.style);
           return this;
         }
@@ -2794,8 +2792,7 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(ComponentBase.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(ComponentBase.prototype), "setOptions", this)) get(getPrototypeOf(ComponentBase.prototype), "setOptions", this).call(this, options);
           return this;
         }
       }]);
@@ -2919,8 +2916,7 @@
       }, {
         key: "setOptions",
         value: function setOptions(options) {
-          get(getPrototypeOf(Scroll.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(Scroll.prototype), "setOptions", this)) get(getPrototypeOf(Scroll.prototype), "setOptions", this).call(this, options);
           this.context = options.context;
           this.setClip(0, 0, options.width || 1, options.height || 1);
           this.setRealSize(options.realWidth || 1, options.realHeight || 1);
@@ -3042,8 +3038,7 @@
          * @param {*} options
          */
         value: function setOptions(options) {
-          get(getPrototypeOf(Text.prototype), "setOptions", this).call(this, options);
-
+          if (get(getPrototypeOf(Text.prototype), "setOptions", this)) get(getPrototypeOf(Text.prototype), "setOptions", this).call(this, options);
           if (options.wrapWidth > 0) this.wrapWidth = options.wrapWidth;
           this.lineHeight = options.lineHeight || 0;
           if (options.special) this.special = Object.assign(this.special || {}, options.special);

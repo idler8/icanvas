@@ -19,9 +19,9 @@ export default superClass => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
-			if (options.radian) this.radian = options.radian;
-			if (options.angle) this.angle = options.angle;
+			if(super.setOptions) super.setOptions(options);
+			if (options.radian !== undefined) this.radian = options.radian;
+			if (options.angle !== undefined) this.angle = options.angle;
 			return this;
 		}
 	};

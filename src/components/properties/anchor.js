@@ -29,8 +29,10 @@ export default superClass => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
+			if(super.setOptions) super.setOptions(options);
 			if (options.anchor) Object.assign(this.anchor, options.anchor);
+			if (options.anchorX) this.anchor.x = options.anchorX;
+			if (options.anchorY) this.anchor.y = options.anchorY;
 			return this;
 		}
 		/**

@@ -22,8 +22,10 @@ export default (superClass = Object) => {
 			return this;
 		}
 		setOptions(options) {
-			super.setOptions(options);
+			if(super.setOptions) super.setOptions(options);
 			if (options.position) Object.assign(this.position, options.position);
+			if (options.x !== undefined) this.position.x = options.x;
+			if (options.y !== undefined) this.position.y = options.y;
 			return this;
 		}
 	};
