@@ -1,6 +1,5 @@
 export { default as ApiWebCanvas } from './web/canvas.js';
 export { default as ApiWebSystem } from './web/system.js';
-export { default as ApiWebRequest } from './web/request.js';
 export { default as ApiWebStorage } from './web/storage.js';
 export { default as ApiWebFont } from './web/font.js';
 

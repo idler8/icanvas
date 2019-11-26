@@ -9,7 +9,7 @@ import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import _typeof from '@babel/runtime/helpers/typeof';
 import _get from '@babel/runtime/helpers/get';
 import Event from 'eventemitter3';
-import axios from 'axios';
+import qs from 'qs';
 
 /**
  * @class 扩展数组类
@@ -3511,45 +3511,6 @@ function System() {
   return System;
 }
 
-var Request =
-/*#__PURE__*/
-function () {
-  function Request() {
-    _classCallCheck(this, Request);
-
-    _defineProperty(this, "baseURL", '');
-
-    _defineProperty(this, "baseData", {});
-  }
-
-  _createClass(Request, [{
-    key: "request",
-    //全局附加参数
-    value: function request(method, url, data) {
-      return axios({
-        method: method,
-        url: url,
-        data: data
-      }).then(function (res) {
-        if (res.status == 200) return res.data;
-        return Promise.reject('接口请求失败');
-      });
-    }
-  }, {
-    key: "post",
-    value: function post(url, data) {
-      return this.request('post', this.baseURL + url, Object.assign({}, this.baseData, data));
-    }
-  }, {
-    key: "get",
-    value: function get(url, data) {
-      return this.request('get', this.baseURL + url, Object.assign({}, this.baseData, data));
-    }
-  }]);
-
-  return Request;
-}();
-
 var Storage = {
   /**
    * 异步获取本地storage
@@ -3649,81 +3610,173 @@ function System$1() {
   return System$1;
 }
 
-/**
- * 模拟axios请求
- * 增加方法download 下载资源
- * @param {String} url 资源路径
- * @param {String} filePath 本地路径
- * @param {Function} callback 下载进度回调
- * @return {Promise}
- */
+var qsConfig = {
+  arrayFormat: 'indices',
+  encodeValuesOnly: true
+};
 
-/**
- * 模拟axios请求
- * @param {String} url 请求路径
- * @param {Object} data 请求参数
- * @return {Promise}
- */
-var Request$1 =
-/*#__PURE__*/
-function () {
-  function Request() {
-    _classCallCheck(this, Request);
+function mergeDefaultConfig() {
+  var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var getMethods = arguments.length > 1 ? arguments[1] : undefined;
+  var postMethods = arguments.length > 2 ? arguments[2] : undefined;
+  var method = config.method || 'get';
+  var baseURL = config.baseURL || '';
+  var configHeaders = config.headers || {};
+  var headers = {
+    common: Object.assign({}, configHeaders.common)
+  };
+  getMethods.forEach(function (method) {
+    headers[method] = Object.assign({}, configHeaders[method]);
+  });
+  postMethods.forEach(function (method) {
+    headers[method] = Object.assign({}, configHeaders[method]);
+  });
+  var params = config.params ? JSON.parse(JSON.stringify(config.params)) : {};
+  var data = config.data ? JSON.parse(JSON.stringify(config.data)) : {};
+  return {
+    method: method,
+    baseURL: baseURL,
+    headers: headers,
+    params: params,
+    data: data
+  };
+}
 
-    _defineProperty(this, "baseURL", '');
+function request(defaultConfig) {
+  var urlOrConfig = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var getConfig = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var interceptors = arguments.length > 3 ? arguments[3] : undefined;
+  var method = getConfig.method || urlOrConfig.method || defaultConfig.method;
+  var header = Object.assign({}, defaultConfig.headers.common, defaultConfig.headers[method], urlOrConfig.header, getConfig.header);
+  var url = (getConfig.baseURL || urlOrConfig.baseURL || defaultConfig.baseURL || '') + (getConfig.url || urlOrConfig.url || defaultConfig.url);
+  var params = Object.assign({}, defaultConfig.params, urlOrConfig.params, getConfig.params);
+  var data = Object.assign({}, defaultConfig.data, urlOrConfig.data, getConfig.data);
+  var dataType = getConfig.dataType || urlOrConfig.dataType || defaultConfig.dataType || 'json';
+  var responseType = getConfig.responseType || urlOrConfig.responseType || defaultConfig.responseType || 'text';
 
-    _defineProperty(this, "baseData", {});
+  if (method == 'get') {
+    params = Object.assign(data, params);
+    data = null;
   }
 
-  _createClass(Request, [{
-    key: "request",
-    //全局附加参数
-    value: function request(method, url, data) {
-      return new Promise(function (success, fail) {
-        wx.request({
-          method: method,
-          data: data,
-          url: url,
-          success: success,
-          fail: fail
-        });
-      }).then(function (res) {
-        if (res.statusCode == 200) return res.data;
-        return Promise.reject('接口请求失败');
-      });
-    }
-  }, {
-    key: "post",
-    value: function post(url, data) {
-      return this.request('post', this.baseURL + url, Object.assign({}, this.baseData, data));
-    }
-  }, {
-    key: "get",
-    value: function get(url, data) {
-      return this.request('get', this.baseURL + url, Object.assign({}, this.baseData, data));
-    }
-  }, {
-    key: "create",
-    value: function create() {
-      return new Req();
-    }
-  }, {
-    key: "download",
-    value: function download(url, filePath, callback) {
-      return new Promise(function (success, fail) {
-        var task = wx.downloadFile({
-          url: url,
-          filePath: filePath,
-          success: success,
-          fail: fail
-        });
-        if (callback) task.onProgressUpdate(callback);
-      });
-    }
-  }]);
+  var promiseConfig = Promise.resolve({
+    method: method,
+    url: url + '?' + qs.stringify(params, qsConfig),
+    data: data,
+    header: header,
+    dataType: dataType,
+    responseType: responseType
+  });
+  var transformRequest = getConfig.transformRequest || urlOrConfig.transformRequest || interceptors.request.transform;
 
-  return Request;
-}();
+  if (transformRequest) {
+    promiseConfig = transformRequest.reduce(function (promise, fn) {
+      if (!fn) return promise;
+      if (typeof fn == 'function') return promise.then(function (res) {
+        return fn(res) || res;
+      });
+      if (fn.resolve) promise = promise.then(function (res) {
+        return fn.resolve(res) || res;
+      });
+      if (fn.reject) promise = promise["catch"](function (res) {
+        return fn.reject(res) || res;
+      });
+      return promise;
+    }, promiseConfig);
+  }
+
+  var promiseRequest = promiseConfig.then(function (Config) {
+    return new Promise(function (resolve, reject) {
+      Config.success = function (res) {
+        Config.response = res;
+        resolve(Config);
+      };
+
+      Config.fail = function (res) {
+        Config.error = res;
+        reject(Config);
+      };
+
+      wx.request(Config);
+    });
+  });
+  var transformResponse = getConfig.transformResponse || urlOrConfig.transformResponse || interceptors.response.transform;
+
+  if (transformResponse) {
+    promiseRequest = transformResponse.reduce(function (promise, fn) {
+      if (!fn) return promise;
+      if (typeof fn == 'function') return promise.then(function (res) {
+        return fn(res) || res;
+      });
+      if (fn.resolve) promise = promise.then(function (res) {
+        return fn.resolve(res) || res;
+      });
+      if (fn.reject) promise = promise["catch"](function (res) {
+        return fn.reject(res) || res;
+      });
+      return promise;
+    }, promiseRequest);
+  }
+
+  return promiseRequest;
+}
+
+function createInterceptors(resolve, reject) {
+  this.transform.push(reject ? {
+    resolve: resolve,
+    reject: reject
+  } : resolve);
+  return this;
+}
+
+function createInstance(defaultConfig) {
+  var getMethods = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ['get'];
+  var postMethods = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : ['post'];
+
+  var axios = function axios(urlOrConfig, getConfig) {
+    if (typeof urlOrConfig == 'string') {
+      urlOrConfig = {
+        url: urlOrConfig,
+        method: 'get'
+      };
+    }
+
+    return request(axios.defaults, urlOrConfig, getConfig, axios.interceptors);
+  };
+
+  axios.defaults = mergeDefaultConfig(defaultConfig, getMethods, postMethods);
+  axios.interceptors = {
+    request: {
+      transform: [],
+      use: createInterceptors
+    },
+    response: {
+      transform: [],
+      use: createInterceptors
+    }
+  };
+  axios.create = createInstance;
+  axios.request = axios;
+  getMethods.forEach(function (method) {
+    axios[method] = function (url, params, config) {
+      return axios({
+        url: url,
+        method: method,
+        params: params
+      }, config);
+    };
+  });
+  postMethods.forEach(function (method) {
+    axios[method] = function (url, data, config) {
+      return axios({
+        url: url,
+        method: method,
+        data: data
+      }, config);
+    };
+  });
+  return axios;
+}
 
 var Storage$1 = {
   /**
@@ -4421,4 +4474,4 @@ function LoginFactory() {
   return Login;
 }
 
-export { GetCanvas as ApiWebCanvas, loadFont as ApiWebFont, Request as ApiWebRequest, Storage as ApiWebStorage, System as ApiWebSystem, GetCanvas$1 as ApiWxgameCanvas, LoginFactory as ApiWxgameLogin, Request$1 as ApiWxgameRequest, Storage$1 as ApiWxgameStorage, System$1 as ApiWxgameSystem, ComponentBase, ComponentBuild, ComponentScroll, ComponentText, ComponentTexture, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Matrix4 as MathMatrix4, Position as MathPosition, Random as MathRandom, time as MathTime, Vector as MathVector, Vector2 as MathVector2, Vector3 as MathVector3, Vector4 as MathVector4, AudioControl as ResourceAudio, ImageControl as ResourceImage, Load as ResourceLoad, WebAudio as ResourceWebAudio, WebImage as ResourceWebImage, WxgameAudio as ResourceWxgameAudio, WxgameImage as ResourceWxgameImage, Canvas as UtilCanvas, Collision as UtilCollsion, Loader as UtilLoaderMap, UtilPointInRect, UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch, UtilWebMouseListen, UtilWebTouchListen, UtilWxgameTouchListen, UtilWxgameVary };
+export { GetCanvas as ApiWebCanvas, loadFont as ApiWebFont, Storage as ApiWebStorage, System as ApiWebSystem, GetCanvas$1 as ApiWxgameCanvas, LoginFactory as ApiWxgameLogin, createInstance as ApiWxgameRequest, Storage$1 as ApiWxgameStorage, System$1 as ApiWxgameSystem, ComponentBase, ComponentBuild, ComponentScroll, ComponentText, ComponentTexture, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Matrix4 as MathMatrix4, Position as MathPosition, Random as MathRandom, time as MathTime, Vector as MathVector, Vector2 as MathVector2, Vector3 as MathVector3, Vector4 as MathVector4, AudioControl as ResourceAudio, ImageControl as ResourceImage, Load as ResourceLoad, WebAudio as ResourceWebAudio, WebImage as ResourceWebImage, WxgameAudio as ResourceWxgameAudio, WxgameImage as ResourceWxgameImage, Canvas as UtilCanvas, Collision as UtilCollsion, Loader as UtilLoaderMap, UtilPointInRect, UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch, UtilWebMouseListen, UtilWebTouchListen, UtilWxgameTouchListen, UtilWxgameVary };

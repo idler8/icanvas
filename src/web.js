@@ -12,4 +12,4 @@ export {
 export { ResourceImage, ResourceWebImage, ResourceAudio, ResourceWebAudio } from './resources/';
 export * from './maths/';
 export * from './components/';
-export { ApiWebCanvas, ApiWebSystem, ApiWebRequest, ApiWebStorage, ApiWebFont } from './apis/';
+export { ApiWebCanvas, ApiWebSystem, ApiWebStorage, ApiWebFont } from './apis/';
