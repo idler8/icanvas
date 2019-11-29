@@ -100,7 +100,7 @@ export class WebAudio extends AudioControl {
 			let audio = new Audio();
 			audio.loop = false;
 			audio.autoplay = false;
-			audio.onloadeddata = function() {
+			audio.onloadedmetadata = function() {
 				resolve(audio);
 			};
 			audio.onerror = function(e) {
