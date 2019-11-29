@@ -38,10 +38,41 @@ export function UtilWebTouchListen(dom, Touch) {
  * @param {ICanvas.UtilTouch} Touch
  */
 export function UtilWebMouseListen(dom, Touch) {
-	dom.addEventListener('mousedown', e => Touch.onTouchStart(e), { passive: true });
-	dom.addEventListener('mousemove', e => Touch.onTouchMove(e), { passive: true });
-	dom.addEventListener('mouseup', e => Touch.onTouchEnd(e), { passive: true });
-	dom.addEventListener('mouseout', e => Touch.onTouchEnd(e), { passive: true });
+	let DownState = false;
+	dom.addEventListener(
+		'mousedown',
+		function(e) {
+			DownState = true;
+			Touch.onTouchStart({ identifier: 0, changedTouches: [{ clientX: e.clientX - dom.offsetLeft, clientY: e.clientY - dom.offsetTop }] });
+		},
+		{ passive: true },
+	);
+	dom.addEventListener(
+		'mousemove',
+		function(e) {
+			if (!DownState) return;
+			Touch.onTouchMove({ identifier: 0, changedTouches: [{ clientX: e.clientX - dom.offsetLeft, clientY: e.clientY - dom.offsetTop }] });
+		},
+		{ passive: true },
+	);
+	dom.addEventListener(
+		'mouseup',
+		function(e) {
+			if (!DownState) return;
+			DownState = false;
+			Touch.onTouchEnd({ identifier: 0, changedTouches: [{ clientX: e.clientX - dom.offsetLeft, clientY: e.clientY - dom.offsetTop }] });
+		},
+		{ passive: true },
+	);
+	dom.addEventListener(
+		'mouseout',
+		function(e) {
+			if (!DownState) return;
+			DownState = false;
+			Touch.onTouchEnd({ identifier: 0, changedTouches: [{ clientX: e.clientX - dom.offsetLeft, clientY: e.clientY - dom.offsetTop }] });
+		},
+		{ passive: true },
+	);
 }
 /**
  * 微信触摸事件和Touch类进行关联

@@ -4282,23 +4282,54 @@ function UtilWebTouchListen(dom, Touch) {
  */
 
 function UtilWebMouseListen(dom, Touch) {
+  var DownState = false;
   dom.addEventListener('mousedown', function (e) {
-    return Touch.onTouchStart(e);
+    DownState = true;
+    Touch.onTouchStart({
+      identifier: 0,
+      changedTouches: [{
+        clientX: e.clientX - dom.offsetLeft,
+        clientY: e.clientY - dom.offsetTop
+      }]
+    });
   }, {
     passive: true
   });
   dom.addEventListener('mousemove', function (e) {
-    return Touch.onTouchMove(e);
+    if (!DownState) return;
+    Touch.onTouchMove({
+      identifier: 0,
+      changedTouches: [{
+        clientX: e.clientX - dom.offsetLeft,
+        clientY: e.clientY - dom.offsetTop
+      }]
+    });
   }, {
     passive: true
   });
   dom.addEventListener('mouseup', function (e) {
-    return Touch.onTouchEnd(e);
+    if (!DownState) return;
+    DownState = false;
+    Touch.onTouchEnd({
+      identifier: 0,
+      changedTouches: [{
+        clientX: e.clientX - dom.offsetLeft,
+        clientY: e.clientY - dom.offsetTop
+      }]
+    });
   }, {
     passive: true
   });
   dom.addEventListener('mouseout', function (e) {
-    return Touch.onTouchEnd(e);
+    if (!DownState) return;
+    DownState = false;
+    Touch.onTouchEnd({
+      identifier: 0,
+      changedTouches: [{
+        clientX: e.clientX - dom.offsetLeft,
+        clientY: e.clientY - dom.offsetTop
+      }]
+    });
   }, {
     passive: true
   });
