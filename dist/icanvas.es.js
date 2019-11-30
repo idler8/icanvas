@@ -1882,7 +1882,7 @@ var Scale = (function (superClass) {
       key: "setOptions",
       value: function setOptions(options) {
         if (_get(_getPrototypeOf(Scale.prototype), "setOptions", this)) _get(_getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
-        if (options.scale !== undefined) this.scale.set(scale);
+        if (options.scale !== undefined) this.scale.set(options.scale);
         if (options.scaleX !== undefined) this.scale.x = options.scaleX;
         if (options.scaleY !== undefined) this.scale.y = options.scaleY;
         return this;
