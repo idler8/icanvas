@@ -1,10 +1,5 @@
 import Load from './load.js';
 export default class AudioControl extends Load {
-	//获取音效
-	_get(key) {
-		if (!this.resources[key]) throw Error('音频不存在');
-		return this.Get(this.resources[key].src);
-	}
 	channels = {};
 	//单声道音效
 	channel(name = '', key = '', loop = true) {
@@ -14,8 +9,7 @@ export default class AudioControl extends Load {
 			delete this.channels[name];
 		}
 		if (key) {
-			let audio = this._get(key);
-			audio.Loop = loop;
+			let audio = this.Get(key, loop);
 			this.channels[name] = audio;
 			if (!this._mute) audio.play();
 		}
@@ -39,7 +33,7 @@ export default class AudioControl extends Load {
 		if (!this.pools[key]) this.pools[key] = [];
 		if (this._mute) return this;
 		let audio = this.pools[key].find(a => a.paused);
-		if (!audio) this.pools[key].push((audio = this._get(key)));
+		if (!audio) this.pools[key].push((audio = this.Get(key)));
 		audio.play();
 		return this;
 	}
@@ -79,18 +73,15 @@ export class WxgameAudio extends AudioControl {
 			audio.onError(function(e) {
 				reject(e);
 			});
-			audio.key = audio.src = url;
+			audio.src = url;
 		});
 	}
-	Get(url) {
+	Get(key, loop = false) {
+		if (!this.resources[key]) throw Error('音频不存在');
 		let audio = wx.createInnerAudioContext();
-		audio.loop = false;
+		audio.loop = loop;
 		audio.autoplay = false;
-		audio.onCanplay(function() {
-			if (audio.Loop) audio.loop = audio.Loop;
-			if (!audio.paused) audio.play();
-		});
-		audio.src = url;
+		audio.src = this.resources[key].src;
 		return audio;
 	}
 }
@@ -109,15 +100,12 @@ export class WebAudio extends AudioControl {
 			audio.key = audio.src = url;
 		});
 	}
-	Get(url) {
+	Get(key, loop = false) {
+		if (!this.resources[key]) throw Error('音频不存在');
 		let audio = new Audio();
-		audio.loop = false;
+		audio.loop = loop;
 		audio.autoplay = false;
-		audio.onloadeddata = function() {
-			if (audio.Loop) audio.loop = audio.Loop;
-			if (!audio.paused) audio.play();
-		};
-		audio.src = url;
+		audio.src = this.resources[key].src;
 		return audio;
 	}
 }

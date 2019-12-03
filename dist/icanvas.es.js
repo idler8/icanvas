@@ -3279,13 +3279,6 @@ function (_Load) {
   }
 
   _createClass(AudioControl, [{
-    key: "_get",
-    //获取音效
-    value: function _get(key) {
-      if (!this.resources[key]) throw Error('音频不存在');
-      return this.Get(this.resources[key].src);
-    }
-  }, {
     key: "channel",
     //单声道音效
     value: function channel() {
@@ -3300,9 +3293,7 @@ function (_Load) {
       }
 
       if (key) {
-        var audio = this._get(key);
-
-        audio.Loop = loop;
+        var audio = this.Get(key, loop);
         this.channels[name] = audio;
         if (!this._mute) audio.play();
       }
@@ -3337,7 +3328,7 @@ function (_Load) {
       var audio = this.pools[key].find(function (a) {
         return a.paused;
       });
-      if (!audio) this.pools[key].push(audio = this._get(key));
+      if (!audio) this.pools[key].push(audio = this.Get(key));
       audio.play();
       return this;
     }
@@ -3411,20 +3402,18 @@ function (_AudioControl) {
         audio.onError(function (e) {
           reject(e);
         });
-        audio.key = audio.src = url;
+        audio.src = url;
       });
     }
   }, {
     key: "Get",
-    value: function Get(url) {
+    value: function Get(key) {
+      var loop = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!this.resources[key]) throw Error('音频不存在');
       var audio = wx.createInnerAudioContext();
-      audio.loop = false;
+      audio.loop = loop;
       audio.autoplay = false;
-      audio.onCanplay(function () {
-        if (audio.Loop) audio.loop = audio.Loop;
-        if (!audio.paused) audio.play();
-      });
-      audio.src = url;
+      audio.src = this.resources[key].src;
       return audio;
     }
   }]);
@@ -3463,17 +3452,13 @@ function (_AudioControl2) {
     }
   }, {
     key: "Get",
-    value: function Get(url) {
+    value: function Get(key) {
+      var loop = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!this.resources[key]) throw Error('音频不存在');
       var audio = new Audio();
-      audio.loop = false;
+      audio.loop = loop;
       audio.autoplay = false;
-
-      audio.onloadeddata = function () {
-        if (audio.Loop) audio.loop = audio.Loop;
-        if (!audio.paused) audio.play();
-      };
-
-      audio.src = url;
+      audio.src = this.resources[key].src;
       return audio;
     }
   }]);
