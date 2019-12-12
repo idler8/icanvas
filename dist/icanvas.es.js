@@ -2486,8 +2486,6 @@ var Base = (function (superClass) {
     }, {
       key: "addChild",
       value: function addChild(Component) {
-        if (!Component) return this;
-
         if (arguments.length > 1) {
           for (var i = 0; i < arguments.length; i++) {
             this.addChild(arguments[i]);
@@ -2495,6 +2493,8 @@ var Base = (function (superClass) {
 
           return this;
         }
+
+        if (!Component) return this;
 
         if (Component instanceof Array) {
           for (var _i = 0; _i < Component.length; _i++) {
@@ -2698,7 +2698,7 @@ var Scroll = (function (superClass) {
         if (_get(_getPrototypeOf(Scroll.prototype), "setOptions", this)) _get(_getPrototypeOf(Scroll.prototype), "setOptions", this).call(this, options);
         this.context = options.context;
         this.setClip(0, 0, options.width || 1, options.height || 1);
-        this.setRealSize(options.realWidth || 1, options.realHeight || 1);
+        this.setRealSize(options.realWidth || options.width || 1, options.realHeight || options.width || 1);
         return this;
       }
       /**

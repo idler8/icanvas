@@ -56,7 +56,7 @@ export default superClass => {
 			if (super.setOptions) super.setOptions(options);
 			this.context = options.context;
 			this.setClip(0, 0, options.width || 1, options.height || 1);
-			this.setRealSize(options.realWidth || 1, options.realHeight || 1);
+			this.setRealSize(options.realWidth || options.width || 1, options.realHeight || options.width || 1);
 			return this;
 		}
 		/**

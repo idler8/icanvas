@@ -50,11 +50,11 @@ export default superClass => {
 		 * @param {Component} Component 组件
 		 */
 		addChild(Component) {
-			if (!Component) return this;
 			if (arguments.length > 1) {
 				for (let i = 0; i < arguments.length; i++) this.addChild(arguments[i]);
 				return this;
 			}
+			if (!Component) return this;
 			if (Component instanceof Array) {
 				for (let i = 0; i < Component.length; i++) this.addChild(Component[i]);
 				return this;
