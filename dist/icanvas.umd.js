@@ -3851,18 +3851,36 @@
     }
 
     createClass(AudioControl, [{
+      key: "channelPause",
+      value: function channelPause(name) {
+        var kill = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        this.channels[name].pause();
+        if (!kill) return this;
+        delete this.channels[name];
+      }
+    }, {
+      key: "channelContinue",
+      value: function channelContinue(name) {
+        var _this2 = this;
+
+        if (name === true) {
+          Object.keys(this.channels).forEach(function (k) {
+            return _this2.channelContinue(k);
+          });
+          return this;
+        }
+
+        this.channels[name].play();
+        return this;
+      } //单声道音效
+
+    }, {
       key: "channel",
-      //单声道音效
       value: function channel() {
         var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
         var key = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
         var loop = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-        if (this.channels[name]) {
-          this.channels[name].pause();
-          if (this.channels[name].destroy) this.channels[name].destroy();
-          delete this.channels[name];
-        }
+        if (this.channels[name]) this.channelPause(name, true);
 
         if (key) {
           var audio = this.Get(key, loop);
@@ -3875,20 +3893,17 @@
     }, {
       key: "channelMute",
       value: function channelMute(name) {
-        var _this2 = this;
+        var _this3 = this;
 
         if (name === true) {
           Object.keys(this.channels).forEach(function (k) {
-            return _this2.channelMute(k);
+            return _this3.channelMute(k);
           });
           return this;
         }
 
         if (!this.channels[name]) return this;
-        this.channels[name].pause();
-        if (this.channels[name].loop) return this;
-        if (this.channels[name].destroy) this.channels[name].destroy();
-        delete this.channels[name];
+        this.channelPause(name, !this.channels[name].Loop);
         return this;
       }
     }, {
@@ -3907,11 +3922,11 @@
     }, {
       key: "poolMute",
       value: function poolMute(key) {
-        var _this3 = this;
+        var _this4 = this;
 
         if (key === true) {
           Object.keys(this.pools).forEach(function (k) {
-            return _this3.poolMute(k);
+            return _this4.poolMute(k);
           });
           return this;
         }
@@ -3929,22 +3944,8 @@
         return this._mute;
       },
       set: function set(mute) {
-        var _this4 = this;
-
         this._mute = mute;
-
-        if (mute) {
-          Object.keys(this.pools).forEach(function (name) {
-            return _this4.poolMute(true);
-          });
-          Object.keys(this.channels).forEach(function (name) {
-            return _this4.channelMute(true);
-          });
-        } else {
-          Object.keys(this.channels).forEach(function (name) {
-            return _this4.channels[name].loop && _this4.channels[name].play();
-          });
-        }
+        mute ? this.poolMute(true).channelMute(true) : this.channelContinue(true);
       }
     }]);
 
@@ -3962,6 +3963,15 @@
     }
 
     createClass(WxgameAudio, [{
+      key: "channelPause",
+      value: function channelPause(name) {
+        var kill = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        this.channels[name].pause();
+        if (!kill) return;
+        this.channels[name].destroy();
+        delete this.channels[name];
+      }
+    }, {
       key: "Set",
       value: function Set(url) {
         return new Promise(function (resolve, reject) {
@@ -3983,7 +3993,7 @@
         var loop = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         if (!this.resources[key]) throw Error('音频不存在');
         var audio = wx.createInnerAudioContext();
-        audio.loop = loop;
+        audio.Loop = audio.loop = loop;
         audio.autoplay = false;
         audio.src = this.resources[key].src;
         return audio;
@@ -4028,7 +4038,7 @@
         var loop = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         if (!this.resources[key]) throw Error('音频不存在');
         var audio = new Audio();
-        audio.loop = loop;
+        audio.Loop = audio.loop = loop;
         audio.autoplay = false;
         audio.src = this.resources[key].src;
         return audio;

@@ -1,13 +1,22 @@
 import Load from './load.js';
 export default class AudioControl extends Load {
 	channels = {};
+	channelPause(name, kill = false) {
+		this.channels[name].pause();
+		if (!kill) return this;
+		delete this.channels[name];
+	}
+	channelContinue(name) {
+		if (name === true) {
+			Object.keys(this.channels).forEach(k => this.channelContinue(k));
+			return this;
+		}
+		this.channels[name].play();
+		return this;
+	}
 	//单声道音效
 	channel(name = '', key = '', loop = true) {
-		if (this.channels[name]) {
-			this.channels[name].pause();
-			if (this.channels[name].destroy) this.channels[name].destroy();
-			delete this.channels[name];
-		}
+		if (this.channels[name]) this.channelPause(name, true);
 		if (key) {
 			let audio = this.Get(key, loop);
 			this.channels[name] = audio;
@@ -21,10 +30,7 @@ export default class AudioControl extends Load {
 			return this;
 		}
 		if (!this.channels[name]) return this;
-		this.channels[name].pause();
-		if (this.channels[name].loop) return this;
-		if (this.channels[name].destroy) this.channels[name].destroy();
-		delete this.channels[name];
+		this.channelPause(name, !this.channels[name].Loop);
 		return this;
 	}
 	pools = {};
@@ -53,15 +59,16 @@ export default class AudioControl extends Load {
 	}
 	set mute(mute) {
 		this._mute = mute;
-		if (mute) {
-			Object.keys(this.pools).forEach(name => this.poolMute(true));
-			Object.keys(this.channels).forEach(name => this.channelMute(true));
-		} else {
-			Object.keys(this.channels).forEach(name => this.channels[name].loop && this.channels[name].play());
-		}
+		mute ? this.poolMute(true).channelMute(true) : this.channelContinue(true);
 	}
 }
 export class WxgameAudio extends AudioControl {
+	channelPause(name, kill = false) {
+		this.channels[name].pause();
+		if (!kill) return;
+		this.channels[name].destroy();
+		delete this.channels[name];
+	}
 	Set(url) {
 		return new Promise((resolve, reject) => {
 			let audio = wx.createInnerAudioContext();
@@ -79,7 +86,7 @@ export class WxgameAudio extends AudioControl {
 	Get(key, loop = false) {
 		if (!this.resources[key]) throw Error('音频不存在');
 		let audio = wx.createInnerAudioContext();
-		audio.loop = loop;
+		audio.Loop = audio.loop = loop;
 		audio.autoplay = false;
 		audio.src = this.resources[key].src;
 		return audio;
@@ -103,7 +110,7 @@ export class WebAudio extends AudioControl {
 	Get(key, loop = false) {
 		if (!this.resources[key]) throw Error('音频不存在');
 		let audio = new Audio();
-		audio.loop = loop;
+		audio.Loop = audio.loop = loop;
 		audio.autoplay = false;
 		audio.src = this.resources[key].src;
 		return audio;
