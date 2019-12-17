@@ -4020,16 +4020,8 @@
           var audio = new Audio();
           audio.loop = false;
           audio.autoplay = false;
-
-          audio.onloadedmetadata = function () {
-            resolve(audio);
-          };
-
-          audio.onerror = function (e) {
-            reject(e);
-          };
-
           audio.key = audio.src = url;
+          resolve(audio);
         });
       }
     }, {
