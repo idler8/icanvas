@@ -12,7 +12,7 @@ export default [
 				format: 'esm',
 			},
 		],
-		external: ['wx', 'window', 'document'],
+		external: ['window', 'document'],
 		plugins: [
 			json(),
 			babel({
@@ -35,7 +35,7 @@ export default [
 				format: 'umd',
 			},
 		],
-		external: ['wx', 'window', 'document'],
+		external: ['window', 'document'],
 		plugins: [
 			resolve({ preferBuiltins: true, browser: true }),
 			json(),

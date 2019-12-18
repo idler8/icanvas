@@ -57,7 +57,7 @@ es6调用完整支持Tree Shake
 #### [浏览器生成Canvas方法](src/apis/web/canvas.js)`ICanvas.Api.Canvas`
 #### [浏览器获取系统属性方法](src/apis/web/system.js)`ICanvas.Api.System`
 #### [浏览器外部字体加载方法](src/apis/web/font.js)`ICanvas.Api.Font`
-#### [浏览器触摸监听传递](src/utils/index.js)`ICanvas.Util.TouchListen`
+#### [浏览器触摸监听传递](src/utils/index.js)`ICanvas.Util.Touch`
 
 ### 工具包
 #### [Canvas2D扩展](src/utils/lib/canvas2d.js)`ICanvas.Util.Canvas2D`
