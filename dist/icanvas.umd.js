@@ -1985,7 +1985,7 @@
       createClass(Texture, [{
         key: "setTexture",
         value: function setTexture(texture) {
-          this.texture = Texture.GetImage ? Texture.GetImage(texture) : texture;
+          this.texture = texture;
           if (!this.texture) return this;
           if (this.size) this.size.setTo(this.texture.width, this.texture.height);
           if (this.useFrame) this.useFrame = false;

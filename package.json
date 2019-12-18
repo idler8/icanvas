@@ -1,6 +1,6 @@
 {
 	"name": "@icanvas/core",
-	"version": "3.0.1",
+	"version": "3.0.2",
 	"description": "这是icanvas的核心包",
 	"scripts": {
 		"build": "rollup -c"
@@ -23,10 +23,8 @@
 	"author": "潘丽敏",
 	"license": "MIT",
 	"dependencies": {
-		"axios": "^0.19.0",
 		"eventemitter3": "^4.0.0",
-		"howler": "^2.1.2",
-		"qs": "^6.9.1"
+		"howler": "^2.1.2"
 	},
 	"main": "dist/icanvas.umd.js",
 	"module": "dist/icanvas.es.js",
