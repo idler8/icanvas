@@ -1,4 +1,4 @@
-import { MathVector2 } from '../../maths/index.js';
+import { MathVector2 } from '../../../maths/index.js';
 export default superClass => {
 	return class Scale extends superClass {
 		/**
@@ -22,12 +22,11 @@ export default superClass => {
 			this.scale.y = y;
 			return this;
 		}
-		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
+		constructor(options) {
+			super(options);
 			if (options.scale !== undefined) this.scale.set(options.scale);
 			if (options.scaleX !== undefined) this.scale.x = options.scaleX;
 			if (options.scaleY !== undefined) this.scale.y = options.scaleY;
-			return this;
 		}
 	};
 };

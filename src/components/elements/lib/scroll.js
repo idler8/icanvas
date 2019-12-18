@@ -1,9 +1,5 @@
 export default superClass => {
 	return class Scroll extends superClass {
-		constructor(options) {
-			super();
-			if (options) this.setOptions(options);
-		}
 		/**
 		 * 真实场地大小
 		 */

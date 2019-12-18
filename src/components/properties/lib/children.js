@@ -1,19 +1,7 @@
-import { MathMatrix3 } from '../../maths/index.js';
-let CID = 0; //全局递增组件id
 export default superClass => {
-	return class ComponentBase extends superClass {
-		constructor(options) {
-			super();
-			if (options) this.setOptions(options);
-		}
-		id = ++CID;
-		zIndex = 0;
-		children = []; //子元素列表
+	return class Children extends superClass {
 		parent = null; //父元素
-		lockChild = false; //是否在销毁时同时销毁子元素
-		touchChildren = true; //是否允许点击子元素
-		touchStop = false; //点击是否不冒泡到父元素
-		matrix = new MathMatrix3(); //计算矩阵
+		children = []; //子元素列表
 		/**
 		 * 将本组件加入某个组件下面
 		 * @param {Component} Component 父级
@@ -76,7 +64,7 @@ export default superClass => {
 				return this;
 			}
 			if (Component.parent != this) return this;
-			if (!Component.lockChild) Component.removeChildren();
+			Component.removeChildren();
 			if (Component.destroy) Component.destroy();
 			let index = this.children.indexOf(Component);
 			if (index >= 0) this.children.splice(index, 1);
@@ -92,10 +80,6 @@ export default superClass => {
 			for (let i = this.children.length - 1; i >= 0; i--) {
 				this.removeChild(this.children[i]);
 			}
-			return this;
-		}
-		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
 			return this;
 		}
 	};

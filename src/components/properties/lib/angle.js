@@ -18,11 +18,10 @@ export default superClass => {
 			this.angle = a;
 			return this;
 		}
-		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
+		constructor(options) {
+			super(options);
 			if (options.radian !== undefined) this.radian = options.radian;
 			if (options.angle !== undefined) this.angle = options.angle;
-			return this;
 		}
 	};
 };

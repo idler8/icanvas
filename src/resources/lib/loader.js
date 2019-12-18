@@ -1,10 +1,7 @@
 import Event from 'eventemitter3';
-export default class Load extends Event {
+export default class Loader extends Event {
 	Set(url) {
 		throw Error('请先挂载加载函数(Set)');
-	}
-	Get() {
-		throw Error('请先挂载读取函数(Get)');
 	}
 	resources = {};
 	load(key, url) {

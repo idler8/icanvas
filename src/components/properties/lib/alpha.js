@@ -1,5 +1,9 @@
 export default superClass => {
 	return class Alpha extends superClass {
+		constructor(options) {
+			super(options);
+			if (options.alpha !== undefined) this.alpha = options.alpha;
+		}
 		/**
 		 * 透明度控制
 		 * 当透明度小于0时，使用上级透明度
@@ -14,11 +18,6 @@ export default superClass => {
 		}
 		setAlpha(n) {
 			this.alpha = n;
-			return this;
-		}
-		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
-			if (options.alpha !== undefined) this.alpha = options.alpha;
 			return this;
 		}
 	};

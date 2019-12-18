@@ -1,20 +1,22 @@
 /**
  * 数学包
  */
-export * from './maths/';
+import * as Math from './maths/';
 /**
  * 界面组件包
  */
-export * from './components/';
+import * as Component from './components/';
 /**
  * 资源加载包
  */
-export * from './resources/';
+import * as Resource from './resources/';
 /**
  * 特性包
  */
-export * from './apis/';
+import * as Api from './apis/';
 /**
  * 工具包
  */
-export * from './utils/';
+import * as Util from './utils/';
+
+export { Math, Component, Resource, Api, Util };

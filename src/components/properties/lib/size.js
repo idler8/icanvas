@@ -1,4 +1,4 @@
-import { MathVector2 } from '../../maths/index.js';
+import { MathVector2 } from '../../../maths/index.js';
 export default superClass => {
 	return class Size extends superClass {
 		/**
@@ -42,12 +42,11 @@ export default superClass => {
 			}
 			return this;
 		}
-		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
+		constructor(options) {
+			super(options);
 			if (options.size) Object.assign(this.size, options.size);
 			if (options.width !== undefined) this.size.x = options.width;
 			if (options.height !== undefined) this.size.y = options.height;
-			return this;
 		}
 		hitMe(x, y) {
 			if (this.padding) {

@@ -1,12 +1,8 @@
-export default superClass => {
+export default (superClass, Context) => {
 	return class Text extends superClass {
 		static AlignWidth = { left: 0, center: 0.5, right: 1 };
 		static AlignHeight = { top: 0, middle: 0.5, bottom: 1, hanging: 0, alphabetic: 1, ideographic: 1 };
 		static defaultHandle = { cursorX: 0, cursorY: 0, nextCursorX: 0, currentString: '', currentText: '', currentWidth: 0, Special: false };
-		constructor(options) {
-			super();
-			if (options) this.setOptions(options);
-		}
 		/**
 		 * 当前内容字符串
 		 */
@@ -66,8 +62,8 @@ export default superClass => {
 		_Lines = [];
 		_Handle = Object.assign({}, Text.defaultHandle);
 		separate(value) {
-			if (!Text.Context) return; //TODO 是否补充测试例
-			Text.Context.font = this.font;
+			if (!Context) return; //TODO 是否补充测试例
+			Context.font = this.font;
 			this._Lines.length = 0;
 			this._LineWidth.length = 0;
 			this.size.setTo(0, this.style ? this.style.size : this.lineHeight);
@@ -77,13 +73,13 @@ export default superClass => {
 		}
 		//检查当前字符
 		checkCurrentText(value) {
-			if (!Text.Context) return; //TODO 是否补充测试例
+			if (!Context) return; //TODO 是否补充测试例
 			if (this.checkSpecial(value)) return;
 			this._Handle.currentText = value;
 			if (!this._Handle.currentText) {
 				this._Handle.currentWidth = 0;
 			} else {
-				let measureText = Text.Context.measureText(this._Handle.currentText);
+				let measureText = Context.measureText(this._Handle.currentText);
 				this._Handle.currentWidth = measureText ? measureText.width : 0;
 			}
 			this._Handle.nextCursorX = this._Handle.cursorX + this._Handle.currentWidth;

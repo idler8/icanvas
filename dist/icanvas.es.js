@@ -9,7 +9,7 @@ import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import _typeof from '@babel/runtime/helpers/typeof';
 import _get from '@babel/runtime/helpers/get';
 import Event from 'eventemitter3';
-import qs from 'qs';
+import { Howl, Howler } from 'howler';
 
 /**
  * @class 扩展数组类
@@ -1720,688 +1720,25 @@ function () {
   return Clock;
 }();
 
-var Position$1 = (function () {
-  var _temp;
 
-  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Object;
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Position, _superClass);
 
-    function Position() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Position);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Position)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "position", new Vector2());
-
-      return _this;
-    }
-
-    _createClass(Position, [{
-      key: "setPosition",
-      value: function setPosition(x, y) {
-        this.position.setTo(x, y);
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Position.prototype), "setOptions", this)) _get(_getPrototypeOf(Position.prototype), "setOptions", this).call(this, options);
-        if (options.position) Object.assign(this.position, options.position);
-        if (options.x !== undefined) this.position.x = options.x;
-        if (options.y !== undefined) this.position.y = options.y;
-        return this;
-      }
-    }, {
-      key: "x",
-      get: function get() {
-        return this.position.x;
-      },
-      set: function set(x) {
-        this.position.x = x;
-      }
-    }, {
-      key: "y",
-      get: function get() {
-        return this.position.y;
-      },
-      set: function set(y) {
-        this.position.y = y;
-      }
-    }]);
-
-    return Position;
-  }(superClass), _temp;
+var index = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	MathArray: BaseArray,
+	MathVector: Vector,
+	MathVector2: Vector2,
+	MathVector3: Vector3,
+	MathVector4: Vector4,
+	MathMatrix3: Matrix3,
+	MathMatrix4: Matrix4,
+	MathRandom: Random,
+	MathTime: time,
+	MathColor: color,
+	MathPosition: Position,
+	MathClock: Clock
 });
 
-var Angle = (function (superClass) {
-  var _temp;
-
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Angle, _superClass);
-
-    function Angle() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Angle);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Angle)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "radian", 0);
-
-      return _this;
-    }
-
-    _createClass(Angle, [{
-      key: "setRadian",
-      value: function setRadian(r) {
-        this.radian = r;
-        return this;
-      }
-    }, {
-      key: "setAngle",
-      value: function setAngle(a) {
-        this.angle = a;
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Angle.prototype), "setOptions", this)) _get(_getPrototypeOf(Angle.prototype), "setOptions", this).call(this, options);
-        if (options.radian !== undefined) this.radian = options.radian;
-        if (options.angle !== undefined) this.angle = options.angle;
-        return this;
-      }
-    }, {
-      key: "angle",
-      //弧度
-      set: function set(a) {
-        this.radian = a * Math.PI / 180;
-      },
-      get: function get() {
-        return this.radian * 180 / Math.PI;
-      }
-    }]);
-
-    return Angle;
-  }(superClass), _temp;
-});
-
-var Scale = (function (superClass) {
-  var _temp;
-
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Scale, _superClass);
-
-    function Scale() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Scale);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Scale)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "scale", new Vector2(1, 1));
-
-      return _this;
-    }
-
-    _createClass(Scale, [{
-      key: "setScale",
-      value: function setScale(x, y) {
-        this.scale.x = x;
-        this.scale.y = y;
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Scale.prototype), "setOptions", this)) _get(_getPrototypeOf(Scale.prototype), "setOptions", this).call(this, options);
-        if (options.scale !== undefined) this.scale.set(options.scale);
-        if (options.scaleX !== undefined) this.scale.x = options.scaleX;
-        if (options.scaleY !== undefined) this.scale.y = options.scaleY;
-        return this;
-      }
-    }, {
-      key: "scaleX",
-      get: function get() {
-        return this.scale.x;
-      },
-      set: function set(x) {
-        this.scale.x = x;
-      }
-    }, {
-      key: "scaleY",
-      get: function get() {
-        return this.scale.y;
-      },
-      set: function set(y) {
-        this.scale.y = y;
-      }
-    }]);
-
-    return Scale;
-  }(superClass), _temp;
-});
-
-var Anchor = (function (superClass) {
-  var _temp;
-
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Anchor, _superClass);
-
-    function Anchor() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Anchor);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Anchor)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "anchor", new Vector2());
-
-      return _this;
-    }
-
-    _createClass(Anchor, [{
-      key: "setAnchor",
-      value: function setAnchor(x, y) {
-        this.anchor.x = x;
-        this.anchor.y = y;
-        return this;
-      }
-    }, {
-      key: "setAnchorSize",
-      value: function setAnchorSize() {
-        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
-        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
-        if (!this.size) return this;
-        this.anchor.x = this.width * x;
-        this.anchor.y = this.height * y;
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Anchor.prototype), "setOptions", this)) _get(_getPrototypeOf(Anchor.prototype), "setOptions", this).call(this, options);
-        if (options.anchor) Object.assign(this.anchor, options.anchor);
-        if (options.anchorX) this.anchor.x = options.anchorX;
-        if (options.anchorY) this.anchor.y = options.anchorY;
-        return this;
-      }
-      /**
-       * 触摸事件位置偏移量
-       * @param {*} touch
-       */
-
-    }, {
-      key: "offsetTouch",
-      value: function offsetTouch(touch) {
-        if (_get(_getPrototypeOf(Anchor.prototype), "offsetTouch", this)) _get(_getPrototypeOf(Anchor.prototype), "offsetTouch", this).call(this, touch);
-        return touch.addToVector(this.anchor);
-      }
-    }, {
-      key: "anchorX",
-      get: function get() {
-        return this.anchor.x;
-      },
-      set: function set(x) {
-        this.anchor.x = x;
-      }
-    }, {
-      key: "anchorY",
-      get: function get() {
-        return this.anchor.y;
-      },
-      set: function set(y) {
-        this.anchor.y = y;
-      }
-    }]);
-
-    return Anchor;
-  }(superClass), _temp;
-});
-
-var Alpha = (function (superClass) {
-  var _temp;
-
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Alpha, _superClass);
-
-    function Alpha() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Alpha);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Alpha)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "_alpha", 1);
-
-      return _this;
-    }
-
-    _createClass(Alpha, [{
-      key: "setAlpha",
-      value: function setAlpha(n) {
-        this.alpha = n;
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Alpha.prototype), "setOptions", this)) _get(_getPrototypeOf(Alpha.prototype), "setOptions", this).call(this, options);
-        if (options.alpha !== undefined) this.alpha = options.alpha;
-        return this;
-      }
-    }, {
-      key: "alpha",
-      set: function set(a) {
-        this._alpha = a;
-      },
-      get: function get() {
-        if (this._alpha < 0 && this.parent) return this.parent.alpha;
-        return this._alpha;
-      }
-    }]);
-
-    return Alpha;
-  }(superClass), _temp;
-});
-
-var Visible = (function (superClass) {
-  var _temp;
-
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Visible, _superClass);
-
-    function Visible() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Visible);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Visible)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "_visible", true);
-
-      return _this;
-    }
-
-    _createClass(Visible, [{
-      key: "setVisible",
-      value: function setVisible(n) {
-        this.visible = n;
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Visible.prototype), "setOptions", this)) _get(_getPrototypeOf(Visible.prototype), "setOptions", this).call(this, options);
-        if (options.visible !== undefined) this.visible = options.visible;
-        return this;
-      }
-    }, {
-      key: "visible",
-      get: function get() {
-        if (!this.parent) return this._visible;
-        return this._visible && this.parent.visible;
-      },
-      set: function set(v) {
-        if (this._visible == v) return;
-        this._visible = v;
-        v ? this.show && this.show() : this.hide && this.hide();
-      }
-    }]);
-
-    return Visible;
-  }(superClass), _temp;
-});
-
-var Size = (function (superClass) {
-  var _temp;
-
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Size, _superClass);
-
-    function Size() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Size);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Size)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "size", new Vector2());
-
-      return _this;
-    }
-
-    _createClass(Size, [{
-      key: "setSize",
-      value: function setSize(x, y) {
-        this.size.setTo(x, y);
-        return this;
-      }
-    }, {
-      key: "setSizeLimit",
-      value: function setSizeLimit(maxX, maxY, minX, minY) {
-        if (!this.size.y) return this;
-        var lv = this.size.x / this.size.y;
-
-        if (maxX && this.size.x > maxX) {
-          this.size.x = maxX;
-          this.size.y = maxX / lv;
-        }
-
-        if (maxY && this.size.y > maxY) {
-          this.size.y = maxY;
-          this.size.x = maxY * lv;
-        }
-
-        if (minX && this.size.x < minX) {
-          this.size.x = minX;
-          this.size.y = maxX / lv;
-        }
-
-        if (minY && this.size.y < minY) {
-          this.size.y = maxY;
-          this.size.x = maxY * lv;
-        }
-
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Size.prototype), "setOptions", this)) _get(_getPrototypeOf(Size.prototype), "setOptions", this).call(this, options);
-        if (options.size) Object.assign(this.size, options.size);
-        if (options.width !== undefined) this.size.x = options.width;
-        if (options.height !== undefined) this.size.y = options.height;
-        return this;
-      }
-    }, {
-      key: "hitMe",
-      value: function hitMe(x, y) {
-        if (this.padding) {
-          return x >= -this.paddingLeft && x <= this.width + this.paddingRight && y >= -this.paddingTop && y <= this.height + this.paddingBottom;
-        } else {
-          return x >= 0 && x <= this.width && y >= 0 && y <= this.height;
-        }
-      }
-    }, {
-      key: "width",
-      get: function get() {
-        return this.size.x;
-      },
-      set: function set(x) {
-        this.size.x = x;
-      }
-    }, {
-      key: "height",
-      get: function get() {
-        return this.size.y;
-      },
-      set: function set(y) {
-        this.size.y = y;
-      }
-    }]);
-
-    return Size;
-  }(superClass), _temp;
-});
-
-var Clip = (function (superClass) {
-  var _temp;
-
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Clip, _superClass);
-
-    function Clip() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Clip);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Clip)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "useClip", false);
-
-      _defineProperty(_assertThisInitialized(_this), "clipPosition", new Vector2());
-
-      _defineProperty(_assertThisInitialized(_this), "clipSize", new Vector2());
-
-      return _this;
-    }
-
-    _createClass(Clip, [{
-      key: "setClip",
-      //切割大小
-      value: function setClip() {
-        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-        var width = arguments.length > 2 ? arguments[2] : undefined;
-        var height = arguments.length > 3 ? arguments[3] : undefined;
-        this.useClip = true;
-        this.clipPosition.setTo(x, y);
-        this.clipSize.setTo(width, height);
-        if (this.size) this.size.setTo(width, height);
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Clip.prototype), "setOptions", this)) _get(_getPrototypeOf(Clip.prototype), "setOptions", this).call(this, options);
-        if (options.clip) this.setClip.apply(this, options.clip);
-        return this;
-      }
-    }]);
-
-    return Clip;
-  }(superClass), _temp;
-});
-
-var Padding = (function (superClass) {
-  var _temp;
-
-  return _temp =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Padding, _superClass);
-
-    function Padding() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Padding);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Padding)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "padding", new Vector(0, 0, 0, 0));
-
-      return _this;
-    }
-
-    _createClass(Padding, [{
-      key: "setPadding",
-      value: function setPadding(top, right, botton, left) {
-        this.padding.setTo(top, right, botton, left);
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Padding.prototype), "setOptions", this)) _get(_getPrototypeOf(Padding.prototype), "setOptions", this).call(this, options);
-        if (options.padding) Object.assign(this.padding, options.padding);
-        return this;
-      }
-    }, {
-      key: "paddingTop",
-      get: function get() {
-        return this.padding[0];
-      }
-    }, {
-      key: "paddingRight",
-      get: function get() {
-        return this.padding[1];
-      }
-    }, {
-      key: "paddingBottom",
-      get: function get() {
-        return this.padding[2];
-      }
-    }, {
-      key: "paddingLeft",
-      get: function get() {
-        return this.padding[3];
-      }
-    }]);
-
-    return Padding;
-  }(superClass), _temp;
-});
-
-var Style = (function (superClass) {
-  var _class, _temp;
-
-  return _temp = _class =
-  /*#__PURE__*/
-  function (_superClass) {
-    _inherits(Style, _superClass);
-
-    function Style() {
-      var _getPrototypeOf2;
-
-      var _this;
-
-      _classCallCheck(this, Style);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Style)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this), "style", Object.assign({}, Style.defaultStyle));
-
-      return _this;
-    }
-
-    _createClass(Style, [{
-      key: "setStyle",
-      value: function setStyle(options) {
-        if (!options.cacheFont) this.style.cacheFont = '';
-        Object.assign(this.style, options);
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Style.prototype), "setOptions", this)) _get(_getPrototypeOf(Style.prototype), "setOptions", this).call(this, options);
-        if (options.style) this.setStyle(options.style);
-        return this;
-      }
-    }, {
-      key: "font",
-      set: function set(font) {
-        this.style.cacheFont = font;
-      },
-      get: function get() {
-        return this.style.cacheFont || (this._cacheFont = "".concat(this.style.weight, " ").concat(this.style.size, "px ").concat(this.style.family));
-      }
-    }]);
-
-    return Style;
-  }(superClass), _defineProperty(_class, "defaultStyle", {
-    color: '#FFFFFF',
-    //填充色
-    stroke: 0,
-    //线宽
-    strokeColor: '#FFFFFF',
-    //线框色
-    family: '微软雅黑,黑体',
-    //字体
-    size: 26,
-    //字号px
-    weight: '',
-    //字宽
-    align: 'center',
-    //横向对齐方式
-    baseline: 'middle',
-    //纵向对齐方式
-    cacheFont: '' //组合字体
-
-  }), _temp;
-});
-
-var CID = 0; //全局递增组件id
-
-var Base = (function (superClass) {
+var base = (function (superClass) {
   var _temp;
 
   return _temp =
@@ -2409,22 +1746,18 @@ var Base = (function (superClass) {
   function (_superClass) {
     _inherits(ComponentBase, _superClass);
 
-    function ComponentBase(options) {
+    function ComponentBase() {
+      var _getPrototypeOf2;
+
       var _this;
 
       _classCallCheck(this, ComponentBase);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(ComponentBase).call(this));
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
 
-      _defineProperty(_assertThisInitialized(_this), "id", ++CID);
-
-      _defineProperty(_assertThisInitialized(_this), "zIndex", 0);
-
-      _defineProperty(_assertThisInitialized(_this), "children", []);
-
-      _defineProperty(_assertThisInitialized(_this), "parent", null);
-
-      _defineProperty(_assertThisInitialized(_this), "lockChild", false);
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(ComponentBase)).call.apply(_getPrototypeOf2, [this].concat(args)));
 
       _defineProperty(_assertThisInitialized(_this), "touchChildren", true);
 
@@ -2432,163 +1765,21 @@ var Base = (function (superClass) {
 
       _defineProperty(_assertThisInitialized(_this), "matrix", new Matrix3());
 
-      if (options) _this.setOptions(options);
       return _this;
-    }
+    } //计算矩阵
 
-    _createClass(ComponentBase, [{
-      key: "setParent",
-      //计算矩阵
-
-      /**
-       * 将本组件加入某个组件下面
-       * @param {Component} Component 父级
-       * @param {Number} index 位置
-       * Component为空时，相当于从父组件卸载本组件
-       */
-      value: function setParent(Component) {
-        var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
-        if (!Component) return this.parent ? this.parent.removeChild(this) : this;
-        if (this.parent == Component) return this;
-        if (!this.parent) Component.addChildAt(this, index);
-        return this;
-      }
-      /**
-       * 在固定位置增加子组件
-       * @param {Component} Component 组件
-       * @param {Number} index 位置
-       */
-
-    }, {
-      key: "addChildAt",
-      value: function addChildAt(Component) {
-        var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-        if (!Component) return this;
-        if (Component.create) Component.create();
-        Component.parent = this;
-
-        if (index == -1) {
-          this.children.push(Component);
-        } else if (index == 0) {
-          this.children.unshift(Component);
-        } else {
-          this.children.splice(index, 0, Component);
-        }
-
-        if (Component.created) Component.created();
-        return this;
-      }
-      /**
-       * 增加子组件
-       * @param {Component} Component 组件
-       */
-
-    }, {
-      key: "addChild",
-      value: function addChild(Component) {
-        if (arguments.length > 1) {
-          for (var i = 0; i < arguments.length; i++) {
-            this.addChild(arguments[i]);
-          }
-
-          return this;
-        }
-
-        if (!Component) return this;
-
-        if (Component instanceof Array) {
-          for (var _i = 0; _i < Component.length; _i++) {
-            this.addChild(Component[_i]);
-          }
-
-          return this;
-        }
-
-        return this.addChildAt(Component, -1);
-      }
-      /**
-       * 移除子组件
-       * @param {Component} Component 组件
-       */
-
-    }, {
-      key: "removeChild",
-      value: function removeChild(Component) {
-        if (!Component) return this;
-
-        if (arguments.length > 1) {
-          for (var i = 0; i < arguments.length; i++) {
-            this.removeChild(arguments[i]);
-          }
-
-          return this;
-        }
-
-        if (Component instanceof Array) {
-          for (var _i2 = 0; _i2 < Component.length; _i2++) {
-            this.removeChild(Component[_i2]);
-          }
-
-          return this;
-        }
-
-        if (Component.parent != this) return this;
-        if (!Component.lockChild) Component.removeChildren();
-        if (Component.destroy) Component.destroy();
-        var index = this.children.indexOf(Component);
-        if (index >= 0) this.children.splice(index, 1); // if (this.children.length == 1) this.children = this.children[0];
-
-        Component.parent = null;
-        if (Component.destroyed) Component.destroyed();
-        return this;
-      }
-      /**
-       * 逐个移除所有子组件
-       */
-
-    }, {
-      key: "removeChildren",
-      value: function removeChildren() {
-        for (var i = this.children.length - 1; i >= 0; i--) {
-          this.removeChild(this.children[i]);
-        }
-
-        return this;
-      }
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(ComponentBase.prototype), "setOptions", this)) _get(_getPrototypeOf(ComponentBase.prototype), "setOptions", this).call(this, options);
-        return this;
-      }
-    }]);
 
     return ComponentBase;
   }(superClass), _temp;
 });
 
-var Texture = (function (superClass) {
+var texture = (function (superClass) {
   var _temp;
 
   return _temp =
   /*#__PURE__*/
   function (_superClass) {
     _inherits(Texture, _superClass);
-
-    function Texture(texture, options) {
-      var _this;
-
-      _classCallCheck(this, Texture);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Texture).call(this));
-
-      _defineProperty(_assertThisInitialized(_this), "texture", null);
-
-      _this.setTexture(texture);
-
-      if (options) _this.setOptions(options);
-      return _this;
-    }
 
     _createClass(Texture, [{
       key: "setTexture",
@@ -2599,18 +1790,23 @@ var Texture = (function (superClass) {
         if (this.useFrame) this.useFrame = false;
         return this;
       }
-      /**
-       * @param {*} options
-       */
+    }]);
 
-    }, {
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Texture.prototype), "setOptions", this)) _get(_getPrototypeOf(Texture.prototype), "setOptions", this).call(this, options);
-        if (options.texture) this.setTexture(options.texture);
-        return this;
-      }
-    }, {
+    function Texture(texture, options) {
+      var _this;
+
+      _classCallCheck(this, Texture);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Texture).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "texture", null);
+
+      _this.setTexture(options && options.texture ? options.texture : texture);
+
+      return _this;
+    }
+
+    _createClass(Texture, [{
       key: "update",
       value: function update(Context) {
         if (!this.texture) return;
@@ -2627,7 +1823,7 @@ var Texture = (function (superClass) {
   }(superClass), _temp;
 });
 
-var Scroll = (function (superClass) {
+var scroll = (function (superClass) {
   var _temp;
 
   return _temp =
@@ -2635,22 +1831,23 @@ var Scroll = (function (superClass) {
   function (_superClass) {
     _inherits(Scroll, _superClass);
 
-    function Scroll(options) {
+    function Scroll() {
+      var _getPrototypeOf2;
+
       var _this;
 
       _classCallCheck(this, Scroll);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Scroll).call(this));
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Scroll)).call.apply(_getPrototypeOf2, [this].concat(args)));
 
       _defineProperty(_assertThisInitialized(_this), "context", null);
 
-      if (options) _this.setOptions(options);
       return _this;
     }
-    /**
-     * 真实场地大小
-     */
-
 
     _createClass(Scroll, [{
       key: "setRealSize",
@@ -2762,7 +1959,7 @@ var Scroll = (function (superClass) {
   }(superClass), _temp;
 });
 
-var Text = (function (superClass) {
+var text = (function (superClass, Context) {
   var _class, _temp;
 
   return _temp = _class =
@@ -2770,12 +1967,18 @@ var Text = (function (superClass) {
   function (_superClass) {
     _inherits(Text, _superClass);
 
-    function Text(options) {
+    function Text() {
+      var _getPrototypeOf2;
+
       var _this;
 
       _classCallCheck(this, Text);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this));
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Text)).call.apply(_getPrototypeOf2, [this].concat(args)));
 
       _defineProperty(_assertThisInitialized(_this), "_value", '');
 
@@ -2792,13 +1995,8 @@ var Text = (function (superClass) {
 
       _defineProperty(_assertThisInitialized(_this), "_Handle", Object.assign({}, Text.defaultHandle));
 
-      if (options) _this.setOptions(options);
       return _this;
     }
-    /**
-     * 当前内容字符串
-     */
-
 
     _createClass(Text, [{
       key: "setValue",
@@ -2831,9 +2029,9 @@ var Text = (function (superClass) {
     }, {
       key: "separate",
       value: function separate(value) {
-        if (!Text.Context) return; //TODO 是否补充测试例
+        if (!Context) return; //TODO 是否补充测试例
 
-        Text.Context.font = this.font;
+        Context.font = this.font;
         this._Lines.length = 0;
         this._LineWidth.length = 0;
         this.size.setTo(0, this.style ? this.style.size : this.lineHeight);
@@ -2849,7 +2047,7 @@ var Text = (function (superClass) {
     }, {
       key: "checkCurrentText",
       value: function checkCurrentText(value) {
-        if (!Text.Context) return; //TODO 是否补充测试例
+        if (!Context) return; //TODO 是否补充测试例
 
         if (this.checkSpecial(value)) return;
         this._Handle.currentText = value;
@@ -2857,7 +2055,7 @@ var Text = (function (superClass) {
         if (!this._Handle.currentText) {
           this._Handle.currentWidth = 0;
         } else {
-          var measureText = Text.Context.measureText(this._Handle.currentText);
+          var measureText = Context.measureText(this._Handle.currentText);
           this._Handle.currentWidth = measureText ? measureText.width : 0;
         }
 
@@ -3063,81 +2261,905 @@ var Text = (function (superClass) {
   }), _temp;
 });
 
-var ComponentBuild = {
-  Position: Position$1,
-  Angle: Angle,
-  Scale: Scale,
-  Anchor: Anchor,
-  Alpha: Alpha,
-  Visible: Visible,
-  Size: Size,
-  Clip: Clip,
-  Padding: Padding,
-  Style: Style
-};
 
-var Options =
+
+var index$1 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	Base: base,
+	Texture: texture,
+	Scroll: scroll,
+	Text: text
+});
+
+var position = (function () {
+  var _temp;
+
+  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Object;
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Position, _superClass);
+
+    _createClass(Position, [{
+      key: "setPosition",
+      value: function setPosition(x, y) {
+        this.position.setTo(x, y);
+        return this;
+      }
+    }, {
+      key: "x",
+
+      /**
+       * 定位控制
+       */
+      get: function get() {
+        return this.position.x;
+      },
+      set: function set(x) {
+        this.position.x = x;
+      }
+    }, {
+      key: "y",
+      get: function get() {
+        return this.position.y;
+      },
+      set: function set(y) {
+        this.position.y = y;
+      }
+    }]);
+
+    function Position(options) {
+      var _this;
+
+      _classCallCheck(this, Position);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Position).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "position", new Vector2());
+
+      if (options.position) Object.assign(_this.position, options.position);
+      if (options.x !== undefined) _this.position.x = options.x;
+      if (options.y !== undefined) _this.position.y = options.y;
+      return _this;
+    }
+
+    return Position;
+  }(superClass), _temp;
+});
+
+var angle = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Angle, _superClass);
+
+    _createClass(Angle, [{
+      key: "setRadian",
+      value: function setRadian(r) {
+        this.radian = r;
+        return this;
+      }
+    }, {
+      key: "setAngle",
+      value: function setAngle(a) {
+        this.angle = a;
+        return this;
+      }
+    }, {
+      key: "angle",
+
+      /**
+       * 角度控制
+       */
+      //弧度
+      set: function set(a) {
+        this.radian = a * Math.PI / 180;
+      },
+      get: function get() {
+        return this.radian * 180 / Math.PI;
+      }
+    }]);
+
+    function Angle(options) {
+      var _this;
+
+      _classCallCheck(this, Angle);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Angle).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "radian", 0);
+
+      if (options.radian !== undefined) _this.radian = options.radian;
+      if (options.angle !== undefined) _this.angle = options.angle;
+      return _this;
+    }
+
+    return Angle;
+  }(superClass), _temp;
+});
+
+var scale = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Scale, _superClass);
+
+    _createClass(Scale, [{
+      key: "setScale",
+      value: function setScale(x, y) {
+        this.scale.x = x;
+        this.scale.y = y;
+        return this;
+      }
+    }, {
+      key: "scaleX",
+
+      /**
+       * 缩放控制
+       */
+      get: function get() {
+        return this.scale.x;
+      },
+      set: function set(x) {
+        this.scale.x = x;
+      }
+    }, {
+      key: "scaleY",
+      get: function get() {
+        return this.scale.y;
+      },
+      set: function set(y) {
+        this.scale.y = y;
+      }
+    }]);
+
+    function Scale(options) {
+      var _this;
+
+      _classCallCheck(this, Scale);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Scale).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "scale", new Vector2(1, 1));
+
+      if (options.scale !== undefined) _this.scale.set(options.scale);
+      if (options.scaleX !== undefined) _this.scale.x = options.scaleX;
+      if (options.scaleY !== undefined) _this.scale.y = options.scaleY;
+      return _this;
+    }
+
+    return Scale;
+  }(superClass), _temp;
+});
+
+var anchor = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Anchor, _superClass);
+
+    _createClass(Anchor, [{
+      key: "setAnchor",
+      value: function setAnchor(x, y) {
+        this.anchor.x = x;
+        this.anchor.y = y;
+        return this;
+      }
+    }, {
+      key: "setAnchorSize",
+      value: function setAnchorSize() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
+        if (!this.size) return this;
+        this.anchor.x = this.width * x;
+        this.anchor.y = this.height * y;
+        return this;
+      }
+    }, {
+      key: "anchorX",
+
+      /**
+       * 锚点控制
+       */
+      get: function get() {
+        return this.anchor.x;
+      },
+      set: function set(x) {
+        this.anchor.x = x;
+      }
+    }, {
+      key: "anchorY",
+      get: function get() {
+        return this.anchor.y;
+      },
+      set: function set(y) {
+        this.anchor.y = y;
+      }
+    }]);
+
+    function Anchor(options) {
+      var _this;
+
+      _classCallCheck(this, Anchor);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Anchor).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "anchor", new Vector2());
+
+      if (options.anchor) Object.assign(_this.anchor, options.anchor);
+      if (options.anchorX) _this.anchor.x = options.anchorX;
+      if (options.anchorY) _this.anchor.y = options.anchorY;
+      return _this;
+    }
+    /**
+     * 触摸事件位置偏移量
+     * @param {*} touch
+     */
+
+
+    _createClass(Anchor, [{
+      key: "offsetTouch",
+      value: function offsetTouch(touch) {
+        if (_get(_getPrototypeOf(Anchor.prototype), "offsetTouch", this)) _get(_getPrototypeOf(Anchor.prototype), "offsetTouch", this).call(this, touch);
+        return touch.addToVector(this.anchor);
+      }
+    }]);
+
+    return Anchor;
+  }(superClass), _temp;
+});
+
+var alpha = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Alpha, _superClass);
+
+    function Alpha(options) {
+      var _this;
+
+      _classCallCheck(this, Alpha);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Alpha).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "_alpha", 1);
+
+      if (options.alpha !== undefined) _this.alpha = options.alpha;
+      return _this;
+    }
+    /**
+     * 透明度控制
+     * 当透明度小于0时，使用上级透明度
+     */
+
+
+    _createClass(Alpha, [{
+      key: "setAlpha",
+      value: function setAlpha(n) {
+        this.alpha = n;
+        return this;
+      }
+    }, {
+      key: "alpha",
+      set: function set(a) {
+        this._alpha = a;
+      },
+      get: function get() {
+        if (this._alpha < 0 && this.parent) return this.parent.alpha;
+        return this._alpha;
+      }
+    }]);
+
+    return Alpha;
+  }(superClass), _temp;
+});
+
+var visible = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Visible, _superClass);
+
+    _createClass(Visible, [{
+      key: "setVisible",
+      value: function setVisible(n) {
+        this.visible = n;
+        return this;
+      }
+    }, {
+      key: "visible",
+
+      /**
+       * 显示状态控制
+       */
+      get: function get() {
+        if (!this.parent) return this._visible;
+        return this._visible && this.parent.visible;
+      },
+      set: function set(v) {
+        if (this._visible == v) return;
+        this._visible = v;
+        v ? this.show && this.show() : this.hide && this.hide();
+      }
+    }]);
+
+    function Visible(options) {
+      var _this;
+
+      _classCallCheck(this, Visible);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Visible).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "_visible", true);
+
+      if (options.visible !== undefined) _this.visible = options.visible;
+      return _this;
+    }
+
+    return Visible;
+  }(superClass), _temp;
+});
+
+var size = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Size, _superClass);
+
+    _createClass(Size, [{
+      key: "setSize",
+      value: function setSize(x, y) {
+        this.size.setTo(x, y);
+        return this;
+      }
+    }, {
+      key: "setSizeLimit",
+      value: function setSizeLimit(maxX, maxY, minX, minY) {
+        if (!this.size.y) return this;
+        var lv = this.size.x / this.size.y;
+
+        if (maxX && this.size.x > maxX) {
+          this.size.x = maxX;
+          this.size.y = maxX / lv;
+        }
+
+        if (maxY && this.size.y > maxY) {
+          this.size.y = maxY;
+          this.size.x = maxY * lv;
+        }
+
+        if (minX && this.size.x < minX) {
+          this.size.x = minX;
+          this.size.y = maxX / lv;
+        }
+
+        if (minY && this.size.y < minY) {
+          this.size.y = maxY;
+          this.size.x = maxY * lv;
+        }
+
+        return this;
+      }
+    }, {
+      key: "width",
+
+      /**
+       * 大小控制
+       */
+      get: function get() {
+        return this.size.x;
+      },
+      set: function set(x) {
+        this.size.x = x;
+      }
+    }, {
+      key: "height",
+      get: function get() {
+        return this.size.y;
+      },
+      set: function set(y) {
+        this.size.y = y;
+      }
+    }]);
+
+    function Size(options) {
+      var _this;
+
+      _classCallCheck(this, Size);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Size).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "size", new Vector2());
+
+      if (options.size) Object.assign(_this.size, options.size);
+      if (options.width !== undefined) _this.size.x = options.width;
+      if (options.height !== undefined) _this.size.y = options.height;
+      return _this;
+    }
+
+    _createClass(Size, [{
+      key: "hitMe",
+      value: function hitMe(x, y) {
+        if (this.padding) {
+          return x >= -this.paddingLeft && x <= this.width + this.paddingRight && y >= -this.paddingTop && y <= this.height + this.paddingBottom;
+        } else {
+          return x >= 0 && x <= this.width && y >= 0 && y <= this.height;
+        }
+      }
+    }]);
+
+    return Size;
+  }(superClass), _temp;
+});
+
+var clip = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Clip, _superClass);
+
+    _createClass(Clip, [{
+      key: "setClip",
+
+      /**
+       * 裁剪控制
+       */
+      //是否切割
+      //切割位置
+      //切割大小
+      value: function setClip() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        var width = arguments.length > 2 ? arguments[2] : undefined;
+        var height = arguments.length > 3 ? arguments[3] : undefined;
+        this.useClip = true;
+        this.clipPosition.setTo(x, y);
+        this.clipSize.setTo(width, height);
+        if (this.size) this.size.setTo(width, height);
+        return this;
+      }
+    }]);
+
+    function Clip(options) {
+      var _this;
+
+      _classCallCheck(this, Clip);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Clip).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "useClip", false);
+
+      _defineProperty(_assertThisInitialized(_this), "clipPosition", new Vector2());
+
+      _defineProperty(_assertThisInitialized(_this), "clipSize", new Vector2());
+
+      if (options.clip) _this.setClip.apply(_assertThisInitialized(_this), options.clip);
+      return _this;
+    }
+
+    return Clip;
+  }(superClass), _temp;
+});
+
+var padding = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Padding, _superClass);
+
+    _createClass(Padding, [{
+      key: "setPadding",
+      value: function setPadding(top, right, botton, left) {
+        this.padding.setTo(top, right, botton, left);
+        return this;
+      }
+    }, {
+      key: "paddingTop",
+
+      /**
+       * 边距控制
+       */
+      get: function get() {
+        return this.padding[0];
+      }
+    }, {
+      key: "paddingRight",
+      get: function get() {
+        return this.padding[1];
+      }
+    }, {
+      key: "paddingBottom",
+      get: function get() {
+        return this.padding[2];
+      }
+    }, {
+      key: "paddingLeft",
+      get: function get() {
+        return this.padding[3];
+      }
+    }]);
+
+    function Padding(options) {
+      var _this;
+
+      _classCallCheck(this, Padding);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Padding).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "padding", new Vector(0, 0, 0, 0));
+
+      if (options.padding) Object.assign(_this.padding, options.padding);
+      return _this;
+    }
+
+    return Padding;
+  }(superClass), _temp;
+});
+
+var style = (function (superClass) {
+  var _class, _temp;
+
+  return _temp = _class =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Style, _superClass);
+
+    _createClass(Style, [{
+      key: "setStyle",
+
+      /**
+       * 绘制样式控制
+       */
+      value: function setStyle(options) {
+        if (!options.cacheFont) this.style.cacheFont = '';
+        Object.assign(this.style, options);
+        return this;
+      }
+    }]);
+
+    function Style(options) {
+      var _this;
+
+      _classCallCheck(this, Style);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Style).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "style", Object.assign({}, Style.defaultStyle));
+
+      if (options.style) _this.setStyle(options.style);
+      return _this;
+    }
+
+    _createClass(Style, [{
+      key: "font",
+      set: function set(font) {
+        this.style.cacheFont = font;
+      },
+      get: function get() {
+        return this.style.cacheFont || (this._cacheFont = "".concat(this.style.weight, " ").concat(this.style.size, "px ").concat(this.style.family));
+      }
+    }]);
+
+    return Style;
+  }(superClass), _defineProperty(_class, "defaultStyle", {
+    color: '#FFFFFF',
+    //填充色
+    stroke: 0,
+    //线宽
+    strokeColor: '#FFFFFF',
+    //线框色
+    family: '微软雅黑,黑体',
+    //字体
+    size: 26,
+    //字号px
+    weight: '',
+    //字宽
+    align: 'center',
+    //横向对齐方式
+    baseline: 'middle',
+    //纵向对齐方式
+    cacheFont: '' //组合字体
+
+  }), _temp;
+});
+
+var zIndex = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(ZIndex, _superClass);
+
+    _createClass(ZIndex, [{
+      key: "setZIndex",
+
+      /**
+       * 渲染层级
+       */
+      //层级
+      value: function setZIndex(a) {
+        this.zIndex = a;
+        return this;
+      }
+    }]);
+
+    function ZIndex(options) {
+      var _this;
+
+      _classCallCheck(this, ZIndex);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(ZIndex).call(this, options));
+
+      _defineProperty(_assertThisInitialized(_this), "zIndex", 0);
+
+      if (options.zIndex) _this.zIndex = options.zIndex;
+      return _this;
+    }
+
+    return ZIndex;
+  }(superClass), _temp;
+});
+
+var children = (function (superClass) {
+  var _temp;
+
+  return _temp =
+  /*#__PURE__*/
+  function (_superClass) {
+    _inherits(Children, _superClass);
+
+    function Children() {
+      var _getPrototypeOf2;
+
+      var _this;
+
+      _classCallCheck(this, Children);
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Children)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this), "parent", null);
+
+      _defineProperty(_assertThisInitialized(_this), "children", []);
+
+      return _this;
+    }
+
+    _createClass(Children, [{
+      key: "setParent",
+      //子元素列表
+
+      /**
+       * 将本组件加入某个组件下面
+       * @param {Component} Component 父级
+       * @param {Number} index 位置
+       * Component为空时，相当于从父组件卸载本组件
+       */
+      value: function setParent(Component) {
+        var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
+        if (!Component) return this.parent ? this.parent.removeChild(this) : this;
+        if (this.parent == Component) return this;
+        if (!this.parent) Component.addChildAt(this, index);
+        return this;
+      }
+      /**
+       * 在固定位置增加子组件
+       * @param {Component} Component 组件
+       * @param {Number} index 位置
+       */
+
+    }, {
+      key: "addChildAt",
+      value: function addChildAt(Component) {
+        var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        if (!Component) return this;
+        if (Component.create) Component.create();
+        Component.parent = this;
+
+        if (index == -1) {
+          this.children.push(Component);
+        } else if (index == 0) {
+          this.children.unshift(Component);
+        } else {
+          this.children.splice(index, 0, Component);
+        }
+
+        if (Component.created) Component.created();
+        return this;
+      }
+      /**
+       * 增加子组件
+       * @param {Component} Component 组件
+       */
+
+    }, {
+      key: "addChild",
+      value: function addChild(Component) {
+        if (arguments.length > 1) {
+          for (var i = 0; i < arguments.length; i++) {
+            this.addChild(arguments[i]);
+          }
+
+          return this;
+        }
+
+        if (!Component) return this;
+
+        if (Component instanceof Array) {
+          for (var _i = 0; _i < Component.length; _i++) {
+            this.addChild(Component[_i]);
+          }
+
+          return this;
+        }
+
+        return this.addChildAt(Component, -1);
+      }
+      /**
+       * 移除子组件
+       * @param {Component} Component 组件
+       */
+
+    }, {
+      key: "removeChild",
+      value: function removeChild(Component) {
+        if (!Component) return this;
+
+        if (arguments.length > 1) {
+          for (var i = 0; i < arguments.length; i++) {
+            this.removeChild(arguments[i]);
+          }
+
+          return this;
+        }
+
+        if (Component instanceof Array) {
+          for (var _i2 = 0; _i2 < Component.length; _i2++) {
+            this.removeChild(Component[_i2]);
+          }
+
+          return this;
+        }
+
+        if (Component.parent != this) return this;
+        Component.removeChildren();
+        if (Component.destroy) Component.destroy();
+        var index = this.children.indexOf(Component);
+        if (index >= 0) this.children.splice(index, 1); // if (this.children.length == 1) this.children = this.children[0];
+
+        Component.parent = null;
+        if (Component.destroyed) Component.destroyed();
+        return this;
+      }
+      /**
+       * 逐个移除所有子组件
+       */
+
+    }, {
+      key: "removeChildren",
+      value: function removeChildren() {
+        for (var i = this.children.length - 1; i >= 0; i--) {
+          this.removeChild(this.children[i]);
+        }
+
+        return this;
+      }
+    }]);
+
+    return Children;
+  }(superClass), _temp;
+});
+
+
+
+var index$2 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	Position: position,
+	Angle: angle,
+	Scale: scale,
+	Anchor: anchor,
+	Alpha: alpha,
+	Visible: visible,
+	Size: size,
+	Clip: clip,
+	Padding: padding,
+	Style: style,
+	ZIndex: zIndex,
+	Children: children
+});
+
+var Component =
 /*#__PURE__*/
-function () {
-  function Options() {
-    _classCallCheck(this, Options);
-  }
+function (_subClass) {
+  _inherits(Component, _subClass);
 
-  _createClass(Options, [{
-    key: "setOptions",
-    value: function setOptions() {}
-  }]);
-
-  return Options;
-}();
-
-ComponentBuild.Build = function () {
-  var subClass = Options;
-
-  for (var i = 0; i < arguments.length; i++) {
-    subClass = ComponentBuild[arguments[i]](subClass);
-  }
-
-  return subClass;
-};
-
-var ComponentBase = Base(ComponentBuild.Build('Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible'));
-var ComponentTexture = Texture(Base(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));
-var ComponentScroll = Scroll(Base(ComponentBuild.Build('Clip', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));
-var ComponentText = Text(Base(ComponentBuild.Build('Style', 'Size', 'Position', 'Angle', 'Scale', 'Anchor', 'Alpha', 'Visible')));
-
-var Load =
-/*#__PURE__*/
-function (_Event) {
-  _inherits(Load, _Event);
-
-  function Load() {
+  function Component() {
     var _getPrototypeOf2;
 
     var _this;
 
-    _classCallCheck(this, Load);
+    _classCallCheck(this, Component);
 
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
 
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Load)).call.apply(_getPrototypeOf2, [this].concat(args)));
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Component)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "id", ++Component.CID);
+
+    return _this;
+  }
+
+  return Component;
+}(subClass);
+
+_defineProperty(Component, "CID", 0);
+
+function Build() {
+  var subClass = Component;
+
+  for (var i = 0; i < arguments.length; i++) {
+    subClass = arguments[i](subClass);
+  }
+
+  return subClass;
+}
+
+var index$3 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	Elements: index$1,
+	Properties: index$2,
+	'default': Build
+});
+
+var Loader =
+/*#__PURE__*/
+function (_Event) {
+  _inherits(Loader, _Event);
+
+  function Loader() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, Loader);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Loader)).call.apply(_getPrototypeOf2, [this].concat(args)));
 
     _defineProperty(_assertThisInitialized(_this), "resources", {});
 
     return _this;
   }
 
-  _createClass(Load, [{
+  _createClass(Loader, [{
     key: "Set",
     value: function Set(url) {
       throw Error('请先挂载加载函数(Set)');
-    }
-  }, {
-    key: "Get",
-    value: function Get() {
-      throw Error('请先挂载读取函数(Get)');
     }
   }, {
     key: "load",
@@ -3166,13 +3188,13 @@ function (_Event) {
     }
   }]);
 
-  return Load;
+  return Loader;
 }(Event);
 
 var ImageControl =
 /*#__PURE__*/
-function (_Load) {
-  _inherits(ImageControl, _Load);
+function (_Loader) {
+  _inherits(ImageControl, _Loader);
 
   function ImageControl() {
     _classCallCheck(this, ImageControl);
@@ -3183,10 +3205,8 @@ function (_Load) {
   _createClass(ImageControl, [{
     key: "Set",
     value: function Set(url) {
-      var _this = this;
-
       return new Promise(function (resolve, reject) {
-        var image = _this.Get();
+        var image = new Image();
 
         image.onload = function () {
           resolve(image);
@@ -3207,54 +3227,14 @@ function (_Load) {
   }]);
 
   return ImageControl;
-}(Load);
+}(Loader);
 
 _defineProperty(ImageControl, "Error", null);
-var WebImage =
-/*#__PURE__*/
-function (_ImageControl) {
-  _inherits(WebImage, _ImageControl);
-
-  function WebImage() {
-    _classCallCheck(this, WebImage);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(WebImage).apply(this, arguments));
-  }
-
-  _createClass(WebImage, [{
-    key: "Get",
-    value: function Get() {
-      return new Image();
-    }
-  }]);
-
-  return WebImage;
-}(ImageControl);
-var WxgameImage =
-/*#__PURE__*/
-function (_ImageControl2) {
-  _inherits(WxgameImage, _ImageControl2);
-
-  function WxgameImage() {
-    _classCallCheck(this, WxgameImage);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(WxgameImage).apply(this, arguments));
-  }
-
-  _createClass(WxgameImage, [{
-    key: "Get",
-    value: function Get() {
-      return wx.createImage();
-    }
-  }]);
-
-  return WxgameImage;
-}(ImageControl);
 
 var AudioControl =
 /*#__PURE__*/
-function (_Load) {
-  _inherits(AudioControl, _Load);
+function (_Loader) {
+  _inherits(AudioControl, _Loader);
 
   function AudioControl() {
     var _getPrototypeOf2;
@@ -3269,103 +3249,34 @@ function (_Load) {
 
     _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(AudioControl)).call.apply(_getPrototypeOf2, [this].concat(args)));
 
-    _defineProperty(_assertThisInitialized(_this), "channels", {});
-
-    _defineProperty(_assertThisInitialized(_this), "pools", {});
-
     _defineProperty(_assertThisInitialized(_this), "_mute", false);
 
     return _this;
   }
 
   _createClass(AudioControl, [{
-    key: "channelPause",
-    value: function channelPause(name) {
-      var kill = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      this.channels[name].pause();
-      if (!kill) return this;
-      delete this.channels[name];
-    }
-  }, {
-    key: "channelContinue",
-    value: function channelContinue(name) {
-      var _this2 = this;
-
-      if (name === true) {
-        Object.keys(this.channels).forEach(function (k) {
-          return _this2.channelContinue(k);
-        });
-        return this;
-      }
-
-      this.channels[name].play();
-      return this;
-    } //单声道音效
-
-  }, {
-    key: "channel",
-    value: function channel() {
-      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-      var key = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-      var loop = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-      if (this.channels[name]) this.channelPause(name, true);
-
-      if (key) {
-        var audio = this.Get(key, loop);
-        this.channels[name] = audio;
-        if (!this._mute) audio.play();
-      }
-
-      return this;
-    }
-  }, {
-    key: "channelMute",
-    value: function channelMute(name) {
-      var _this3 = this;
-
-      if (name === true) {
-        Object.keys(this.channels).forEach(function (k) {
-          return _this3.channelMute(k);
-        });
-        return this;
-      }
-
-      if (!this.channels[name]) return this;
-      this.channelPause(name, !this.channels[name].Loop);
-      return this;
-    }
-  }, {
-    key: "pool",
-    //声道池
-    value: function pool(key) {
-      if (!this.pools[key]) this.pools[key] = [];
-      if (this._mute) return this;
-      var audio = this.pools[key].find(function (a) {
-        return a.paused;
-      });
-      if (!audio) this.pools[key].push(audio = this.Get(key));
-      audio.play();
-      return this;
-    }
-  }, {
-    key: "poolMute",
-    value: function poolMute(key) {
-      var _this4 = this;
-
-      if (key === true) {
-        Object.keys(this.pools).forEach(function (k) {
-          return _this4.poolMute(k);
-        });
-        return this;
-      }
-
-      if (!this.pools[key]) return this;
-      this.pools[key].forEach(function (a) {
-        return a.pause();
-      });
-      return this;
+    key: "get",
+    //获取音频
+    value: function get(key) {
+      return this.resources[key] || AudioControl.Error;
     } //静音
 
+  }, {
+    key: "Set",
+    //加载文件
+    value: function Set(url) {
+      return new Promise(function (resolve, reject) {
+        var audio = new Howl({
+          src: url,
+          loop: false,
+          autoplay: false
+        });
+        audio.once('load', function () {
+          audio.key = url;
+          resolve(audio);
+        });
+      });
+    }
   }, {
     key: "mute",
     get: function get() {
@@ -3373,100 +3284,33 @@ function (_Load) {
     },
     set: function set(mute) {
       this._mute = mute;
-      mute ? this.poolMute(true).channelMute(true) : this.channelContinue(true);
+      Howler.mute(mute);
+    } //设置音量
+
+  }, {
+    key: "volume",
+    set: function set() {
+      var v = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      Howler.volume(v);
+    },
+    get: function get() {
+      return Howler.volume();
     }
   }]);
 
   return AudioControl;
-}(Load);
-var WxgameAudio =
-/*#__PURE__*/
-function (_AudioControl) {
-  _inherits(WxgameAudio, _AudioControl);
+}(Loader);
 
-  function WxgameAudio() {
-    _classCallCheck(this, WxgameAudio);
+_defineProperty(AudioControl, "Error", new Howl());
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(WxgameAudio).apply(this, arguments));
-  }
 
-  _createClass(WxgameAudio, [{
-    key: "channelPause",
-    value: function channelPause(name) {
-      var kill = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      this.channels[name].pause();
-      if (!kill) return;
-      this.channels[name].destroy();
-      delete this.channels[name];
-    }
-  }, {
-    key: "Set",
-    value: function Set(url) {
-      return new Promise(function (resolve, reject) {
-        var audio = wx.createInnerAudioContext();
-        audio.loop = false;
-        audio.autoplay = false;
-        audio.onCanplay(function () {
-          resolve(audio);
-        });
-        audio.onError(function (e) {
-          reject(e);
-        });
-        audio.src = url;
-      });
-    }
-  }, {
-    key: "Get",
-    value: function Get(key) {
-      var loop = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (!this.resources[key]) throw Error('音频不存在');
-      var audio = wx.createInnerAudioContext();
-      audio.Loop = audio.loop = loop;
-      audio.autoplay = false;
-      audio.src = this.resources[key].src;
-      return audio;
-    }
-  }]);
 
-  return WxgameAudio;
-}(AudioControl);
-var WebAudio =
-/*#__PURE__*/
-function (_AudioControl2) {
-  _inherits(WebAudio, _AudioControl2);
-
-  function WebAudio() {
-    _classCallCheck(this, WebAudio);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(WebAudio).apply(this, arguments));
-  }
-
-  _createClass(WebAudio, [{
-    key: "Set",
-    value: function Set(url) {
-      return new Promise(function (resolve, reject) {
-        var audio = new Audio();
-        audio.loop = false;
-        audio.autoplay = false;
-        audio.key = audio.src = url;
-        resolve(audio);
-      });
-    }
-  }, {
-    key: "Get",
-    value: function Get(key) {
-      var loop = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (!this.resources[key]) throw Error('音频不存在');
-      var audio = new Audio();
-      audio.Loop = audio.loop = loop;
-      audio.autoplay = false;
-      audio.src = this.resources[key].src;
-      return audio;
-    }
-  }]);
-
-  return WebAudio;
-}(AudioControl);
+var index$4 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	Loader: Loader,
+	Image: ImageControl,
+	Audio: AudioControl
+});
 
 /**
  * 获得一个canvas对象
@@ -3476,11 +3320,20 @@ function (_AudioControl2) {
  * 打包模式为web时
  * key取main则该canvas将上屏
  */
-function GetCanvas(key) {
+function Canvas(key) {
   if (key && GetCanvas[key]) return GetCanvas[key];
   var canvas = document.createElement('canvas');
   if (key == 'main') document.body.appendChild(canvas);
   return key ? GetCanvas[key] = canvas : canvas;
+}
+
+function loadFont(url) {
+  var key = 'Font' + Date.now();
+  var style = document.createElement('style');
+  style.type = 'text/css';
+  style.innerHTML = "\n            @font-face {\n                font-family: '".concat(key, "';\n                src: url('").concat(url, "'); \n            }\n            body {\n                font-family: '").concat(key, "';\n            }\n        ");
+  document.body.appendChild(style);
+  return key;
 }
 
 /**
@@ -3498,325 +3351,81 @@ function System() {
   return System;
 }
 
-var Storage = {
-  /**
-   * 异步获取本地storage
-   * @param {String} key
-   */
-  Get: function Get(key) {
-    return Promise.resolve(window.localStorage.getItem(key)).then(function (res) {
-      return JSON.parse(res);
-    })["catch"](function () {
-      return null;
-    });
-  },
-
-  /**
-   * 异步设置本地storage
-   * @param {String} key
-   * @param {Any} data
-   */
-  Set: function Set(key, data) {
-    window.localStorage.setItem(key, JSON.stringify(data));
-    return Promise.resolve(data);
-  },
-
-  /**
-   * 同步获取storage
-   */
-  GetSync: function GetSync(key) {
-    try {
-      return JSON.parse(window.localStorage.getItem(key));
-    } catch (e) {
-      return null;
-    }
-  },
-
-  /**
-   * 同步设置storage
-   */
-  SetSync: function SetSync(key, data) {
-    window.localStorage.setItem(key, JSON.stringify(data));
-    return data;
-  }
-};
-
-function loadFont(url) {
-  var key = 'Font' + Date.now();
-  var style = document.createElement('style');
-  style.type = 'text/css';
-  style.innerHTML = "\n            @font-face {\n                font-family: '".concat(key, "';\n                src: url('").concat(url, "'); \n            }\n            body {\n                font-family: '").concat(key, "';\n            }\n        ");
-  document.body.appendChild(style);
-  return key;
-}
-
-/**
- * 获得一个canvas对象
- *
- * @param {String} key 特殊模版标识
- *
- * 打包模式为wxgame时
- * key取share则获得主域内开放canvas
- * key取shared则获得开发域内开放canvas
- */
-function GetCanvas$1(key) {
-  if (!GetCanvas$1.main && key != 'main') GetCanvas$1('main');
-  if (key && GetCanvas$1[key]) return GetCanvas$1[key];
-  var canvas = null;
-
-  if (key == 'share' && typeof wx.getOpenDataContext == 'function') {
-    var context = wx.getOpenDataContext();
-
-    context.canvas.getContext = function () {
-      return context;
-    };
-
-    canvas = context.canvas;
-  } else if (key == 'shared' && typeof wx.getSharedCanvas == 'function') {
-    canvas = wx.getSharedCanvas();
-  } else {
-    canvas = wx.createCanvas();
-  }
-
-  return key ? GetCanvas$1[key] = canvas : canvas;
-}
-
-/**
- * 获取系统参数
- * pixel 屏幕与设备像素比
- * width 屏幕宽度
- * height 屏幕高度
- * ratio 宽高比
- */
-function System$1() {
-  System$1.wx = wx.getSystemInfoSync();
-  System$1.pixel = System$1.wx.pixelRatio;
-  System$1.width = System$1.wx.screenWidth;
-  System$1.height = System$1.wx.screenHeight;
-  System$1.ratio = System$1.width / System$1.height;
-  return System$1;
-}
-
-var qsConfig = {
-  arrayFormat: 'indices',
-  encodeValuesOnly: true
-};
-
-function mergeDefaultConfig() {
-  var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var getMethods = arguments.length > 1 ? arguments[1] : undefined;
-  var postMethods = arguments.length > 2 ? arguments[2] : undefined;
-  var method = config.method || 'get';
-  var baseURL = config.baseURL || '';
-  var configHeaders = config.headers || {};
-  var headers = {
-    common: Object.assign({}, configHeaders.common)
-  };
-  getMethods.forEach(function (method) {
-    headers[method] = Object.assign({}, configHeaders[method]);
-  });
-  postMethods.forEach(function (method) {
-    headers[method] = Object.assign({}, configHeaders[method]);
-  });
-  var params = config.params ? JSON.parse(JSON.stringify(config.params)) : {};
-  var data = config.data ? JSON.parse(JSON.stringify(config.data)) : {};
+function GetTouchEvent(dom, MouseEvent) {
   return {
-    method: method,
-    baseURL: baseURL,
-    headers: headers,
-    params: params,
-    data: data
+    identifier: 0,
+    changedTouches: [{
+      clientX: MouseEvent.clientX - dom.offsetLeft,
+      clientY: MouseEvent.clientY - dom.offsetTop
+    }]
   };
 }
 
-function request(defaultConfig) {
-  var urlOrConfig = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var getConfig = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var interceptors = arguments.length > 3 ? arguments[3] : undefined;
-  var method = getConfig.method || urlOrConfig.method || defaultConfig.method;
-  var header = Object.assign({}, defaultConfig.headers.common, defaultConfig.headers[method], urlOrConfig.header, getConfig.header);
-  var url = (getConfig.baseURL || urlOrConfig.baseURL || defaultConfig.baseURL || '') + (getConfig.url || urlOrConfig.url || defaultConfig.url);
-  var params = Object.assign({}, defaultConfig.params, urlOrConfig.params, getConfig.params);
-  var data = Object.assign({}, defaultConfig.data, urlOrConfig.data, getConfig.data);
-  var dataType = getConfig.dataType || urlOrConfig.dataType || defaultConfig.dataType || 'json';
-  var responseType = getConfig.responseType || urlOrConfig.responseType || defaultConfig.responseType || 'text';
-
-  if (method == 'get') {
-    params = Object.assign(data, params);
-    data = null;
-  }
-
-  var promiseConfig = Promise.resolve({
-    method: method,
-    url: url + '?' + qs.stringify(params, qsConfig),
-    data: data,
-    header: header,
-    dataType: dataType,
-    responseType: responseType
+function MouseListen(dom, Touch) {
+  var DownState = false;
+  dom.addEventListener('mousedown', function (e) {
+    return DownState = true, Touch.onTouchStart(GetTouchEvent(dom, e));
+  }, {
+    passive: true
   });
-  var transformRequest = getConfig.transformRequest || urlOrConfig.transformRequest || interceptors.request.transform;
-
-  if (transformRequest) {
-    promiseConfig = transformRequest.reduce(function (promise, fn) {
-      if (!fn) return promise;
-      if (typeof fn == 'function') return promise.then(function (res) {
-        return fn(res) || res;
-      });
-      if (fn.resolve) promise = promise.then(function (res) {
-        return fn.resolve(res) || res;
-      });
-      if (fn.reject) promise = promise["catch"](function (res) {
-        return fn.reject(res) || res;
-      });
-      return promise;
-    }, promiseConfig);
-  }
-
-  var promiseRequest = promiseConfig.then(function (Config) {
-    return new Promise(function (resolve, reject) {
-      Config.success = function (res) {
-        Config.response = res;
-        resolve(Config);
-      };
-
-      Config.fail = function (res) {
-        Config.error = res;
-        reject(Config);
-      };
-
-      wx.request(Config);
-    });
+  dom.addEventListener('mousemove', function (e) {
+    return DownState && Touch.onTouchMove(GetTouchEvent(dom, e));
+  }, {
+    passive: true
   });
-  var transformResponse = getConfig.transformResponse || urlOrConfig.transformResponse || interceptors.response.transform;
+  dom.addEventListener('mouseup', function (e) {
+    return DownState && (DownState = false, Touch.onTouchEnd(GetTouchEvent(dom, e)));
+  }, {
+    passive: true
+  });
+  dom.addEventListener('mouseout', function (e) {
+    return DownState && (DownState = false, Touch.onTouchEnd(GetTouchEvent(dom, e)));
+  }, {
+    passive: true
+  });
+}
+/**
+ * 将dom元素触摸事件和Touch类进行关联
+ * @param {HTMLElement} dom
+ * @param {ICanvas.UtilTouch} Touch
+ */
 
-  if (transformResponse) {
-    promiseRequest = transformResponse.reduce(function (promise, fn) {
-      if (!fn) return promise;
-      if (typeof fn == 'function') return promise.then(function (res) {
-        return fn(res) || res;
-      });
-      if (fn.resolve) promise = promise.then(function (res) {
-        return fn.resolve(res) || res;
-      });
-      if (fn.reject) promise = promise["catch"](function (res) {
-        return fn.reject(res) || res;
-      });
-      return promise;
-    }, promiseRequest);
-  }
 
-  return promiseRequest;
+function TouchListen(dom, Touch) {
+  if (!('ontouchstart' in window)) return MouseListen(dom, Touch);
+  dom.addEventListener('touchstart', function (e) {
+    return Touch.onTouchStart(e);
+  }, {
+    passive: true
+  });
+  dom.addEventListener('touchmove', function (e) {
+    return Touch.onTouchMove(e);
+  }, {
+    passive: true
+  });
+  dom.addEventListener('touchend', function (e) {
+    return Touch.onTouchEnd(e);
+  }, {
+    passive: true
+  });
+  dom.addEventListener('touchcancel', function (e) {
+    return Touch.onTouchEnd(e);
+  }, {
+    passive: true
+  });
 }
 
-function createInterceptors(resolve, reject) {
-  this.transform.push(reject ? {
-    resolve: resolve,
-    reject: reject
-  } : resolve);
-  return this;
-}
 
-function createInstance(defaultConfig) {
-  var getMethods = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ['get'];
-  var postMethods = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : ['post'];
 
-  var axios = function axios(urlOrConfig, getConfig) {
-    if (typeof urlOrConfig == 'string') {
-      urlOrConfig = {
-        url: urlOrConfig,
-        method: 'get'
-      };
-    }
+var index$5 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	Canvas: Canvas,
+	Font: loadFont,
+	System: System,
+	Touch: TouchListen
+});
 
-    return request(axios.defaults, urlOrConfig, getConfig, axios.interceptors);
-  };
-
-  axios.defaults = mergeDefaultConfig(defaultConfig, getMethods, postMethods);
-  axios.interceptors = {
-    request: {
-      transform: [],
-      use: createInterceptors
-    },
-    response: {
-      transform: [],
-      use: createInterceptors
-    }
-  };
-  axios.create = createInstance;
-  axios.request = axios;
-  getMethods.forEach(function (method) {
-    axios[method] = function (url, params, config) {
-      return axios({
-        url: url,
-        method: method,
-        params: params
-      }, config);
-    };
-  });
-  postMethods.forEach(function (method) {
-    axios[method] = function (url, data, config) {
-      return axios({
-        url: url,
-        method: method,
-        data: data
-      }, config);
-    };
-  });
-  return axios;
-}
-
-var Storage$1 = {
-  /**
-   * 异步获取本地storage
-   * @param {String} key
-   */
-  Get: function Get(key) {
-    return new Promise(function (success, fail) {
-      wx.getStorage({
-        success: success,
-        fail: fail,
-        key: key
-      });
-    }).then(function (r) {
-      return JSON.parse(r.data);
-    })["catch"](function () {
-      return null;
-    });
-  },
-
-  /**
-   * 异步设置本地storage
-   * @param {String} key
-   * @param {Any} data
-   */
-  Set: function Set(key, data) {
-    return new Promise(function (success, fail) {
-      return wx.setStorage({
-        success: success,
-        fail: fail,
-        key: key,
-        data: JSON.stringify(data)
-      }), data;
-    });
-  },
-
-  /**
-   * 同步获取storage
-   */
-  GetSync: function GetSync(key) {
-    return JSON.parse(wx.getStorageSync(key));
-  },
-
-  /**
-   * 同步设置storage
-   */
-  SetSync: function SetSync(key, value) {
-    return wx.setStorageSync(key, JSON.stringify(value));
-  }
-};
-
-var Patterns = {};
-var Canvas = {
+var canvas2d = {
   SetTransform: function SetTransform(matrix) {
     this.setTransform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
     return this;
@@ -3828,17 +3437,6 @@ var Canvas = {
       this.transform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
     }
 
-    return this;
-  },
-  //将图片缓存为平铺
-  ImagePattern: function ImagePattern(a, x, y, w, h) {
-    if (!a || !a.src) return this;
-    Patterns[a.src] = this.createPattern(a, 'no-repeat');
-    this.save();
-    this.fillStyle = Patterns[a];
-    this.translate(x, y);
-    this.fillRect(0, 0, w, h);
-    this.restore();
     return this;
   },
   //设置大小
@@ -3857,14 +3455,6 @@ var Canvas = {
     this.clearRect(x, y, w || this.canvas.width, h || this.canvas.height);
     return this;
   },
-  //设置文字属性
-  FontSet: function FontSet(font, fillStyle, textAlign, textBaseline) {
-    if (font && this.font != font) this.font = font;
-    if (fillStyle && this.fillStyle != fillStyle) this.fillStyle = fillStyle;
-    if (textAlign && this.textAlign != textAlign) this.textAlign = textAlign;
-    if (textBaseline && this.textBaseline != textBaseline) this.textBaseline = textBaseline;
-    return this;
-  },
   //填充
   Fill: function Fill(fillStyle) {
     if (fillStyle && this.fillStyle != fillStyle) this.fillStyle = fillStyle;
@@ -3876,13 +3466,6 @@ var Canvas = {
     if (strokeStyle && this.strokeStyle != strokeStyle) this.strokeStyle = strokeStyle;
     if (lineWidth && this.lineWidth != lineWidth) this.lineWidth = lineWidth;
     this.stroke();
-    return this;
-  },
-  //绘制图片
-  Image: function Image(a, x, y, w, h) {
-    var img = Canvas.Image.GetImage(a);
-    Array.prototype.splice.call(arguments, 0, 3, img, x - (w || img.width) / 2, y - (h || img.height) / 2);
-    this.drawImage.apply(this, arguments);
     return this;
   },
   //多边形
@@ -4207,7 +3790,7 @@ function () {
   return Collision;
 }();
 
-function Loader() {
+function Loader$1() {
   var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
   var perfix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
@@ -4228,118 +3811,15 @@ function Loader() {
 
       Result[_key] = _url;
     } else {
-      Object.assign(Result, Loader(map[k], root, perfix + k + '/', exts));
+      Object.assign(Result, Loader$1(map[k], root, perfix + k + '/', exts));
     }
   });
   return Result;
 }
 
 /**
- * 将dom元素触摸事件和Touch类进行关联
- * @param {HTMLElement} dom
- * @param {ICanvas.UtilTouch} Touch
+ * Canvas2D上下文扩展函数
  */
-
-function UtilWebTouchListen(dom, Touch) {
-  dom.addEventListener('touchstart', function (e) {
-    return Touch.onTouchStart(e);
-  }, {
-    passive: true
-  });
-  dom.addEventListener('touchmove', function (e) {
-    return Touch.onTouchMove(e);
-  }, {
-    passive: true
-  });
-  dom.addEventListener('touchend', function (e) {
-    return Touch.onTouchEnd(e);
-  }, {
-    passive: true
-  });
-  dom.addEventListener('touchcancel', function (e) {
-    return Touch.onTouchEnd(e);
-  }, {
-    passive: true
-  });
-}
-/**
- * 将dom元素鼠标事件和Touch类进行关联
- * @param {HTMLElement} dom
- * @param {ICanvas.UtilTouch} Touch
- */
-
-function UtilWebMouseListen(dom, Touch) {
-  var DownState = false;
-  dom.addEventListener('mousedown', function (e) {
-    DownState = true;
-    Touch.onTouchStart({
-      identifier: 0,
-      changedTouches: [{
-        clientX: e.clientX - dom.offsetLeft,
-        clientY: e.clientY - dom.offsetTop
-      }]
-    });
-  }, {
-    passive: true
-  });
-  dom.addEventListener('mousemove', function (e) {
-    if (!DownState) return;
-    Touch.onTouchMove({
-      identifier: 0,
-      changedTouches: [{
-        clientX: e.clientX - dom.offsetLeft,
-        clientY: e.clientY - dom.offsetTop
-      }]
-    });
-  }, {
-    passive: true
-  });
-  dom.addEventListener('mouseup', function (e) {
-    if (!DownState) return;
-    DownState = false;
-    Touch.onTouchEnd({
-      identifier: 0,
-      changedTouches: [{
-        clientX: e.clientX - dom.offsetLeft,
-        clientY: e.clientY - dom.offsetTop
-      }]
-    });
-  }, {
-    passive: true
-  });
-  dom.addEventListener('mouseout', function (e) {
-    if (!DownState) return;
-    DownState = false;
-    Touch.onTouchEnd({
-      identifier: 0,
-      changedTouches: [{
-        clientX: e.clientX - dom.offsetLeft,
-        clientY: e.clientY - dom.offsetTop
-      }]
-    });
-  }, {
-    passive: true
-  });
-}
-/**
- * 微信触摸事件和Touch类进行关联
- * @param {ICanvas.UtilTouch} Touch
- */
-
-function UtilWxgameTouchListen(Touch) {
-  wx.onTouchStart(function (e) {
-    return Touch.onTouchStart(e);
-  });
-  wx.onTouchMove(function (e) {
-    return Touch.onTouchMove(e);
-  });
-  wx.onTouchEnd(function (e) {
-    return Touch.onTouchEnd(e);
-  });
-  wx.onTouchCancel(function (e) {
-    return Touch.onTouchEnd(e);
-  });
-}
 /**
  * 从键值对中递归获取某个值
  * @param {Object} root
@@ -4347,43 +3827,13 @@ function UtilWxgameTouchListen(Touch) {
  * @param {string} split
  */
 
-function UtilRecursiveMap(root, keys) {
+function RecursiveMap(root, keys) {
   var split = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '.';
   if (typeof key == 'string') keys = keys.split(split);
   return keys.reduce(function (obj, key) {
     if (!obj) return obj;
     return obj[key];
   }, root);
-}
-/**
- * 将微信方法进行变种
- * @param {string} action 方法名
- * @param {Any} root 根元素/上下文
- * @param {Number} mode 变种方式 0:Promise返回success和fail,1:Promise返回执行结果,2:原样子调用
- */
-
-function UtilWxgameVary(action) {
-  var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : wx;
-  var mode = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-  if (mode == 2) {
-    return root[action];
-  } else if (mode == 1) {
-    return function (args, key) {
-      return new Promise(function (resolve) {
-        return resolve(root[action](key ? _defineProperty({}, key, args) : args));
-      });
-    };
-  } else if (mode == 0) {
-    return function (args, key) {
-      return new Promise(function (success, fail) {
-        return root[action](Object.assign({
-          success: success,
-          fail: fail
-        }, key ? _defineProperty({}, key, args) : args));
-      });
-    };
-  }
 }
 /**
  * 点是否在矩形范围内
@@ -4399,97 +3849,15 @@ function UtilPointInRect(x, y, bx, by, bw, bh) {
   return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
 }
 
-function LoginFactory() {
-  var defaultStyle = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
-    left: 0,
-    top: 0,
-    width: 1000,
-    height: 2000,
-    backgroundColor: 'rgba(0,0,0,0)',
-    borderColor: '#FFFFFF',
-    borderWidth: 0,
-    borderRadius: 0,
-    textAlign: 'center',
-    fontSize: 32,
-    lineHeight: 32
-  };
+var index$6 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	RecursiveMap: RecursiveMap,
+	UtilPointInRect: UtilPointInRect,
+	Canvas2D: canvas2d,
+	Render: Render,
+	Touch: Touch,
+	Collsion: Collision,
+	LoaderMap: Loader$1
+});
 
-  //微信用户授权按钮监听
-  var GetLoginButtonListen = function GetLoginButtonListen(UserInfoButton) {
-    return new Promise(function (resolve, reject) {
-      UserInfoButton.offTap();
-      UserInfoButton.onTap(resolve);
-    }).then(function (res) {
-      if (!res.userInfo) return GetLoginButtonListen(UserInfoButton);
-      if (Login.GetUserInfo.Abort) Login.GetUserInfo.Abort();
-      return res.userInfo;
-    });
-  }; //微信用户授权按钮
-
-
-  var GetLoginButton = function GetLoginButton(infoStyle) {
-    var UserInfoButton = wx.createUserInfoButton({
-      type: 'text',
-      text: '',
-      style: Object.assign(defaultStyle, infoStyle),
-      withCredentials: false,
-      lang: 'zh_CN'
-    });
-    UserInfoButton.show();
-    return UserInfoButton;
-  };
-
-  var openSetting = UtilWxgameVary('openSetting');
-  var authorize = UtilWxgameVary('authorize');
-  var getUserInfo = UtilWxgameVary('getUserInfo');
-  var login = UtilWxgameVary('login'); //打开权限设置界面
-
-  var SetAuthorize = function SetAuthorize(scope) {
-    return openSetting().then(function (res) {
-      return res.authSetting[scope] ? Promise.resolve() : Promise.reject();
-    })["catch"](function () {
-      return SetAuthorize(scope);
-    });
-  }; //微信登陆
-
-
-  var Login = function Login(info) {
-    return login()["catch"](function (err) {
-      wx.showToast({
-        title: '登陆失败，请检查登陆状态',
-        icon: 'none'
-      });
-      return Promise.reject(err);
-    }).then(function (res) {
-      if (!info) return res;
-      return Login.GetUserInfo(info).then(function (user) {
-        res.user = user;
-        return res;
-      });
-    });
-  }; //获取用户信息
-
-
-  Login.GetUserInfo = function (info) {
-    return authorize('scope.userInfo', 'scope')["catch"](function () {
-      if (info === true) return SetAuthorize(scope);
-      var Button = GetLoginButton(info);
-
-      Login.GetUserInfo.Abort = function () {
-        Button.hide();
-        Button.destroy();
-        delete Login.GetUserInfo.Abort;
-      };
-
-      return GetLoginButtonListen(Button);
-    }).then(function () {
-      return getUserInfo('zh_CN', 'lang');
-    }).then(function (res) {
-      return res.userInfo;
-    });
-  };
-
-  return Login;
-}
-
-export { GetCanvas as ApiWebCanvas, loadFont as ApiWebFont, Storage as ApiWebStorage, System as ApiWebSystem, GetCanvas$1 as ApiWxgameCanvas, LoginFactory as ApiWxgameLogin, createInstance as ApiWxgameRequest, Storage$1 as ApiWxgameStorage, System$1 as ApiWxgameSystem, ComponentBase, ComponentBuild, ComponentScroll, ComponentText, ComponentTexture, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Matrix4 as MathMatrix4, Position as MathPosition, Random as MathRandom, time as MathTime, Vector as MathVector, Vector2 as MathVector2, Vector3 as MathVector3, Vector4 as MathVector4, AudioControl as ResourceAudio, ImageControl as ResourceImage, Load as ResourceLoad, WebAudio as ResourceWebAudio, WebImage as ResourceWebImage, WxgameAudio as ResourceWxgameAudio, WxgameImage as ResourceWxgameImage, Canvas as UtilCanvas, Collision as UtilCollsion, Loader as UtilLoaderMap, UtilPointInRect, UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch, UtilWebMouseListen, UtilWebTouchListen, UtilWxgameTouchListen, UtilWxgameVary };
+export { index$5 as Api, index$3 as Component, index as Math, index$4 as Resource, index$6 as Util };

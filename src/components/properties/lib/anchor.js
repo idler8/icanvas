@@ -1,4 +1,4 @@
-import { MathVector2 } from '../../maths/index.js';
+import { MathVector2 } from '../../../maths/index.js';
 export default superClass => {
 	return class Anchor extends superClass {
 		/**
@@ -28,12 +28,11 @@ export default superClass => {
 			this.anchor.y = this.height * y;
 			return this;
 		}
-		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
+		constructor(options) {
+			super(options);
 			if (options.anchor) Object.assign(this.anchor, options.anchor);
 			if (options.anchorX) this.anchor.x = options.anchorX;
 			if (options.anchorY) this.anchor.y = options.anchorY;
-			return this;
 		}
 		/**
 		 * 触摸事件位置偏移量

@@ -1,4 +1,4 @@
-import { MathVector } from '../../maths/index.js';
+import { MathVector } from '../../../maths/index.js';
 export default superClass => {
 	return class Padding extends superClass {
 		/**
@@ -21,10 +21,9 @@ export default superClass => {
 			this.padding.setTo(top, right, botton, left);
 			return this;
 		}
-		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
+		constructor(options) {
+			super(options);
 			if (options.padding) Object.assign(this.padding, options.padding);
-			return this;
 		}
 	};
 };

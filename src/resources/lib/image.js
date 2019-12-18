@@ -1,9 +1,9 @@
-import Load from './load.js';
-export default class ImageControl extends Load {
+import Loader from './loader.js';
+export default class ImageControl extends Loader {
 	static Error = null;
 	Set(url) {
 		return new Promise((resolve, reject) => {
-			let image = this.Get();
+			let image = new Image();
 			image.onload = function() {
 				resolve(image);
 			};
@@ -15,15 +15,5 @@ export default class ImageControl extends Load {
 	}
 	get(key) {
 		return this.resources[key] || ImageControl.Error || (ImageControl.Error = this.Get());
-	}
-}
-export class WebImage extends ImageControl {
-	Get() {
-		return new Image();
-	}
-}
-export class WxgameImage extends ImageControl {
-	Get() {
-		return wx.createImage();
 	}
 }

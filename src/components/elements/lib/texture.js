@@ -1,10 +1,5 @@
 export default superClass => {
 	return class Texture extends superClass {
-		constructor(texture, options) {
-			super();
-			this.setTexture(texture);
-			if (options) this.setOptions(options);
-		}
 		texture = null;
 		setTexture(texture) {
 			this.texture = Texture.GetImage ? Texture.GetImage(texture) : texture;
@@ -13,13 +8,9 @@ export default superClass => {
 			if (this.useFrame) this.useFrame = false;
 			return this;
 		}
-		/**
-		 * @param {*} options
-		 */
-		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
-			if (options.texture) this.setTexture(options.texture);
-			return this;
+		constructor(texture, options) {
+			super(options);
+			this.setTexture(options && options.texture ? options.texture : texture);
 		}
 		update(Context) {
 			if (!this.texture) return;

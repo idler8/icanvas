@@ -1,4 +1,4 @@
-import { MathVector2 } from '../../maths/index.js';
+import { MathVector2 } from '../../../maths/index.js';
 export default superClass => {
 	return class Clip extends superClass {
 		/**
@@ -15,11 +15,9 @@ export default superClass => {
 			if (this.size) this.size.setTo(width, height);
 			return this;
 		}
-
-		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
+		constructor(options) {
+			super(options);
 			if (options.clip) this.setClip.apply(this, options.clip);
-			return this;
 		}
 	};
 };

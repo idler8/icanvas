@@ -1,5 +1,4 @@
-let Patterns = {};
-let Canvas = {
+export default {
 	SetTransform(matrix) {
 		this.setTransform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
 		return this;
@@ -10,17 +9,6 @@ let Canvas = {
 		} else {
 			this.transform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
 		}
-		return this;
-	},
-	//将图片缓存为平铺
-	ImagePattern: function(a, x, y, w, h) {
-		if (!a || !a.src) return this;
-		Patterns[a.src] = this.createPattern(a, 'no-repeat');
-		this.save();
-		this.fillStyle = Patterns[a];
-		this.translate(x, y);
-		this.fillRect(0, 0, w, h);
-		this.restore();
 		return this;
 	},
 	//设置大小
@@ -35,14 +23,6 @@ let Canvas = {
 		this.clearRect(x, y, w || this.canvas.width, h || this.canvas.height);
 		return this;
 	},
-	//设置文字属性
-	FontSet(font, fillStyle, textAlign, textBaseline) {
-		if (font && this.font != font) this.font = font;
-		if (fillStyle && this.fillStyle != fillStyle) this.fillStyle = fillStyle;
-		if (textAlign && this.textAlign != textAlign) this.textAlign = textAlign;
-		if (textBaseline && this.textBaseline != textBaseline) this.textBaseline = textBaseline;
-		return this;
-	},
 	//填充
 	Fill: function(fillStyle) {
 		if (fillStyle && this.fillStyle != fillStyle) this.fillStyle = fillStyle;
@@ -54,13 +34,6 @@ let Canvas = {
 		if (strokeStyle && this.strokeStyle != strokeStyle) this.strokeStyle = strokeStyle;
 		if (lineWidth && this.lineWidth != lineWidth) this.lineWidth = lineWidth;
 		this.stroke();
-		return this;
-	},
-	//绘制图片
-	Image: function(a, x, y, w, h) {
-		let img = Canvas.Image.GetImage(a);
-		Array.prototype.splice.call(arguments, 0, 3, img, x - (w || img.width) / 2, y - (h || img.height) / 2);
-		this.drawImage.apply(this, arguments);
 		return this;
 	},
 	//多边形
@@ -136,4 +109,3 @@ let Canvas = {
 		}
 	},
 };
-export default Canvas;

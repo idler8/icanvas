@@ -1,4 +1,4 @@
-import { MathVector2 } from '../../maths/index.js';
+import { MathVector2 } from '../../../maths/index.js';
 export default (superClass = Object) => {
 	return class Position extends superClass {
 		/**
@@ -21,12 +21,11 @@ export default (superClass = Object) => {
 			this.position.setTo(x, y);
 			return this;
 		}
-		setOptions(options) {
-			if(super.setOptions) super.setOptions(options);
+		constructor(options) {
+			super(options);
 			if (options.position) Object.assign(this.position, options.position);
 			if (options.x !== undefined) this.position.x = options.x;
 			if (options.y !== undefined) this.position.y = options.y;
-			return this;
 		}
 	};
 };
