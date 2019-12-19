@@ -1967,18 +1967,65 @@ var text = (function (superClass, Context) {
   function (_superClass) {
     _inherits(Text, _superClass);
 
-    function Text() {
-      var _getPrototypeOf2;
+    _createClass(Text, [{
+      key: "setValue",
+      value: function setValue(v) {
+        this.value = v;
+        return this;
+      }
+      /**
+       * 特殊插入对象
+       */
 
+    }, {
+      key: "value",
+
+      /**
+       * 当前内容字符串
+       */
+      set: function set(v) {
+        if (this._value === v) return;
+
+        if (!v && v !== 0) {
+          v = '';
+        } else if (typeof v != 'string') {
+          v = v.toString();
+        }
+
+        this._value = v;
+        this.separate(v);
+      },
+      get: function get() {
+        return this._value;
+      }
+    }, {
+      key: "wrapWidth",
+      get: function get() {
+        return this.wrap.width;
+      },
+      set: function set(width) {
+        this.wrap.width = width;
+      }
+    }, {
+      key: "lineHeight",
+      get: function get() {
+        return this.wrap.height || (this.wrap.height = this.style ? this.style.size * 1.5 | 0 : 0);
+      },
+      set: function set(h) {
+        this.wrap.height = h;
+      }
+      /**
+       * @param {*} options
+       */
+
+    }]);
+
+    function Text(options) {
       var _this;
 
       _classCallCheck(this, Text);
 
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Text)).call.apply(_getPrototypeOf2, [this].concat(args)));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, options));
 
       _defineProperty(_assertThisInitialized(_this), "_value", '');
 
@@ -1995,38 +2042,21 @@ var text = (function (superClass, Context) {
 
       _defineProperty(_assertThisInitialized(_this), "_Handle", Object.assign({}, Text.defaultHandle));
 
-      return _this;
+      if (options) {
+        if (options.wrapWidth > 0) _this.wrapWidth = options.wrapWidth;
+        _this.lineHeight = options.lineHeight || 0;
+        if (options.special) _this.special = Object.assign(_this.special || {}, options.special);
+        if (options.value) _this.value = options.value;
+      }
+
+      return _possibleConstructorReturn(_this, _assertThisInitialized(_this));
     }
+    /**
+     * 文本切割配置
+     */
+
 
     _createClass(Text, [{
-      key: "setValue",
-      value: function setValue(v) {
-        this.value = v;
-        return this;
-      }
-      /**
-       * 特殊插入对象
-       */
-
-    }, {
-      key: "setOptions",
-
-      /**
-       * @param {*} options
-       */
-      value: function setOptions(options) {
-        if (_get(_getPrototypeOf(Text.prototype), "setOptions", this)) _get(_getPrototypeOf(Text.prototype), "setOptions", this).call(this, options);
-        if (options.wrapWidth > 0) this.wrapWidth = options.wrapWidth;
-        this.lineHeight = options.lineHeight || 0;
-        if (options.special) this.special = Object.assign(this.special || {}, options.special);
-        if (options.value) this.value = options.value;
-        return this;
-      }
-      /**
-       * 文本切割配置
-       */
-
-    }, {
       key: "separate",
       value: function separate(value) {
         if (!Context) return; //TODO 是否补充测试例
@@ -2202,39 +2232,6 @@ var text = (function (superClass, Context) {
             Context.fillText(this._Lines[i], x, y);
           }
         }
-      }
-    }, {
-      key: "value",
-      set: function set(v) {
-        if (this._value === v) return;
-
-        if (!v && v !== 0) {
-          v = '';
-        } else if (typeof v != 'string') {
-          v = v.toString();
-        }
-
-        this._value = v;
-        this.separate(v);
-      },
-      get: function get() {
-        return this._value;
-      }
-    }, {
-      key: "wrapWidth",
-      get: function get() {
-        return this.wrap.width;
-      },
-      set: function set(width) {
-        this.wrap.width = width;
-      }
-    }, {
-      key: "lineHeight",
-      get: function get() {
-        return this.wrap.height || (this.wrap.height = this.style ? this.style.size * 1.5 | 0 : 0);
-      },
-      set: function set(h) {
-        this.wrap.height = h;
       }
     }]);
 

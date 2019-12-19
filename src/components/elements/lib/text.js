@@ -47,12 +47,14 @@ export default (superClass, Context) => {
 		/**
 		 * @param {*} options
 		 */
-		setOptions(options) {
-			if (super.setOptions) super.setOptions(options);
-			if (options.wrapWidth > 0) this.wrapWidth = options.wrapWidth;
-			this.lineHeight = options.lineHeight || 0;
-			if (options.special) this.special = Object.assign(this.special || {}, options.special);
-			if (options.value) this.value = options.value;
+		constructor(options) {
+			super(options);
+			if (options) {
+				if (options.wrapWidth > 0) this.wrapWidth = options.wrapWidth;
+				this.lineHeight = options.lineHeight || 0;
+				if (options.special) this.special = Object.assign(this.special || {}, options.special);
+				if (options.value) this.value = options.value;
+			}
 			return this;
 		}
 		/**
