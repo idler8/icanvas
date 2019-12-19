@@ -3290,10 +3290,10 @@ var index$4 = /*#__PURE__*/Object.freeze({
  * key取main则该canvas将上屏
  */
 function Canvas(key) {
-  if (key && GetCanvas[key]) return GetCanvas[key];
+  if (key && Canvas[key]) return Canvas[key];
   var canvas = document.createElement('canvas');
   if (key == 'main') document.body.appendChild(canvas);
-  return key ? GetCanvas[key] = canvas : canvas;
+  return key ? Canvas[key] = canvas : canvas;
 }
 
 function loadFont(url) {

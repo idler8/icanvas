@@ -7,8 +7,8 @@
  * key取main则该canvas将上屏
  */
 export default function Canvas(key) {
-	if (key && GetCanvas[key]) return GetCanvas[key];
+	if (key && Canvas[key]) return Canvas[key];
 	let canvas = document.createElement('canvas');
 	if (key == 'main') document.body.appendChild(canvas);
-	return key ? (GetCanvas[key] = canvas) : canvas;
+	return key ? (Canvas[key] = canvas) : canvas;
 }
