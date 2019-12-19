@@ -16,7 +16,9 @@ export default (superClass, Vector2) => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.clip) this.setClip.apply(this, options.clip);
+			if (options) {
+				if (options.clip) this.setClip.apply(this, options.clip);
+			}
 		}
 	};
 };

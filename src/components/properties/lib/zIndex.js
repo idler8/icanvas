@@ -10,7 +10,9 @@ export default superClass => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.zIndex) this.zIndex = options.zIndex;
+			if (options) {
+				if (options.zIndex) this.zIndex = options.zIndex;
+			}
 		}
 	};
 };

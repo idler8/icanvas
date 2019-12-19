@@ -2552,9 +2552,12 @@
 
         defineProperty(assertThisInitialized(_this), "position", new Vector2());
 
-        if (options.position) Object.assign(_this.position, options.position);
-        if (options.x !== undefined) _this.position.x = options.x;
-        if (options.y !== undefined) _this.position.y = options.y;
+        if (options) {
+          if (options.position) Object.assign(_this.position, options.position);
+          if (options.x !== undefined) _this.position.x = options.x;
+          if (options.y !== undefined) _this.position.y = options.y;
+        }
+
         return _this;
       }
 
@@ -2606,8 +2609,11 @@
 
         defineProperty(assertThisInitialized(_this), "radian", 0);
 
-        if (options.radian !== undefined) _this.radian = options.radian;
-        if (options.angle !== undefined) _this.angle = options.angle;
+        if (options) {
+          if (options.radian !== undefined) _this.radian = options.radian;
+          if (options.angle !== undefined) _this.angle = options.angle;
+        }
+
         return _this;
       }
 
@@ -2661,9 +2667,12 @@
 
         defineProperty(assertThisInitialized(_this), "scale", new Vector2(1, 1));
 
-        if (options.scale !== undefined) _this.scale.set(options.scale);
-        if (options.scaleX !== undefined) _this.scale.x = options.scaleX;
-        if (options.scaleY !== undefined) _this.scale.y = options.scaleY;
+        if (options) {
+          if (options.scale !== undefined) _this.scale.set(options.scale);
+          if (options.scaleX !== undefined) _this.scale.x = options.scaleX;
+          if (options.scaleY !== undefined) _this.scale.y = options.scaleY;
+        }
+
         return _this;
       }
 
@@ -2727,9 +2736,12 @@
 
         defineProperty(assertThisInitialized(_this), "anchor", new Vector2());
 
-        if (options.anchor) Object.assign(_this.anchor, options.anchor);
-        if (options.anchorX) _this.anchor.x = options.anchorX;
-        if (options.anchorY) _this.anchor.y = options.anchorY;
+        if (options) {
+          if (options.anchor) Object.assign(_this.anchor, options.anchor);
+          if (options.anchorX) _this.anchor.x = options.anchorX;
+          if (options.anchorY) _this.anchor.y = options.anchorY;
+        }
+
         return _this;
       }
       /**
@@ -2767,7 +2779,7 @@
 
         defineProperty(assertThisInitialized(_this), "_alpha", 1);
 
-        if (options.alpha !== undefined) _this.alpha = options.alpha;
+        if (options && options.alpha !== undefined) _this.alpha = options.alpha;
         return _this;
       }
       /**
@@ -2837,7 +2849,10 @@
 
         defineProperty(assertThisInitialized(_this), "_visible", true);
 
-        if (options.visible !== undefined) _this.visible = options.visible;
+        if (options) {
+          if (options.visible !== undefined) _this.visible = options.visible;
+        }
+
         return _this;
       }
 
@@ -2918,9 +2933,12 @@
 
         defineProperty(assertThisInitialized(_this), "size", new Vector2());
 
-        if (options.size) Object.assign(_this.size, options.size);
-        if (options.width !== undefined) _this.size.x = options.width;
-        if (options.height !== undefined) _this.size.y = options.height;
+        if (options) {
+          if (options.size) Object.assign(_this.size, options.size);
+          if (options.width !== undefined) _this.size.x = options.width;
+          if (options.height !== undefined) _this.size.y = options.height;
+        }
+
         return _this;
       }
 
@@ -2982,7 +3000,10 @@
 
         defineProperty(assertThisInitialized(_this), "clipSize", new Vector2());
 
-        if (options.clip) _this.setClip.apply(assertThisInitialized(_this), options.clip);
+        if (options) {
+          if (options.clip) _this.setClip.apply(assertThisInitialized(_this), options.clip);
+        }
+
         return _this;
       }
 
@@ -3039,7 +3060,10 @@
 
         defineProperty(assertThisInitialized(_this), "padding", new Vector(0, 0, 0, 0));
 
-        if (options.padding) Object.assign(_this.padding, options.padding);
+        if (options) {
+          if (options.padding) Object.assign(_this.padding, options.padding);
+        }
+
         return _this;
       }
 
@@ -3077,7 +3101,10 @@
 
         defineProperty(assertThisInitialized(_this), "style", Object.assign({}, Style.defaultStyle));
 
-        if (options.style) _this.setStyle(options.style);
+        if (options) {
+          if (options.style) _this.setStyle(options.style);
+        }
+
         return _this;
       }
 
@@ -3144,7 +3171,10 @@
 
         defineProperty(assertThisInitialized(_this), "zIndex", 0);
 
-        if (options.zIndex) _this.zIndex = options.zIndex;
+        if (options) {
+          if (options.zIndex) _this.zIndex = options.zIndex;
+        }
+
         return _this;
       }
 

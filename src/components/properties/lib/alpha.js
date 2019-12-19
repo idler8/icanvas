@@ -2,7 +2,7 @@ export default superClass => {
 	return class Alpha extends superClass {
 		constructor(options) {
 			super(options);
-			if (options.alpha !== undefined) this.alpha = options.alpha;
+			if (options && options.alpha !== undefined) this.alpha = options.alpha;
 		}
 		/**
 		 * 透明度控制

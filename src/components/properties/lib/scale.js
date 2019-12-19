@@ -23,9 +23,11 @@ export default (superClass, Vector2) => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.scale !== undefined) this.scale.set(options.scale);
-			if (options.scaleX !== undefined) this.scale.x = options.scaleX;
-			if (options.scaleY !== undefined) this.scale.y = options.scaleY;
+			if (options) {
+				if (options.scale !== undefined) this.scale.set(options.scale);
+				if (options.scaleX !== undefined) this.scale.x = options.scaleX;
+				if (options.scaleY !== undefined) this.scale.y = options.scaleY;
+			}
 		}
 	};
 };

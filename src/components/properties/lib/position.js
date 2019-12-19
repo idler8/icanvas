@@ -22,9 +22,11 @@ export default (superClass, Vector2) => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.position) Object.assign(this.position, options.position);
-			if (options.x !== undefined) this.position.x = options.x;
-			if (options.y !== undefined) this.position.y = options.y;
+			if (options) {
+				if (options.position) Object.assign(this.position, options.position);
+				if (options.x !== undefined) this.position.x = options.x;
+				if (options.y !== undefined) this.position.y = options.y;
+			}
 		}
 	};
 };

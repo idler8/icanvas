@@ -43,9 +43,11 @@ export default (superClass, Vector2) => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.size) Object.assign(this.size, options.size);
-			if (options.width !== undefined) this.size.x = options.width;
-			if (options.height !== undefined) this.size.y = options.height;
+			if (options) {
+				if (options.size) Object.assign(this.size, options.size);
+				if (options.width !== undefined) this.size.x = options.width;
+				if (options.height !== undefined) this.size.y = options.height;
+			}
 		}
 		hitMe(x, y) {
 			if (this.padding) {

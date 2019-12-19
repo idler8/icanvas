@@ -29,9 +29,11 @@ export default (superClass, Vector2) => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.anchor) Object.assign(this.anchor, options.anchor);
-			if (options.anchorX) this.anchor.x = options.anchorX;
-			if (options.anchorY) this.anchor.y = options.anchorY;
+			if (options) {
+				if (options.anchor) Object.assign(this.anchor, options.anchor);
+				if (options.anchorX) this.anchor.x = options.anchorX;
+				if (options.anchorY) this.anchor.y = options.anchorY;
+			}
 		}
 		/**
 		 * 触摸事件位置偏移量

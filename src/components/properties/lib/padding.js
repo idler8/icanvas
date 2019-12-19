@@ -22,7 +22,9 @@ export default (superClass, Vector) => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.padding) Object.assign(this.padding, options.padding);
+			if (options) {
+				if (options.padding) Object.assign(this.padding, options.padding);
+			}
 		}
 	};
 };

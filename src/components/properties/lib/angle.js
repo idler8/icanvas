@@ -20,8 +20,10 @@ export default superClass => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.radian !== undefined) this.radian = options.radian;
-			if (options.angle !== undefined) this.angle = options.angle;
+			if (options) {
+				if (options.radian !== undefined) this.radian = options.radian;
+				if (options.angle !== undefined) this.angle = options.angle;
+			}
 		}
 	};
 };

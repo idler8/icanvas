@@ -19,7 +19,9 @@ export default superClass => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.visible !== undefined) this.visible = options.visible;
+			if (options) {
+				if (options.visible !== undefined) this.visible = options.visible;
+			}
 		}
 	};
 };

@@ -23,7 +23,9 @@ export default superClass => {
 		}
 		constructor(options) {
 			super(options);
-			if (options.style) this.setStyle(options.style);
+			if (options) {
+				if (options.style) this.setStyle(options.style);
+			}
 		}
 		set font(font) {
 			this.style.cacheFont = font;
