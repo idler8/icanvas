@@ -3218,14 +3218,12 @@ function (_Loader) {
   }, {
     key: "get",
     value: function get(key) {
-      return this.resources[key] || ImageControl.Error;
+      return this.resources[key] || ImageControl.Error || (ImageControl.Error = new Image());
     }
   }]);
 
   return ImageControl;
 }(Loader);
-
-_defineProperty(ImageControl, "Error", new Image());
 
 var AudioControl =
 /*#__PURE__*/
@@ -3254,7 +3252,7 @@ function (_Loader) {
     key: "get",
     //获取音频
     value: function get(key) {
-      return this.resources[key] || AudioControl.Error;
+      return this.resources[key] || AudioControl.Error || (AudioControl.Error = new Howl({}));
     } //静音
 
   }, {
@@ -3296,8 +3294,6 @@ function (_Loader) {
 
   return AudioControl;
 }(Loader);
-
-_defineProperty(AudioControl, "Error", new Howl({}));
 
 
 

@@ -1,6 +1,5 @@
 import Loader from './loader.js';
 export default class ImageControl extends Loader {
-	static Error = new Image();
 	Set(url) {
 		return new Promise((resolve, reject) => {
 			let image = new Image();
@@ -14,6 +13,6 @@ export default class ImageControl extends Loader {
 		});
 	}
 	get(key) {
-		return this.resources[key] || ImageControl.Error;
+		return this.resources[key] || ImageControl.Error || (ImageControl.Error = new Image());
 	}
 }

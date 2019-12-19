@@ -3792,14 +3792,12 @@
     }, {
       key: "get",
       value: function get(key) {
-        return this.resources[key] || ImageControl.Error;
+        return this.resources[key] || ImageControl.Error || (ImageControl.Error = new Image());
       }
     }]);
 
     return ImageControl;
   }(Loader);
-
-  defineProperty(ImageControl, "Error", new Image());
 
   var howler = createCommonjsModule(function (module, exports) {
   /*!
@@ -6976,7 +6974,7 @@
       key: "get",
       //获取音频
       value: function get(key) {
-        return this.resources[key] || AudioControl.Error;
+        return this.resources[key] || AudioControl.Error || (AudioControl.Error = new howler_2({}));
       } //静音
 
     }, {
@@ -7018,8 +7016,6 @@
 
     return AudioControl;
   }(Loader);
-
-  defineProperty(AudioControl, "Error", new howler_2({}));
 
 
 
