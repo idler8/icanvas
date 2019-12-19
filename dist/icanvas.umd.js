@@ -1925,18 +1925,18 @@
 
   var index = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    MathArray: BaseArray,
-    MathVector: Vector,
-    MathVector2: Vector2,
-    MathVector3: Vector3,
-    MathVector4: Vector4,
-    MathMatrix3: Matrix3,
-    MathMatrix4: Matrix4,
-    MathRandom: Random,
-    MathTime: time,
-    MathColor: color,
-    MathPosition: Position,
-    MathClock: Clock
+    Array: BaseArray,
+    Vector: Vector,
+    Vector2: Vector2,
+    Vector3: Vector3,
+    Vector4: Vector4,
+    Matrix3: Matrix3,
+    Matrix4: Matrix4,
+    Random: Random,
+    Time: time,
+    Color: color,
+    Position: Position,
+    Clock: Clock
   });
 
   var base = (function (superClass, Matrix) {
@@ -6992,7 +6992,7 @@
     return AudioControl;
   }(Loader);
 
-  defineProperty(AudioControl, "Error", new howler_2());
+  defineProperty(AudioControl, "Error", new howler_2({}));
 
 
 

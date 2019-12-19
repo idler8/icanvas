@@ -1,7 +1,7 @@
 import Loader from './loader.js';
 import { Howl, Howler } from 'howler';
 export default class AudioControl extends Loader {
-	static Error = new Howl();
+	static Error = new Howl({});
 	//获取音频
 	get(key) {
 		return this.resources[key] || AudioControl.Error;
