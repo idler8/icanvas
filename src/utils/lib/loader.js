@@ -30,7 +30,7 @@ export default class Loader extends Event {
 				let url = root + perfix + k + '.' + map[k];
 				Result[key] = url;
 			} else {
-				Object.assign(Result, Loader(map[k], root, perfix + k + '/', exts));
+				Object.assign(Result, this.loadMap(map[k], root, perfix + k + '/', exts));
 			}
 		});
 		return Result;

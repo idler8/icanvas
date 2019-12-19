@@ -4069,6 +4069,8 @@
     }, {
       key: "loadMap",
       value: function loadMap() {
+        var _this4 = this;
+
         var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
         var perfix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
@@ -4089,7 +4091,7 @@
 
             Result[_key2] = _url;
           } else {
-            Object.assign(Result, Loader(map[k], root, perfix + k + '/', exts));
+            Object.assign(Result, _this4.loadMap(map[k], root, perfix + k + '/', exts));
           }
         });
         return Result;
