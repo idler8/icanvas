@@ -4162,7 +4162,7 @@
   exports.MathVector4 = Vector4;
   exports.UtilCanvas2D = canvas2d;
   exports.UtilCollsion = Collision;
-  exports.UtilLoaderMap = Loader;
+  exports.UtilLoader = Loader;
   exports.UtilPointInRect = UtilPointInRect;
   exports.UtilRecursiveMap = UtilRecursiveMap;
   exports.UtilRender = Render;

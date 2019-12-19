@@ -20,7 +20,7 @@ export { default as UtilCollsion } from './lib/collision.js';
 /**
  * 资源文件夹结构转化成一维键值对
  */
-export { default as UtilLoaderMap } from './lib/loader.js';
+export { default as UtilLoader } from './lib/loader.js';
 /**
  * 从键值对中递归获取某个值
  * @param {Object} root
