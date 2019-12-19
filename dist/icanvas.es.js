@@ -9,7 +9,6 @@ import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import _typeof from '@babel/runtime/helpers/typeof';
 import _get from '@babel/runtime/helpers/get';
 import Event from 'eventemitter3';
-import { Howl, Howler } from 'howler';
 
 /**
  * @class 扩展数组类
@@ -3076,275 +3075,6 @@ var ComponentBase = function ComponentBase() {
 
 _defineProperty(ComponentBase, "CID", 0);
 
-var Loader =
-/*#__PURE__*/
-function (_Event) {
-  _inherits(Loader, _Event);
-
-  function Loader() {
-    var _getPrototypeOf2;
-
-    var _this;
-
-    _classCallCheck(this, Loader);
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Loader)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-    _defineProperty(_assertThisInitialized(_this), "resources", {});
-
-    return _this;
-  }
-
-  _createClass(Loader, [{
-    key: "Set",
-    value: function Set(url) {
-      throw Error('请先挂载加载函数(Set)');
-    }
-  }, {
-    key: "load",
-    value: function load(key, url) {
-      var _this2 = this;
-
-      this.emit('load', key, url);
-      return this.Set(url).then(function (res) {
-        _this2.emit('loaded', key, url, res);
-
-        _this2.resources[key] = res;
-      });
-    }
-  }, {
-    key: "preLoad",
-    value: function preLoad() {
-      var _this3 = this;
-
-      var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-      var Keys = Object.keys(map);
-      this.emit('preLoad', Keys.length);
-      return Promise.all(Keys.map(function (key) {
-        return _this3.load(prefix + key, map[key]);
-      }));
-    }
-  }]);
-
-  return Loader;
-}(Event);
-
-var ImageControl =
-/*#__PURE__*/
-function (_Loader) {
-  _inherits(ImageControl, _Loader);
-
-  function ImageControl() {
-    _classCallCheck(this, ImageControl);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(ImageControl).apply(this, arguments));
-  }
-
-  _createClass(ImageControl, [{
-    key: "Set",
-    value: function Set(url) {
-      return new Promise(function (resolve, reject) {
-        var image = new Image();
-
-        image.onload = function () {
-          resolve(image);
-        };
-
-        image.onerror = function (e) {
-          reject(e);
-        };
-
-        image.key = image.src = url;
-      });
-    }
-  }, {
-    key: "get",
-    value: function get(key) {
-      return this.resources[key] || ImageControl.Error || (ImageControl.Error = new Image());
-    }
-  }]);
-
-  return ImageControl;
-}(Loader);
-
-var AudioControl =
-/*#__PURE__*/
-function (_Loader) {
-  _inherits(AudioControl, _Loader);
-
-  function AudioControl() {
-    var _getPrototypeOf2;
-
-    var _this;
-
-    _classCallCheck(this, AudioControl);
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(AudioControl)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-    _defineProperty(_assertThisInitialized(_this), "_mute", false);
-
-    return _this;
-  }
-
-  _createClass(AudioControl, [{
-    key: "get",
-    //获取音频
-    value: function get(key) {
-      return this.resources[key] || AudioControl.Error || (AudioControl.Error = new Howl({}));
-    } //静音
-
-  }, {
-    key: "Set",
-    //加载文件
-    value: function Set(url) {
-      return new Promise(function (resolve, reject) {
-        var audio = new Howl({
-          src: url,
-          loop: false,
-          autoplay: false
-        });
-        audio.once('load', function () {
-          audio.key = url;
-          resolve(audio);
-        });
-      });
-    }
-  }, {
-    key: "mute",
-    get: function get() {
-      return this._mute;
-    },
-    set: function set(mute) {
-      this._mute = mute;
-      Howler.mute(mute);
-    } //设置音量
-
-  }, {
-    key: "volume",
-    set: function set() {
-      var v = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      Howler.volume(v);
-    },
-    get: function get() {
-      return Howler.volume();
-    }
-  }]);
-
-  return AudioControl;
-}(Loader);
-
-/**
- * 获得一个canvas对象
- *
- * @param {String} key 特殊模版标识
- *
- * 打包模式为web时
- * key取main则该canvas将上屏
- */
-function Canvas(key) {
-  if (key && Canvas[key]) return Canvas[key];
-  var canvas = document.createElement('canvas');
-  if (key == 'main') document.body.appendChild(canvas);
-  return key ? Canvas[key] = canvas : canvas;
-}
-
-function loadFont(url) {
-  var key = 'Font' + Date.now();
-  var style = document.createElement('style');
-  style.type = 'text/css';
-  style.innerHTML = "\n            @font-face {\n                font-family: '".concat(key, "';\n                src: url('").concat(url, "'); \n            }\n            body {\n                font-family: '").concat(key, "';\n            }\n        ");
-  document.body.appendChild(style);
-  return key;
-}
-
-/**
- * 获取系统参数
- * pixel 屏幕与设备像素比
- * width 屏幕宽度
- * height 屏幕高度
- * ratio 宽高比
- */
-function System() {
-  System.pixel = window.devicePixelRatio || 2;
-  System.width = document.body.clientWidth;
-  System.height = document.body.clientHeight;
-  System.ratio = System.width / System.height;
-  return System;
-}
-
-function GetTouchEvent(dom, MouseEvent) {
-  return {
-    identifier: 0,
-    changedTouches: [{
-      clientX: MouseEvent.clientX - dom.offsetLeft,
-      clientY: MouseEvent.clientY - dom.offsetTop
-    }]
-  };
-}
-
-function MouseListen(dom, Touch) {
-  var DownState = false;
-  dom.addEventListener('mousedown', function (e) {
-    return DownState = true, Touch.onTouchStart(GetTouchEvent(dom, e));
-  }, {
-    passive: true
-  });
-  dom.addEventListener('mousemove', function (e) {
-    return DownState && Touch.onTouchMove(GetTouchEvent(dom, e));
-  }, {
-    passive: true
-  });
-  dom.addEventListener('mouseup', function (e) {
-    return DownState && (DownState = false, Touch.onTouchEnd(GetTouchEvent(dom, e)));
-  }, {
-    passive: true
-  });
-  dom.addEventListener('mouseout', function (e) {
-    return DownState && (DownState = false, Touch.onTouchEnd(GetTouchEvent(dom, e)));
-  }, {
-    passive: true
-  });
-}
-/**
- * 将dom元素触摸事件和Touch类进行关联
- * @param {HTMLElement} dom
- * @param {ICanvas.UtilTouch} Touch
- */
-
-
-function TouchListen(dom, Touch) {
-  if (!('ontouchstart' in window)) return MouseListen(dom, Touch);
-  dom.addEventListener('touchstart', function (e) {
-    return Touch.onTouchStart(e);
-  }, {
-    passive: true
-  });
-  dom.addEventListener('touchmove', function (e) {
-    return Touch.onTouchMove(e);
-  }, {
-    passive: true
-  });
-  dom.addEventListener('touchend', function (e) {
-    return Touch.onTouchEnd(e);
-  }, {
-    passive: true
-  });
-  dom.addEventListener('touchcancel', function (e) {
-    return Touch.onTouchEnd(e);
-  }, {
-    passive: true
-  });
-}
-
 var canvas2d = {
   SetTransform: function SetTransform(matrix) {
     this.setTransform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
@@ -3710,32 +3440,91 @@ function () {
   return Collision;
 }();
 
-function Loader$1() {
-  var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-  var perfix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
-  var exts = arguments.length > 3 ? arguments[3] : undefined;
-  var Result = {};
-  Object.keys(map).forEach(function (k) {
-    if (k == '_') {
-      if (exts.indexOf(map[k]) == -1) return;
-      var key = perfix.slice(0, -1);
-      var url = root + perfix.slice(0, -1) + '.' + map[k];
-      Result[key] = url;
-    } else if (typeof map[k] == 'string') {
-      if (exts.indexOf(map[k]) == -1) return;
+var Loader =
+/*#__PURE__*/
+function (_Event) {
+  _inherits(Loader, _Event);
 
-      var _key = perfix + k;
+  function Loader() {
+    var _getPrototypeOf2;
 
-      var _url = root + perfix + k + '.' + map[k];
+    var _this;
 
-      Result[_key] = _url;
-    } else {
-      Object.assign(Result, Loader$1(map[k], root, perfix + k + '/', exts));
+    _classCallCheck(this, Loader);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
-  });
-  return Result;
-}
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Loader)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "resources", {});
+
+    return _this;
+  }
+
+  _createClass(Loader, [{
+    key: "Set",
+    value: function Set(url) {
+      throw Error('请先挂载加载函数(Set)');
+    }
+  }, {
+    key: "load",
+    value: function load(key, url) {
+      var _this2 = this;
+
+      this.emit('load', key, url);
+      return this.Set(url).then(function (res) {
+        _this2.emit('loaded', key, url, res);
+
+        _this2.resources[key] = res;
+      });
+    }
+  }, {
+    key: "preLoad",
+    value: function preLoad() {
+      var _this3 = this;
+
+      var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      var Keys = Object.keys(map);
+      this.emit('preLoad', Keys.length);
+      return Promise.all(Keys.map(function (key) {
+        return _this3.load(prefix + key, map[key]);
+      }));
+    }
+  }, {
+    key: "loadMap",
+    value: function loadMap() {
+      var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      var perfix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
+      var exts = arguments.length > 3 ? arguments[3] : undefined;
+      var Result = {};
+      Object.keys(map).forEach(function (k) {
+        if (k == '_') {
+          if (exts.indexOf(map[k]) == -1) return;
+          var key = perfix.slice(0, -1);
+          var url = root + perfix.slice(0, -1) + '.' + map[k];
+          Result[key] = url;
+        } else if (typeof map[k] == 'string') {
+          if (exts.indexOf(map[k]) == -1) return;
+
+          var _key2 = perfix + k;
+
+          var _url = root + perfix + k + '.' + map[k];
+
+          Result[_key2] = _url;
+        } else {
+          Object.assign(Result, Loader(map[k], root, perfix + k + '/', exts));
+        }
+      });
+      return Result;
+    }
+  }]);
+
+  return Loader;
+}(Event);
 
 /**
  * Canvas2D上下文扩展函数
@@ -3769,4 +3558,4 @@ function UtilPointInRect(x, y, bx, by, bw, bh) {
   return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
 }
 
-export { Canvas as ApiCanvas, loadFont as ApiFont, System as ApiSystem, TouchListen as ApiTouch, ComponentBase, base as ComponentElementBase, scroll as ComponentElementScroll, text as ComponentElementText, texture as ComponentElementTexture, alpha as ComponentPropertyAlpha, anchor as ComponentPropertyAnchor, angle as ComponentPropertyAngle, children as ComponentPropertyChildren, clip as ComponentPropertyClip, padding as ComponentPropertyPadding, position as ComponentPropertyPosition, scale as ComponentPropertyScale, size as ComponentPropertySize, style as ComponentPropertyStyle, visible as ComponentPropertyVisible, zIndex as ComponentPropertyZIndex, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Matrix4 as MathMatrix4, Position as MathPosition, Random as MathRandom, time as MathTime, Vector as MathVector, Vector2 as MathVector2, Vector3 as MathVector3, Vector4 as MathVector4, AudioControl as ResourceAudio, ImageControl as ResourceImage, Loader as ResourceLoader, canvas2d as UtilCanvas2D, Collision as UtilCollsion, Loader$1 as UtilLoaderMap, UtilPointInRect, UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch };
+export { ComponentBase, base as ComponentElementBase, scroll as ComponentElementScroll, text as ComponentElementText, texture as ComponentElementTexture, alpha as ComponentPropertyAlpha, anchor as ComponentPropertyAnchor, angle as ComponentPropertyAngle, children as ComponentPropertyChildren, clip as ComponentPropertyClip, padding as ComponentPropertyPadding, position as ComponentPropertyPosition, scale as ComponentPropertyScale, size as ComponentPropertySize, style as ComponentPropertyStyle, visible as ComponentPropertyVisible, zIndex as ComponentPropertyZIndex, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Matrix4 as MathMatrix4, Position as MathPosition, Random as MathRandom, time as MathTime, Vector as MathVector, Vector2 as MathVector2, Vector3 as MathVector3, Vector4 as MathVector4, canvas2d as UtilCanvas2D, Collision as UtilCollsion, Loader as UtilLoaderMap, UtilPointInRect, UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch };

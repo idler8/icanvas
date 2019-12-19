@@ -12,7 +12,6 @@ export default [
 				format: 'esm',
 			},
 		],
-		external: ['window', 'document'],
 		plugins: [
 			json(),
 			babel({
@@ -35,7 +34,6 @@ export default [
 				format: 'umd',
 			},
 		],
-		external: ['window', 'document'],
 		plugins: [
 			resolve({ preferBuiltins: true, browser: true }),
 			json(),
