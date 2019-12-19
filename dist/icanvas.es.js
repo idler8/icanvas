@@ -3071,7 +3071,7 @@ var children = (function (superClass) {
 var ComponentBase = function ComponentBase() {
   _classCallCheck(this, ComponentBase);
 
-  _defineProperty(this, "id", ++Base.CID);
+  _defineProperty(this, "id", ++ComponentBase.CID);
 };
 
 _defineProperty(ComponentBase, "CID", 0);

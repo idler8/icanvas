@@ -3307,7 +3307,7 @@
   var ComponentBase = function ComponentBase() {
     classCallCheck(this, ComponentBase);
 
-    defineProperty(this, "id", ++Base.CID);
+    defineProperty(this, "id", ++ComponentBase.CID);
   };
 
   defineProperty(ComponentBase, "CID", 0);
