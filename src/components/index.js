@@ -1,7 +1,6 @@
-import * as Elements from './elements/';
-import * as Properties from './properties/';
-class Base {
+export * from './elements/';
+export * from './properties/';
+export class ComponentBase {
 	static CID = 0; //全局递增组件id
 	id = ++Base.CID;
 }
-export { Elements, Properties, Base };

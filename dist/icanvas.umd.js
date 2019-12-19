@@ -1921,24 +1921,6 @@
     return Clock;
   }();
 
-
-
-  var index = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Array: BaseArray,
-    Vector: Vector,
-    Vector2: Vector2,
-    Vector3: Vector3,
-    Vector4: Vector4,
-    Matrix3: Matrix3,
-    Matrix4: Matrix4,
-    Random: Random,
-    Time: time,
-    Color: color,
-    Position: Position,
-    Clock: Clock
-  });
-
   var base = (function (superClass, Matrix) {
     var _temp;
 
@@ -2492,16 +2474,6 @@
       currentWidth: 0,
       Special: false
     }), _temp;
-  });
-
-
-
-  var index$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Base: base,
-    Texture: texture,
-    Scroll: scroll,
-    Text: text
   });
 
   var position = (function (superClass, Vector2) {
@@ -3332,38 +3304,13 @@
     }(superClass), _temp;
   });
 
-
-
-  var index$2 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Position: position,
-    Angle: angle,
-    Scale: scale,
-    Anchor: anchor,
-    Alpha: alpha,
-    Visible: visible,
-    Size: size,
-    Clip: clip,
-    Padding: padding,
-    Style: style,
-    ZIndex: zIndex,
-    Children: children
-  });
-
-  var Base = function Base() {
-    classCallCheck(this, Base);
+  var ComponentBase = function ComponentBase() {
+    classCallCheck(this, ComponentBase);
 
     defineProperty(this, "id", ++Base.CID);
   };
 
-  defineProperty(Base, "CID", 0);
-
-  var index$3 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Elements: index$1,
-    Properties: index$2,
-    Base: Base
-  });
+  defineProperty(ComponentBase, "CID", 0);
 
   var eventemitter3 = createCommonjsModule(function (module) {
 
@@ -7017,15 +6964,6 @@
     return AudioControl;
   }(Loader);
 
-
-
-  var index$4 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Loader: Loader,
-    Image: ImageControl,
-    Audio: AudioControl
-  });
-
   /**
    * 获得一个canvas对象
    *
@@ -7128,16 +7066,6 @@
       passive: true
     });
   }
-
-
-
-  var index$5 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Canvas: Canvas,
-    Font: loadFont,
-    System: System,
-    Touch: TouchListen
-  });
 
   var canvas2d = {
     SetTransform: function SetTransform(matrix) {
@@ -7541,7 +7469,7 @@
    * @param {string} split
    */
 
-  function RecursiveMap(root, keys) {
+  function UtilRecursiveMap(root, keys) {
     var split = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '.';
     if (typeof key == 'string') keys = keys.split(split);
     return keys.reduce(function (obj, key) {
@@ -7563,22 +7491,49 @@
     return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
   }
 
-  var index$6 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    RecursiveMap: RecursiveMap,
-    UtilPointInRect: UtilPointInRect,
-    Canvas2D: canvas2d,
-    Render: Render,
-    Touch: Touch,
-    Collsion: Collision,
-    LoaderMap: Loader$1
-  });
-
-  exports.Api = index$5;
-  exports.Component = index$3;
-  exports.Math = index;
-  exports.Resource = index$4;
-  exports.Util = index$6;
+  exports.ApiCanvas = Canvas;
+  exports.ApiFont = loadFont;
+  exports.ApiSystem = System;
+  exports.ApiTouch = TouchListen;
+  exports.ComponentBase = ComponentBase;
+  exports.ComponentElementBase = base;
+  exports.ComponentElementScroll = scroll;
+  exports.ComponentElementText = text;
+  exports.ComponentElementTexture = texture;
+  exports.ComponentPropertyAlpha = alpha;
+  exports.ComponentPropertyAnchor = anchor;
+  exports.ComponentPropertyAngle = angle;
+  exports.ComponentPropertyChildren = children;
+  exports.ComponentPropertyClip = clip;
+  exports.ComponentPropertyPadding = padding;
+  exports.ComponentPropertyPosition = position;
+  exports.ComponentPropertyScale = scale;
+  exports.ComponentPropertySize = size;
+  exports.ComponentPropertyStyle = style;
+  exports.ComponentPropertyVisible = visible;
+  exports.ComponentPropertyZIndex = zIndex;
+  exports.MathArray = BaseArray;
+  exports.MathClock = Clock;
+  exports.MathColor = color;
+  exports.MathMatrix3 = Matrix3;
+  exports.MathMatrix4 = Matrix4;
+  exports.MathPosition = Position;
+  exports.MathRandom = Random;
+  exports.MathTime = time;
+  exports.MathVector = Vector;
+  exports.MathVector2 = Vector2;
+  exports.MathVector3 = Vector3;
+  exports.MathVector4 = Vector4;
+  exports.ResourceAudio = AudioControl;
+  exports.ResourceImage = ImageControl;
+  exports.ResourceLoader = Loader;
+  exports.UtilCanvas2D = canvas2d;
+  exports.UtilCollsion = Collision;
+  exports.UtilLoaderMap = Loader$1;
+  exports.UtilPointInRect = UtilPointInRect;
+  exports.UtilRecursiveMap = UtilRecursiveMap;
+  exports.UtilRender = Render;
+  exports.UtilTouch = Touch;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

@@ -1720,24 +1720,6 @@ function () {
   return Clock;
 }();
 
-
-
-var index = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	Array: BaseArray,
-	Vector: Vector,
-	Vector2: Vector2,
-	Vector3: Vector3,
-	Vector4: Vector4,
-	Matrix3: Matrix3,
-	Matrix4: Matrix4,
-	Random: Random,
-	Time: time,
-	Color: color,
-	Position: Position,
-	Clock: Clock
-});
-
 var base = (function (superClass, Matrix) {
   var _temp;
 
@@ -2256,16 +2238,6 @@ var text = (function (superClass, Context) {
     currentWidth: 0,
     Special: false
   }), _temp;
-});
-
-
-
-var index$1 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	Base: base,
-	Texture: texture,
-	Scroll: scroll,
-	Text: text
 });
 
 var position = (function (superClass, Vector2) {
@@ -3096,38 +3068,13 @@ var children = (function (superClass) {
   }(superClass), _temp;
 });
 
-
-
-var index$2 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	Position: position,
-	Angle: angle,
-	Scale: scale,
-	Anchor: anchor,
-	Alpha: alpha,
-	Visible: visible,
-	Size: size,
-	Clip: clip,
-	Padding: padding,
-	Style: style,
-	ZIndex: zIndex,
-	Children: children
-});
-
-var Base = function Base() {
-  _classCallCheck(this, Base);
+var ComponentBase = function ComponentBase() {
+  _classCallCheck(this, ComponentBase);
 
   _defineProperty(this, "id", ++Base.CID);
 };
 
-_defineProperty(Base, "CID", 0);
-
-var index$3 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	Elements: index$1,
-	Properties: index$2,
-	Base: Base
-});
+_defineProperty(ComponentBase, "CID", 0);
 
 var Loader =
 /*#__PURE__*/
@@ -3295,15 +3242,6 @@ function (_Loader) {
   return AudioControl;
 }(Loader);
 
-
-
-var index$4 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	Loader: Loader,
-	Image: ImageControl,
-	Audio: AudioControl
-});
-
 /**
  * 获得一个canvas对象
  *
@@ -3406,16 +3344,6 @@ function TouchListen(dom, Touch) {
     passive: true
   });
 }
-
-
-
-var index$5 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	Canvas: Canvas,
-	Font: loadFont,
-	System: System,
-	Touch: TouchListen
-});
 
 var canvas2d = {
   SetTransform: function SetTransform(matrix) {
@@ -3819,7 +3747,7 @@ function Loader$1() {
  * @param {string} split
  */
 
-function RecursiveMap(root, keys) {
+function UtilRecursiveMap(root, keys) {
   var split = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '.';
   if (typeof key == 'string') keys = keys.split(split);
   return keys.reduce(function (obj, key) {
@@ -3841,15 +3769,4 @@ function UtilPointInRect(x, y, bx, by, bw, bh) {
   return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
 }
 
-var index$6 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	RecursiveMap: RecursiveMap,
-	UtilPointInRect: UtilPointInRect,
-	Canvas2D: canvas2d,
-	Render: Render,
-	Touch: Touch,
-	Collsion: Collision,
-	LoaderMap: Loader$1
-});
-
-export { index$5 as Api, index$3 as Component, index as Math, index$4 as Resource, index$6 as Util };
+export { Canvas as ApiCanvas, loadFont as ApiFont, System as ApiSystem, TouchListen as ApiTouch, ComponentBase, base as ComponentElementBase, scroll as ComponentElementScroll, text as ComponentElementText, texture as ComponentElementTexture, alpha as ComponentPropertyAlpha, anchor as ComponentPropertyAnchor, angle as ComponentPropertyAngle, children as ComponentPropertyChildren, clip as ComponentPropertyClip, padding as ComponentPropertyPadding, position as ComponentPropertyPosition, scale as ComponentPropertyScale, size as ComponentPropertySize, style as ComponentPropertyStyle, visible as ComponentPropertyVisible, zIndex as ComponentPropertyZIndex, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Matrix4 as MathMatrix4, Position as MathPosition, Random as MathRandom, time as MathTime, Vector as MathVector, Vector2 as MathVector2, Vector3 as MathVector3, Vector4 as MathVector4, AudioControl as ResourceAudio, ImageControl as ResourceImage, Loader as ResourceLoader, canvas2d as UtilCanvas2D, Collision as UtilCollsion, Loader$1 as UtilLoaderMap, UtilPointInRect, UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch };

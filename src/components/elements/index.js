@@ -1,5 +1,4 @@
-import Base from './lib/base.js';
-import Texture from './lib/texture.js';
-import Scroll from './lib/scroll.js';
-import Text from './lib/text.js';
-export { Base, Texture, Scroll, Text };
+export { default as ComponentElementBase } from './lib/base.js';
+export { default as ComponentElementTexture } from './lib/texture.js';
+export { default as ComponentElementScroll } from './lib/scroll.js';
+export { default as ComponentElementText } from './lib/text.js';

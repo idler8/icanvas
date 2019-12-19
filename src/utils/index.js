@@ -1,33 +1,33 @@
 /**
  * Canvas2D上下文扩展函数
  */
-export { default as Canvas2D } from './lib/canvas2d.js';
+export { default as UtilCanvas2D } from './lib/canvas2d.js';
 /**
  * 渲染器类
  * 将界面组件渲染到Canvas2D上下文
  */
-export { default as Render } from './lib/render.js';
+export { default as UtilRender } from './lib/render.js';
 /**
  * 触摸事件类
  * 整合计算整个touchStart/touchMove/touchEnd过程
  */
-export { default as Touch } from './lib/touch.js';
+export { default as UtilTouch } from './lib/touch.js';
 /**
  * 碰撞检测类
  * 将点和界面组件进行比较判断碰撞
  */
-export { default as Collsion } from './lib/collision.js';
+export { default as UtilCollsion } from './lib/collision.js';
 /**
  * 资源文件夹结构转化成一维键值对
  */
-export { default as LoaderMap } from './lib/loader.js';
+export { default as UtilLoaderMap } from './lib/loader.js';
 /**
  * 从键值对中递归获取某个值
  * @param {Object} root
  * @param {string} keys
  * @param {string} split
  */
-export function RecursiveMap(root, keys, split = '.') {
+export function UtilRecursiveMap(root, keys, split = '.') {
 	if (typeof key == 'string') keys = keys.split(split);
 	return keys.reduce((obj, key) => {
 		if (!obj) return obj;
