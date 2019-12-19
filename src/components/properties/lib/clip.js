@@ -1,12 +1,11 @@
-import { MathVector2 } from '../../../maths/index.js';
-export default superClass => {
+export default (superClass, Vector2) => {
 	return class Clip extends superClass {
 		/**
 		 * 裁剪控制
 		 */
 		useClip = false; //是否切割
-		clipPosition = new MathVector2(); //切割位置
-		clipSize = new MathVector2(); //切割大小
+		clipPosition = new Vector2(); //切割位置
+		clipSize = new Vector2(); //切割大小
 
 		setClip(x = 0, y = 0, width, height) {
 			this.useClip = true;

@@ -1939,7 +1939,7 @@
     MathClock: Clock
   });
 
-  var base = (function (superClass) {
+  var base = (function (superClass, Matrix) {
     var _temp;
 
     return _temp =
@@ -1964,7 +1964,7 @@
 
         defineProperty(assertThisInitialized(_this), "touchStop", false);
 
-        defineProperty(assertThisInitialized(_this), "matrix", new Matrix3());
+        defineProperty(assertThisInitialized(_this), "matrix", new Matrix());
 
         return _this;
       } //计算矩阵
@@ -2507,10 +2507,9 @@
     Text: text
   });
 
-  var position = (function () {
+  var position = (function (superClass, Vector2) {
     var _temp;
 
-    var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Object;
     return _temp =
     /*#__PURE__*/
     function (_superClass) {
@@ -2616,7 +2615,7 @@
     }(superClass), _temp;
   });
 
-  var scale = (function (superClass) {
+  var scale = (function (superClass, Vector2) {
     var _temp;
 
     return _temp =
@@ -2672,7 +2671,7 @@
     }(superClass), _temp;
   });
 
-  var anchor = (function (superClass) {
+  var anchor = (function (superClass, Vector2) {
     var _temp;
 
     return _temp =
@@ -2846,7 +2845,7 @@
     }(superClass), _temp;
   });
 
-  var size = (function (superClass) {
+  var size = (function (superClass, Vector2) {
     var _temp;
 
     return _temp =
@@ -2940,7 +2939,7 @@
     }(superClass), _temp;
   });
 
-  var clip = (function (superClass) {
+  var clip = (function (superClass, Vector2) {
     var _temp;
 
     return _temp =
@@ -2991,7 +2990,7 @@
     }(superClass), _temp;
   });
 
-  var padding = (function (superClass) {
+  var padding = (function (superClass, Vector) {
     var _temp;
 
     return _temp =
@@ -3324,49 +3323,19 @@
     Children: children
   });
 
-  var Component =
-  /*#__PURE__*/
-  function (_subClass) {
-    inherits(Component, _subClass);
+  var Base = function Base() {
+    classCallCheck(this, Base);
 
-    function Component() {
-      var _getPrototypeOf2;
+    defineProperty(this, "id", ++Component.CID);
+  };
 
-      var _this;
-
-      classCallCheck(this, Component);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = possibleConstructorReturn(this, (_getPrototypeOf2 = getPrototypeOf(Component)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      defineProperty(assertThisInitialized(_this), "id", ++Component.CID);
-
-      return _this;
-    }
-
-    return Component;
-  }(subClass);
-
-  defineProperty(Component, "CID", 0);
-
-  function Build() {
-    var subClass = Component;
-
-    for (var i = 0; i < arguments.length; i++) {
-      subClass = arguments[i](subClass);
-    }
-
-    return subClass;
-  }
+  defineProperty(Base, "CID", 0);
 
   var index$3 = /*#__PURE__*/Object.freeze({
     __proto__: null,
     Elements: index$1,
     Properties: index$2,
-    'default': Build
+    Base: Base
   });
 
   var eventemitter3 = createCommonjsModule(function (module) {

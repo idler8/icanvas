@@ -1738,7 +1738,7 @@ var index = /*#__PURE__*/Object.freeze({
 	MathClock: Clock
 });
 
-var base = (function (superClass) {
+var base = (function (superClass, Matrix) {
   var _temp;
 
   return _temp =
@@ -1763,7 +1763,7 @@ var base = (function (superClass) {
 
       _defineProperty(_assertThisInitialized(_this), "touchStop", false);
 
-      _defineProperty(_assertThisInitialized(_this), "matrix", new Matrix3());
+      _defineProperty(_assertThisInitialized(_this), "matrix", new Matrix());
 
       return _this;
     } //计算矩阵
@@ -2271,10 +2271,9 @@ var index$1 = /*#__PURE__*/Object.freeze({
 	Text: text
 });
 
-var position = (function () {
+var position = (function (superClass, Vector2) {
   var _temp;
 
-  var superClass = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Object;
   return _temp =
   /*#__PURE__*/
   function (_superClass) {
@@ -2380,7 +2379,7 @@ var angle = (function (superClass) {
   }(superClass), _temp;
 });
 
-var scale = (function (superClass) {
+var scale = (function (superClass, Vector2) {
   var _temp;
 
   return _temp =
@@ -2436,7 +2435,7 @@ var scale = (function (superClass) {
   }(superClass), _temp;
 });
 
-var anchor = (function (superClass) {
+var anchor = (function (superClass, Vector2) {
   var _temp;
 
   return _temp =
@@ -2610,7 +2609,7 @@ var visible = (function (superClass) {
   }(superClass), _temp;
 });
 
-var size = (function (superClass) {
+var size = (function (superClass, Vector2) {
   var _temp;
 
   return _temp =
@@ -2704,7 +2703,7 @@ var size = (function (superClass) {
   }(superClass), _temp;
 });
 
-var clip = (function (superClass) {
+var clip = (function (superClass, Vector2) {
   var _temp;
 
   return _temp =
@@ -2755,7 +2754,7 @@ var clip = (function (superClass) {
   }(superClass), _temp;
 });
 
-var padding = (function (superClass) {
+var padding = (function (superClass, Vector) {
   var _temp;
 
   return _temp =
@@ -3088,49 +3087,19 @@ var index$2 = /*#__PURE__*/Object.freeze({
 	Children: children
 });
 
-var Component =
-/*#__PURE__*/
-function (_subClass) {
-  _inherits(Component, _subClass);
+var Base = function Base() {
+  _classCallCheck(this, Base);
 
-  function Component() {
-    var _getPrototypeOf2;
+  _defineProperty(this, "id", ++Component.CID);
+};
 
-    var _this;
-
-    _classCallCheck(this, Component);
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Component)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-    _defineProperty(_assertThisInitialized(_this), "id", ++Component.CID);
-
-    return _this;
-  }
-
-  return Component;
-}(subClass);
-
-_defineProperty(Component, "CID", 0);
-
-function Build() {
-  var subClass = Component;
-
-  for (var i = 0; i < arguments.length; i++) {
-    subClass = arguments[i](subClass);
-  }
-
-  return subClass;
-}
+_defineProperty(Base, "CID", 0);
 
 var index$3 = /*#__PURE__*/Object.freeze({
 	__proto__: null,
 	Elements: index$1,
 	Properties: index$2,
-	'default': Build
+	Base: Base
 });
 
 var Loader =

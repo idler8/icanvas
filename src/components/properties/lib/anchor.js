@@ -1,10 +1,9 @@
-import { MathVector2 } from '../../../maths/index.js';
-export default superClass => {
+export default (superClass, Vector2) => {
 	return class Anchor extends superClass {
 		/**
 		 * 锚点控制
 		 */
-		anchor = new MathVector2();
+		anchor = new Vector2();
 		get anchorX() {
 			return this.anchor.x;
 		}

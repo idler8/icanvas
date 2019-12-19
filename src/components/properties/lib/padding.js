@@ -1,10 +1,9 @@
-import { MathVector } from '../../../maths/index.js';
-export default superClass => {
+export default (superClass, Vector) => {
 	return class Padding extends superClass {
 		/**
 		 * 边距控制
 		 */
-		padding = new MathVector(0, 0, 0, 0);
+		padding = new Vector(0, 0, 0, 0);
 		get paddingTop() {
 			return this.padding[0];
 		}

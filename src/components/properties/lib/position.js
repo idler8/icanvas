@@ -1,10 +1,9 @@
-import { MathVector2 } from '../../../maths/index.js';
-export default (superClass = Object) => {
+export default (superClass, Vector2) => {
 	return class Position extends superClass {
 		/**
 		 * 定位控制
 		 */
-		position = new MathVector2();
+		position = new Vector2();
 		get x() {
 			return this.position.x;
 		}

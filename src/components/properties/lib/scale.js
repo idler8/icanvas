@@ -1,10 +1,9 @@
-import { MathVector2 } from '../../../maths/index.js';
-export default superClass => {
+export default (superClass, Vector2) => {
 	return class Scale extends superClass {
 		/**
 		 * 缩放控制
 		 */
-		scale = new MathVector2(1, 1);
+		scale = new Vector2(1, 1);
 		get scaleX() {
 			return this.scale.x;
 		}
