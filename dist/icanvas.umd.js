@@ -3326,7 +3326,7 @@
   var Base = function Base() {
     classCallCheck(this, Base);
 
-    defineProperty(this, "id", ++Component.CID);
+    defineProperty(this, "id", ++Base.CID);
   };
 
   defineProperty(Base, "CID", 0);

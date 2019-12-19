@@ -3090,7 +3090,7 @@ var index$2 = /*#__PURE__*/Object.freeze({
 var Base = function Base() {
   _classCallCheck(this, Base);
 
-  _defineProperty(this, "id", ++Component.CID);
+  _defineProperty(this, "id", ++Base.CID);
 };
 
 _defineProperty(Base, "CID", 0);
