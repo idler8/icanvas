@@ -3221,14 +3221,14 @@ function (_Loader) {
   }, {
     key: "get",
     value: function get(key) {
-      return this.resources[key] || ImageControl.Error || (ImageControl.Error = this.Get());
+      return this.resources[key] || ImageControl.Error;
     }
   }]);
 
   return ImageControl;
 }(Loader);
 
-_defineProperty(ImageControl, "Error", null);
+_defineProperty(ImageControl, "Error", new Image());
 
 var AudioControl =
 /*#__PURE__*/

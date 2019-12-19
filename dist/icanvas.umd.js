@@ -3795,14 +3795,14 @@
     }, {
       key: "get",
       value: function get(key) {
-        return this.resources[key] || ImageControl.Error || (ImageControl.Error = this.Get());
+        return this.resources[key] || ImageControl.Error;
       }
     }]);
 
     return ImageControl;
   }(Loader);
 
-  defineProperty(ImageControl, "Error", null);
+  defineProperty(ImageControl, "Error", new Image());
 
   var howler = createCommonjsModule(function (module, exports) {
   /*!
