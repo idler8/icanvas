@@ -246,8 +246,8 @@ export function TextFactory(GetCanvas2D) {
 			let widths = lines.content.map(l => l.width);
 			this.width = Math.max.apply(null, widths);
 			this.height = lines.content.reduce((r, line) => r + Math.max(line.height, this.lineHeight), 0);
-			Context.canvas.width = maxWidth + this.paddingLeft + this.paddingRight;
-			Context.canvas.height = maxHeight - Math.max(0, this.lineHeight - lines.content[lines.index - 1].height) + this.paddingTop + this.paddingBottom;
+			Context.canvas.width = this.width + this.paddingLeft + this.paddingRight;
+			Context.canvas.height = this.height - Math.max(0, this.lineHeight - lines.content[lines.index - 1].height) + this.paddingTop + this.paddingBottom;
 			Context.textAlign = 'left';
 			Context.textBaseline = 'top';
 			Context.fillStyle = this.style.fillStyle;
