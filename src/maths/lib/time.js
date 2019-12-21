@@ -1,6 +1,8 @@
 let Week = ['日', '一', '二', '三', '四', '五', '六'];
-let Time = class {
-	Date = null;
+export default class Time {
+	constructor() {
+		this.Date = null;
+	}
 	/**
 	 * 设置时间
 	 * @param {Any} value 设置时间值
@@ -124,5 +126,4 @@ let Time = class {
 	get Q() {
 		return Week[this.q];
 	}
-};
-export default new Time();
+}

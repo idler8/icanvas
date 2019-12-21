@@ -9,7 +9,6 @@
     npm install -s @icanvas/core
 ```
 ## 调用
-es6调用完整支持Tree Shake
 ```javascript
     import * as ICanvas from '@icanvas/core';
     // OR
@@ -29,35 +28,10 @@ es6调用完整支持Tree Shake
 #### [随机方法](src/maths/lib/random.js)`ICanvas.MathRandom`
 
 ### 界面组件构造器包
-#### [基本垫底组件类](src/components/index.js)`ICanvas.ComponentBase`
-#### [基础组件构造器](src/component/elements/lib/base.js)`ICanvas.ComponentElementBase`
-#### [纹理图组件](src/components/elements/lib/texture.js)`ICanvas.ComponentElementTexture`
-#### [富文本组件](src/components/elements/lib/text.js)`ICanvas.ComponentElementText`
-#### [滚动框组件](src/components/elements/lib/scroll.js)`ICanvas.ComponentElementScroll`
-
-#### [透明度](src/components/properties/lib/alpha.js)`ICanvas.ComponentPropertyAlpha`
-#### [锚点](src/components/properties/lib/anchor.js)`ICanvas.ComponentPropertyAnchor`
-#### [角度](src/components/properties/lib/angle.js)`ICanvas.ComponentPropertyAngle`
-#### [子元素](src/components/properties/lib/children.js)`ICanvas.ComponentPropertyChildren`
-#### [裁剪](src/components/properties/lib/clip.js)`ICanvas.ComponentPropertyClip`
-#### [边距](src/components/properties/lib/padding.js)`ICanvas.ComponentPropertyPadding`
-#### [定位](src/components/properties/lib/position.js)`ICanvas.ComponentPropertyPosition`
-#### [缩放](src/components/properties/lib/scale.js)`ICanvas.ComponentPropertyScale`
-#### [大小](src/components/properties/lib/size.js)`ICanvas.ComponentPropertySize`
-#### [样式](src/components/properties/lib/style.js)`ICanvas.ComponentPropertyStyle`
-#### [显示状态](src/components/properties/lib/visible.js)`ICanvas.ComponentPropertyVisible`
-#### [偏移层级](src/components/properties/lib/zIndex.js)`ICanvas.ComponentPropertyZIndex`
-
-### 资源加载包
-#### [基本加载器](src/resources/lib/loader.js)`ICanvas.ResourceLoader`
-#### [浏览器图片管理器](src/resources/lib/image.js)`ICanvas.ResourceImage`
-#### [浏览器音频管理器](src/resources/lib/audio.js)`ICanvas.ResourceAudio`
-
-### 特性包
-#### [浏览器生成Canvas方法](src/apis/web/canvas.js)`ICanvas.ApiCanvas`
-#### [浏览器获取系统属性方法](src/apis/web/system.js)`ICanvas.ApiSystem`
-#### [浏览器外部字体加载方法](src/apis/web/font.js)`ICanvas.ApiFont`
-#### [浏览器触摸监听传递](src/utils/index.js)`ICanvas.ApiTouch`
+#### [基本垫底组件类](src/components/index.js)`ICanvas.Factory`
+#### [基础组件构造器](src/component/index.js)`ICanvas.Sprite`
+#### [纹理图组件](src/components/index.js)`ICanvas.Rect`
+#### [富文本组件](src/components/index.js)`ICanvas.Text`
 
 ### 工具包
 #### [Canvas2D扩展](src/utils/lib/canvas2d.js)`ICanvas.UtilCanvas2D`
