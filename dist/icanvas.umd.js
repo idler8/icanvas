@@ -2068,7 +2068,7 @@
   var ContainerData = {};
   var ContainerOptions = [];
   ContainerProperties.forEach(function (p) {
-    Factory$1(ContainerData, p.data);
+    Factory(ContainerData, p.data);
     ContainerOptions.push(p.option);
   });
   Object.assign(ContainerData, {

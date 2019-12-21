@@ -49,7 +49,7 @@ let ContainerProperties = [Children, Visible, Position, Scale, Angle, ZIndex, Si
 var ContainerData = {};
 var ContainerOptions = [];
 ContainerProperties.forEach(function(p) {
-	Factory(ContainerData, p.data);
+	Minix(ContainerData, p.data);
 	ContainerOptions.push(p.option);
 });
 
