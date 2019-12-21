@@ -1849,7 +1849,9 @@ function ContainerFactory() {
   var Container =
   /*#__PURE__*/
   function () {
-    function Container(options) {
+    function Container() {
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
       _classCallCheck(this, Container);
 
       this.id = ContainerFactory.ID ? ++ContainerFactory.ID : ContainerFactory.ID = 1;
@@ -1859,10 +1861,8 @@ function ContainerFactory() {
 
       this.matrix = new Matrix3(); //计算矩阵
 
-      if (options) {
-        for (var i = 0; i < ContainerProperties.length; i++) {
-          ContainerProperties[i].option.call(this, options);
-        }
+      for (var i = 0; i < ContainerProperties.length; i++) {
+        ContainerProperties[i].option.call(this, options);
       }
     }
 
