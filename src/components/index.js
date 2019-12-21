@@ -168,7 +168,7 @@ export function TextFactory(Container, GetCanvas2D) {
 			this.style = Object.assign({}, Text.defaultFont);
 			this.font = Object.assign({}, Text.defaultFont);
 			if (options) {
-				Padding.option(options);
+				Padding.option.call(this, options);
 				this.setStyle(options.style);
 				this.setFont(options.font);
 			}

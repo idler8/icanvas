@@ -2296,7 +2296,7 @@
         _this3.font = Object.assign({}, Text.defaultFont);
 
         if (options) {
-          option$5(options);
+          option$5.call(assertThisInitialized(_this3), options);
 
           _this3.setStyle(options.style);
 
