@@ -2114,7 +2114,7 @@
     renderPreUpdated: function renderPreUpdated(renderArray) {
       this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
       this.matrix.translate(this.x, this.y).rotate(this.radian).scale(this.scaleX, this.scaleY);
-      if (!this.update) return true;
+      if (!this.update) return;
       this._HandleParentZIndex = (this.parent && this.parent._HandleParentZIndex || 0) + this.zIndex;
       this._HandleZIndex = renderArray.push(this);
     },
