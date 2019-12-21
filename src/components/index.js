@@ -18,15 +18,13 @@ import * as ZIndex from './lib/zindex.js';
 export function ContainerFactory() {
 	let ContainerProperties = [Children, Visible, Position, Scale, Angle, ZIndex, Size, Anchor, Alpha];
 	class Container {
-		constructor(options) {
+		constructor(options = {}) {
 			this.id = ContainerFactory.ID ? ++ContainerFactory.ID : (ContainerFactory.ID = 1);
 			this.touchChildren = true; //是否允许点击子元素
 			this.touchStop = false; //点击是否不冒泡到父元素
 			this.matrix = new Matrix3(); //计算矩阵
-			if (options) {
-				for (let i = 0; i < ContainerProperties.length; i++) {
-					ContainerProperties[i].option.call(this, options);
-				}
+			for (let i = 0; i < ContainerProperties.length; i++) {
+				ContainerProperties[i].option.call(this, options);
 			}
 		}
 		setAnchorSize(x = 0.5, y = 0.5) {
