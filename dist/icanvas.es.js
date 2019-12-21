@@ -1081,7 +1081,7 @@ function () {
   return Clock;
 }();
 
-function Factory$1(prototype, source) {
+function Factory(prototype, source) {
   var keys = Object.keys(source);
 
   for (var i = 0; i < keys.length; ++i) {
@@ -1852,7 +1852,7 @@ function ContainerFactory() {
     function Container(options) {
       _classCallCheck(this, Container);
 
-      this.id = Factory.ID ? ++Factory.ID : Factory.ID = 1;
+      this.id = ContainerFactory.ID ? ++ContainerFactory.ID : ContainerFactory.ID = 1;
       this.touchChildren = true; //是否允许点击子元素
 
       this.touchStop = false; //点击是否不冒泡到父元素
@@ -1925,7 +1925,7 @@ function ContainerFactory() {
   }();
 
   for (var i = 0; i < ContainerProperties.length; i++) {
-    Factory$1(Container.prototype, ContainerProperties[i].data);
+    Factory(Container.prototype, ContainerProperties[i].data);
   }
 
   return Container;
@@ -2062,7 +2062,7 @@ function RectFactory(Container) {
 
   _defineProperty(Rect, "defaultStyle", option$9());
 
-  Factory$1(Rect.prototype, data$9);
+  Factory(Rect.prototype, data$9);
   return Rect;
 }
 var AlignWidth = {
@@ -2306,9 +2306,9 @@ function TextFactory(Container, GetCanvas2D) {
     fillStyle: '#FFFFFF'
   }));
 
-  Factory$1(Text.prototype, data$9);
-  Factory$1(Text.prototype, data$4);
-  Factory$1(Text.prototype, data$5);
+  Factory(Text.prototype, data$9);
+  Factory(Text.prototype, data$4);
+  Factory(Text.prototype, data$5);
   return Text;
 }
 

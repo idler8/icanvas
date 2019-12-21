@@ -19,7 +19,7 @@ export function ContainerFactory() {
 	let ContainerProperties = [Children, Visible, Position, Scale, Angle, ZIndex, Size, Anchor, Alpha];
 	class Container {
 		constructor(options) {
-			this.id = Factory.ID ? ++Factory.ID : (Factory.ID = 1);
+			this.id = ContainerFactory.ID ? ++ContainerFactory.ID : (ContainerFactory.ID = 1);
 			this.touchChildren = true; //是否允许点击子元素
 			this.touchStop = false; //点击是否不冒泡到父元素
 			this.matrix = new Matrix3(); //计算矩阵
