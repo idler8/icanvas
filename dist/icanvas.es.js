@@ -1907,6 +1907,9 @@ Object.assign(ContainerData, {
   hitMe: function hitMe(touch) {
     return touch.x >= -this.anchorX - this.paddingLeft && touch.y >= -this.anchorY - this.paddingTop && touch.x <= this.width - this.anchorX + this.paddingRight && touch.x <= this.height - this.anchorY + this.paddingBottom;
   },
+  renderPreUpdate: function renderPreUpdate(renderArray) {
+    if (!this.visible) return true;
+  },
   renderPreUpdated: function renderPreUpdated(renderArray) {
     this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
     this.matrix.translate(this.x, this.y).rotate(this.radian).scale(this.scaleX, this.scaleY);
@@ -2467,7 +2470,7 @@ function () {
           this.PreUpdate(Component[i]);
         }
       } else {
-        if (!Component._visible) return;
+        if (Component.renderPreUpdate(this.renderArray)) return;
         if (Component.preUpdate) Component.preUpdate();
         if (Component.renderPreUpdated(this.renderArray)) return;
         if (Component.preUpdated) Component.preUpdated();
@@ -2486,8 +2489,8 @@ function () {
       var Clear = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
       if (Clear) Context.clearRect(0, 0, Context.canvas.width, Context.canvas.height);
       this.renderArray.forEach(function (Component) {
-        if (Component.renderUpdate) Component.beforeUpdate(Context);
-        if (Component.renderUpdated(Context)) return;
+        if (Component.beforeUpdate) Component.beforeUpdate(Context);
+        if (Component.renderUpdate(Context)) return;
         if (Component.update) Component.update(Context);
       });
       Context.setTransform(1, 0, 0, 1, 0, 0);

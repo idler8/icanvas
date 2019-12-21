@@ -67,6 +67,9 @@ Object.assign(ContainerData, {
 			touch.x <= this.height - this.anchorY + this.paddingBottom
 		);
 	},
+	renderPreUpdate(renderArray) {
+		if (!this.visible) return true;
+	},
 	renderPreUpdated(renderArray) {
 		this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
 		this.matrix

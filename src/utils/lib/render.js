@@ -24,7 +24,7 @@ export default class Render {
 		if (Component instanceof Array) {
 			for (let i = 0, l = Component.length; i < l; i++) this.PreUpdate(Component[i]);
 		} else {
-			if (!Component._visible) return;
+			if (Component.renderPreUpdate(this.renderArray)) return;
 			if (Component.preUpdate) Component.preUpdate();
 			if (Component.renderPreUpdated(this.renderArray)) return;
 			if (Component.preUpdated) Component.preUpdated();
@@ -39,8 +39,8 @@ export default class Render {
 	Updating(Context, Clear = true) {
 		if (Clear) Context.clearRect(0, 0, Context.canvas.width, Context.canvas.height);
 		this.renderArray.forEach(Component => {
-			if (Component.renderUpdate) Component.beforeUpdate(Context);
-			if (Component.renderUpdated(Context)) return;
+			if (Component.beforeUpdate) Component.beforeUpdate(Context);
+			if (Component.renderUpdate(Context)) return;
 			if (Component.update) Component.update(Context);
 		});
 		Context.setTransform(1, 0, 0, 1, 0, 0);
