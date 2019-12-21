@@ -292,10 +292,11 @@ export function TextFactory(Container, GetCanvas2D) {
 				});
 				y = lineY;
 			});
+			this.setAnchorSize(AlignHeight[this.textAlign], AlignHeight[this.textBaseline]);
 		}
 		update(Context) {
-			if (!this.context || !this.context.canvs) return;
-			Context.drawImage(this.context.canvs, -this.anchorX, -this.anchorX, this.width, this.height);
+			if (!this.context || !this.context.canvas) return;
+			Context.drawImage(this.context.canvas, -this.anchorX, -this.anchorX, this.width, this.height);
 		}
 	}
 	Minix(Text.prototype, Style.data);
