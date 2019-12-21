@@ -2129,7 +2129,7 @@ function TextFactory(GetCanvas2D) {
           content: []
         };
 
-        for (var i = 0, len = string.length; i++; i < len) {
+        for (var i = 0, len = string.length; i <= len; i++) {
           if (tags[i]) {
             if (tags[i].action == 'fillStyle' || tags[i].action == 'strokeStyle' || tags[i].action == 'lineWidth') {
               line.index = line.content.push(_defineProperty({}, tags[i].action, tags[i].arg));
@@ -2165,7 +2165,7 @@ function TextFactory(GetCanvas2D) {
 
           var v = string[i];
 
-          if (v === '' || v === '\n') {
+          if (i === len || v === '\n') {
             lines.index = lines.content.push(line);
             line = {
               index: 0,
@@ -2204,7 +2204,8 @@ function TextFactory(GetCanvas2D) {
           return r + Math.max(line.height, _this3.lineHeight);
         }, 0);
         Context.canvas.width = this.width + this.paddingLeft + this.paddingRight;
-        Context.canvas.height = this.height - Math.max(0, this.lineHeight - lines.content[lines.index - 1].height) + this.paddingTop + this.paddingBottom;
+        var lastSubHeight = Math.max(0, this.lineHeight - lines.content[lines.content.length - 1].height);
+        Context.canvas.height = this.height - lastSubHeight + this.paddingTop + this.paddingBottom;
         Context.textAlign = 'left';
         Context.textBaseline = 'top';
         Context.fillStyle = this.style.fillStyle;
@@ -2246,9 +2247,9 @@ function TextFactory(GetCanvas2D) {
               x += cont.texture.width;
             } else if (cont.value) {
               var fontY = y - AlignHeight[_this3.textBaseline] * (cont.height - _this3.fontSize);
-              if (lineWidth && strokeStyle && !_this3.style.strokeUp) Context.strokeStyle(cont.value, x, fontY);
-              Context.fillStyle(cont.value, x, fontY);
-              if (lineWidth && strokeStyle && _this3.style.strokeUp) Context.strokeStyle(cont.value, x, fontY);
+              if (lineWidth && strokeStyle && !_this3.style.strokeUp) Context.strokeText(cont.value, x, fontY);
+              Context.fillText(cont.value, x, fontY);
+              if (lineWidth && strokeStyle && _this3.style.strokeUp) Context.strokeText(cont.value, x, fontY);
               x += cont.width;
             }
           });

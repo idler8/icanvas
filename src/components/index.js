@@ -205,7 +205,7 @@ export function TextFactory(GetCanvas2D) {
 			Context.font = `${font.weight} ${font.size}px ${font.family}`;
 			let lines = { index: 0, content: [] };
 			let line = { index: 0, width: 0, height: font.size, content: [] };
-			for (let i = 0, len = string.length; i++; i < len) {
+			for (let i = 0, len = string.length; i <= len; i++) {
 				if (tags[i]) {
 					if (tags[i].action == 'fillStyle' || tags[i].action == 'strokeStyle' || tags[i].action == 'lineWidth') {
 						line.index = line.content.push({ [tags[i].action]: tags[i].arg });
@@ -228,7 +228,7 @@ export function TextFactory(GetCanvas2D) {
 					}
 				}
 				let v = string[i];
-				if (v === '' || v === '\n') {
+				if (i === len || v === '\n') {
 					lines.index = lines.content.push(line);
 					line = { index: 0, width: 0, content: [] };
 				} else {
@@ -247,7 +247,8 @@ export function TextFactory(GetCanvas2D) {
 			this.width = Math.max.apply(null, widths);
 			this.height = lines.content.reduce((r, line) => r + Math.max(line.height, this.lineHeight), 0);
 			Context.canvas.width = this.width + this.paddingLeft + this.paddingRight;
-			Context.canvas.height = this.height - Math.max(0, this.lineHeight - lines.content[lines.index - 1].height) + this.paddingTop + this.paddingBottom;
+			let lastSubHeight = Math.max(0, this.lineHeight - lines.content[lines.content.length - 1].height);
+			Context.canvas.height = this.height - lastSubHeight + this.paddingTop + this.paddingBottom;
 			Context.textAlign = 'left';
 			Context.textBaseline = 'top';
 			Context.fillStyle = this.style.fillStyle;
@@ -286,9 +287,9 @@ export function TextFactory(GetCanvas2D) {
 						x += cont.texture.width;
 					} else if (cont.value) {
 						let fontY = y - AlignHeight[this.textBaseline] * (cont.height - this.fontSize);
-						if (lineWidth && strokeStyle && !this.style.strokeUp) Context.strokeStyle(cont.value, x, fontY);
-						Context.fillStyle(cont.value, x, fontY);
-						if (lineWidth && strokeStyle && this.style.strokeUp) Context.strokeStyle(cont.value, x, fontY);
+						if (lineWidth && strokeStyle && !this.style.strokeUp) Context.strokeText(cont.value, x, fontY);
+						Context.fillText(cont.value, x, fontY);
+						if (lineWidth && strokeStyle && this.style.strokeUp) Context.strokeText(cont.value, x, fontY);
 						x += cont.width;
 					}
 				});
