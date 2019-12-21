@@ -2103,7 +2103,7 @@ function TextFactory(Container, GetCanvas2D) {
       }
 
       _this3._value = '';
-      if (options.value) _this3._value = options.value;
+      if (options.value) _this3.value = options.value;
       return _this3;
     }
 

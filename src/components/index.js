@@ -171,7 +171,7 @@ export function TextFactory(Container, GetCanvas2D) {
 				this.setFont(options.font);
 			}
 			this._value = '';
-			if (options.value) this._value = options.value;
+			if (options.value) this.value = options.value;
 		}
 		set value(v) {
 			if (this._value === v) return;
