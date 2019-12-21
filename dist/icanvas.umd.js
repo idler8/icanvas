@@ -897,45 +897,27 @@
     return out;
   };
 
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-
-    return obj;
-  }
-
-  var defineProperty = _defineProperty;
-
-  var _temp;
-
   var Week = ['日', '一', '二', '三', '四', '五', '六'];
-  var Time = (_temp =
+
+  var Time =
   /*#__PURE__*/
   function () {
     function Time() {
       classCallCheck(this, Time);
 
-      defineProperty(this, "Date", null);
+      this.Date = null;
     }
+    /**
+     * 设置时间
+     * @param {Any} value 设置时间值
+     * @param {String} fmt 源格式
+     * jstimestamp 13位时间戳 到毫秒
+     * timestamp 10位时间戳 到秒
+     */
+
 
     createClass(Time, [{
       key: "Set",
-
-      /**
-       * 设置时间
-       * @param {Any} value 设置时间值
-       * @param {String} fmt 源格式
-       * jstimestamp 13位时间戳 到毫秒
-       * timestamp 10位时间戳 到秒
-       */
       value: function Set(value) {
         var fmt = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'jstimestamp';
 
@@ -1097,8 +1079,7 @@
     }]);
 
     return Time;
-  }(), _temp);
-  var time = new Time();
+  }();
 
   var color = {
     /**
@@ -1144,6 +1125,23 @@
       return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + (rgb[2] * 255 | 0);
     }
   };
+
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
+  var defineProperty = _defineProperty;
 
   var Position =
   /*#__PURE__*/
@@ -2067,12 +2065,12 @@
     return Component;
   }
   var ContainerProperties = [Children, Visible, Position$1, Scale, Angle, ZIndex, Size, Anchor, Alpha];
-  var ContainerData = Object.assign.apply(null, [{}].concat(ContainerProperties.map(function (p) {
-    return p.data;
-  })));
-  var ContainerOptions = [].concat(ContainerProperties.map(function (p) {
-    return p.option;
-  }));
+  var ContainerData = {};
+  var ContainerOptions = [];
+  ContainerProperties.forEach(function (p) {
+    Factory$1(ContainerData, p.data);
+    ContainerOptions.push(p.option);
+  });
   Object.assign(ContainerData, {
     setAnchorSize: function setAnchorSize() {
       var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
@@ -2083,19 +2081,42 @@
     },
     hitMe: function hitMe(touch) {
       return touch.x >= -this.anchorX - this.paddingLeft && touch.y >= -this.anchorY - this.paddingTop && touch.x <= this.width - this.anchorX + this.paddingRight && touch.x <= this.height - this.anchorY + this.paddingBottom;
+    },
+    renderPreUpdated: function renderPreUpdated(renderArray) {
+      this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
+      this.matrix.translate(this.x, this.y).rotate(this.radian).scale(this.scaleX, this.scaleY);
+      if (!this.update) return true;
+      this._HandleParentZIndex = (this.parent && this.parent._HandleParentZIndex || 0) + this.zIndex;
+      this._HandleZIndex = renderArray.push(this);
+    },
+    renderUpdate: function renderUpdate(Context) {
+      if (this.alpha == 0) return true;
+      var alpha = Math.min(1, this.alpha);
+      if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
+      Context.setTransform.apply(Context, this.matrix);
     }
   });
   function ContainerFactory() {
-    var Container = Factory$1(Data, ContainerOptions);
-    return Container;
-  }
-  var SpriteOptions = [].concat(ContainerOptions);
-  var SpriteData = Object.assign({}, ContainerData);
-  function SpriteFactory() {
     return (
       /*#__PURE__*/
       function (_Factory) {
-        inherits(Sprite, _Factory);
+        inherits(Container, _Factory);
+
+        function Container() {
+          classCallCheck(this, Container);
+
+          return possibleConstructorReturn(this, getPrototypeOf(Container).apply(this, arguments));
+        }
+
+        return Container;
+      }(Factory$1(ContainerData, ContainerOptions))
+    );
+  }
+  function SpriteFactory() {
+    return (
+      /*#__PURE__*/
+      function (_Factory2) {
+        inherits(Sprite, _Factory2);
 
         function Sprite(texture, options) {
           var _this;
@@ -2156,16 +2177,18 @@
         }]);
 
         return Sprite;
-      }(Factory$1(SpriteData, SpriteOptions))
+      }(Factory$1(ContainerData, ContainerOptions))
     );
   }
-  var RectOptions = ContainerOptions.concat(option$9);
-  var RectData = Object.assign({}, ContainerData, data$9);
+  var RectData = {};
+  Factory(RectData, ContainerData);
+  Factory(RectData, data$9);
+  var RectOptions = ContainerOptions.concat([option$9]);
   function RectFactory() {
     return (
       /*#__PURE__*/
-      function (_Factory2) {
-        inherits(Rect, _Factory2);
+      function (_Factory3) {
+        inherits(Rect, _Factory3);
 
         function Rect() {
           classCallCheck(this, Rect);
@@ -2199,7 +2222,11 @@
       }(Factory$1(RectData, RectOptions))
     );
   }
-  var TextData = Object.assign({}, ContainerData, data$4, data$9, data$5);
+  var TextData = {};
+  Factory(TextData, ContainerData);
+  Factory(TextData, data$4);
+  Factory(TextData, data$9);
+  Factory(TextData, data$5);
   var TextOptions = ContainerOptions.concat([option$4, option$9, option$5]);
   var AlignWidth = {
     left: 0,
@@ -2219,8 +2246,8 @@
 
     return _temp = _class =
     /*#__PURE__*/
-    function (_Factory3) {
-      inherits(Text, _Factory3);
+    function (_Factory4) {
+      inherits(Text, _Factory4);
 
       function Text(options) {
         var _this2;
@@ -2593,11 +2620,11 @@
        */
       value: function Update(Stage, Context, Clear) {
         this.PreUpdate(Stage);
-        this.HandleComponents.sort(function (a, b) {
+        this.renderArray.sort(function (a, b) {
           return a._HandleParentZIndex - b._HandleParentZIndex || a._HandleZIndex - b._HandleZIndex;
         });
         this.Updating(Context, Clear);
-        this.HandleComponents.length = 0;
+        this.renderArray.length = 0;
       }
       /**
        * 渲染前
@@ -2616,17 +2643,9 @@
         } else {
           if (!Component._visible) return;
           if (Component.preUpdate) Component.preUpdate();
-          Component.parent ? Component.matrix.setToArray(Component.parent.matrix) : Component.matrix.identity();
-          Component.matrix.translate(Component.x, Component.y).rotate(Component.radian).scale(Component.scaleX, Component.scaleY);
-
-          if (Component.update) {
-            Component._HandleParentZIndex = (Component.parent && Component.parent._HandleParentZIndex || 0) + Component.zIndex;
-            Component._HandleZIndex = this.HandleComponents.push(Component);
-          }
-
+          if (Component.renderPreUpdated(this.renderArray)) return;
           if (Component.preUpdated) Component.preUpdated();
           if (Component.children.length) this.PreUpdate(Component.children);
-          if (Component.preChildrenUpdated) Component.preChildrenUpdated();
         }
       }
       /**
@@ -2640,15 +2659,10 @@
       value: function Updating(Context) {
         var Clear = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
         if (Clear) Context.clearRect(0, 0, Context.canvas.width, Context.canvas.height);
-        this.HandleComponents.forEach(function (Component) {
-          var Alpha = Component.alpha;
-          if (Alpha == 0) return;
-          if (Component.beforeUpdate) Component.beforeUpdate(Context);
-          if (Alpha > 1) Alpha = 1;
-          if (Alpha != Context.globalAlpha) Context.globalAlpha = Alpha;
-          Context.setTransform.apply(Context, Component.matrix);
+        this.renderArray.forEach(function (Component) {
+          if (Component.renderUpdate) Component.beforeUpdate(Context);
+          if (Component.renderUpdated(Context)) return;
           if (Component.update) Component.update(Context);
-          if (Component.updated) Component.updated(Context);
         });
         Context.setTransform(1, 0, 0, 1, 0, 0);
       }
@@ -3258,7 +3272,7 @@
   exports.MathMatrix3 = Matrix3;
   exports.MathPosition = Position;
   exports.MathRandom = Random;
-  exports.MathTime = time;
+  exports.MathTime = Time;
   exports.MathVector = Vector;
   exports.MathVector2 = Vector2;
   exports.Rect = RectFactory;

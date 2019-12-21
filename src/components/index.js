@@ -46,8 +46,13 @@ export function DisplayFactory() {
 }
 
 let ContainerProperties = [Children, Visible, Position, Scale, Angle, ZIndex, Size, Anchor, Alpha];
-let ContainerData = Object.assign.apply(null, [{}].concat(ContainerProperties.map(p => p.data)));
-let ContainerOptions = [].concat(ContainerProperties.map(p => p.option));
+var ContainerData = {};
+var ContainerOptions = [];
+ContainerProperties.forEach(function(p) {
+	Factory(ContainerData, p.data);
+	ContainerOptions.push(p.option);
+});
+
 Object.assign(ContainerData, {
 	setAnchorSize(x = 0.5, y = 0.5) {
 		this.anchor.x = this.width * x;
@@ -62,16 +67,28 @@ Object.assign(ContainerData, {
 			touch.x <= this.height - this.anchorY + this.paddingBottom
 		);
 	},
+	renderPreUpdated(renderArray) {
+		this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
+		this.matrix
+			.translate(this.x, this.y)
+			.rotate(this.radian)
+			.scale(this.scaleX, this.scaleY);
+		if (!this.update) return true;
+		this._HandleParentZIndex = ((this.parent && this.parent._HandleParentZIndex) || 0) + this.zIndex;
+		this._HandleZIndex = renderArray.push(this);
+	},
+	renderUpdate(Context) {
+		if (this.alpha == 0) return true;
+		let alpha = Math.min(1, this.alpha);
+		if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
+		Context.setTransform.apply(Context, this.matrix);
+	},
 });
 export function ContainerFactory() {
-	const Container = Factory(Data, ContainerOptions);
-	return Container;
+	return class Container extends Factory(ContainerData, ContainerOptions) {};
 }
-
-let SpriteOptions = [].concat(ContainerOptions);
-let SpriteData = Object.assign({}, ContainerData);
 export function SpriteFactory() {
-	return class Sprite extends Factory(SpriteData, SpriteOptions) {
+	return class Sprite extends Factory(ContainerData, ContainerOptions) {
 		constructor(texture, options) {
 			super((options = Object.assign(typeof texture == 'string' ? { texture } : texture, options)));
 			this.texture = null;
@@ -117,8 +134,10 @@ export function SpriteFactory() {
 	};
 }
 
-let RectOptions = ContainerOptions.concat(Style.option);
-let RectData = Object.assign({}, ContainerData, Style.data);
+let RectData = {};
+Minix(RectData, ContainerData);
+Minix(RectData, Style.data);
+let RectOptions = ContainerOptions.concat([Style.option]);
 export function RectFactory() {
 	return class Rect extends Factory(RectData, RectOptions) {
 		update(Context) {
@@ -140,7 +159,11 @@ export function RectFactory() {
 	};
 }
 
-let TextData = Object.assign({}, ContainerData, Font.data, Style.data, Padding.data);
+let TextData = {};
+Minix(TextData, ContainerData);
+Minix(TextData, Font.data);
+Minix(TextData, Style.data);
+Minix(TextData, Padding.data);
 let TextOptions = ContainerOptions.concat([Font.option, Style.option, Padding.option]);
 const AlignWidth = { left: 0, center: 0.5, right: 1 };
 const AlignHeight = { top: 0, middle: 0.5, bottom: 1, hanging: 0, alphabetic: 1, ideographic: 1 };
