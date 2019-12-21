@@ -36,4 +36,25 @@ export const data = {
 	getHeight(n = 1) {
 		return this.height * n;
 	},
+	setSizeLimit(maxX, maxY, minX, minY) {
+		if (!this.height || !this.width) return this;
+		var lv = this.width / this.height;
+		if (maxX && this.width > maxX) {
+			this.width = maxX;
+			this.height = maxX / lv;
+		}
+		if (maxY && this.height > maxY) {
+			this.height = maxY;
+			this.width = maxY * lv;
+		}
+		if (minX && this.width < minX) {
+			this.width = minX;
+			this.height = maxX / lv;
+		}
+		if (minY && this.height < minY) {
+			this.height = maxY;
+			this.width = maxY * lv;
+		}
+		return this;
+	},
 };
