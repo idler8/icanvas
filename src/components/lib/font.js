@@ -1,16 +1,17 @@
-export const defaultFont = {
-	family: '微软雅黑,黑体', //字体
-	size: 26, //字号px
-	weight: '', //字宽
-
-	align: 'center', //横向对齐方式
-	baseline: 'middle', //纵向对齐方式
-	lineHeight: 0,
-	wrapWidth: 0,
-};
 export function option(options) {
-	if (!this.font) this.font = Object.assign({}, defaultFont);
-	if (options.font) this.setFont(options.font);
+	return Object.assign(
+		{
+			family: '微软雅黑,黑体', //字体
+			size: 26, //字号px
+			weight: '', //字宽
+
+			align: 'center', //横向对齐方式
+			baseline: 'middle', //纵向对齐方式
+			lineHeight: 0,
+			wrapWidth: 0,
+		},
+		options,
+	);
 }
 export const data = {
 	/**
@@ -50,6 +51,7 @@ export const data = {
 		return `${this.font.weight} ${this.font.size}px ${this.font.family}`;
 	},
 	setFont(font) {
+		if (!font) return this;
 		Object.assign(this.font, font);
 		return this;
 	},

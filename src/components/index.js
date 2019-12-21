@@ -15,83 +15,72 @@ import * as Style from './lib/style.js';
 import * as Visible from './lib/visible.js';
 import * as ZIndex from './lib/zindex.js';
 
-export function Factory(source = {}, setOptions = []) {
-	class Component {
-		constructor(options = {}) {
+export function ContainerFactory() {
+	let ContainerProperties = [Children, Visible, Position, Scale, Angle, ZIndex, Size, Anchor, Alpha];
+	class Container {
+		constructor(options) {
 			this.id = Factory.ID ? ++Factory.ID : (Factory.ID = 1);
 			this.touchChildren = true; //是否允许点击子元素
 			this.touchStop = false; //点击是否不冒泡到父元素
 			this.matrix = new Matrix3(); //计算矩阵
-			this.setOptions(options);
+			if (options) {
+				for (let i = 0; i < ContainerProperties.length; i++) {
+					ContainerProperties[i].option.call(this, options);
+				}
+			}
 		}
-		setOptions(options) {
-			if (!options) return this;
-			if (!setOptions.length) return this;
-			for (let i = 0; i < setOptions.length; i++) {
-				setOptions[i].call(this, options);
+		setAnchorSize(x = 0.5, y = 0.5) {
+			this.anchor.x = this.width * x;
+			this.anchor.y = this.height * y;
+			return this;
+		}
+		hitMe(touch) {
+			return (
+				touch.x >= -this.anchorX - this.paddingLeft &&
+				touch.y >= -this.anchorY - this.paddingTop &&
+				touch.x <= this.width - this.anchorX + this.paddingRight &&
+				touch.x <= this.height - this.anchorY + this.paddingBottom
+			);
+		}
+		renderPreUpdate(renderArray) {
+			if (!this.visible) return true;
+		}
+		renderPreUpdated(renderArray) {
+			this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
+			this.matrix
+				.translate(this.x, this.y)
+				.rotate(this.radian)
+				.scale(this.scaleX, this.scaleY);
+			if (!this.update) return;
+			this._HandleParentZIndex = ((this.parent && this.parent._HandleParentZIndex) || 0) + this.zIndex;
+			this._HandleZIndex = renderArray.push(this);
+		}
+		renderUpdate(Context) {
+			if (this.alpha == 0) return true;
+			let alpha = Math.min(1, this.alpha);
+			if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
+			Context.setTransform.apply(Context, this.matrix);
+			if (this.cache.context) {
+				Context.drawImage(this.cache.context.canvas, 0, 0);
+				return true;
+			}
+		}
+		cache(context) {
+			if (context !== true) this.cache.context = context;
+			if (this.cache.context) {
+				if (!ContainerFactory.Render) ContainerFactory.Render = new Render();
+				ContainerFactory.Render.Update(this, this.cache.context);
 			}
 			return this;
 		}
 	}
-	if (source) Minix(Component.prototype, source);
-	return Component;
+	for (let i = 0; i < ContainerProperties.length; i++) {
+		Minix(Container.prototype, ContainerProperties[i].data);
+	}
+	return Container;
 }
-export function DisplayFactory() {
-	const Display = Factory({
-		get empty() {
-			return true;
-		},
-	});
-	return Display;
-}
-
-let ContainerProperties = [Children, Visible, Position, Scale, Angle, ZIndex, Size, Anchor, Alpha];
-var ContainerData = {};
-var ContainerOptions = [];
-ContainerProperties.forEach(function(p) {
-	Minix(ContainerData, p.data);
-	ContainerOptions.push(p.option);
-});
-
-Object.assign(ContainerData, {
-	setAnchorSize(x = 0.5, y = 0.5) {
-		this.anchor.x = this.width * x;
-		this.anchor.y = this.height * y;
-		return this;
-	},
-	hitMe(touch) {
-		return (
-			touch.x >= -this.anchorX - this.paddingLeft &&
-			touch.y >= -this.anchorY - this.paddingTop &&
-			touch.x <= this.width - this.anchorX + this.paddingRight &&
-			touch.x <= this.height - this.anchorY + this.paddingBottom
-		);
-	},
-	renderPreUpdate(renderArray) {
-		if (!this.visible) return true;
-	},
-	renderPreUpdated(renderArray) {
-		this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
-		this.matrix
-			.translate(this.x, this.y)
-			.rotate(this.radian)
-			.scale(this.scaleX, this.scaleY);
-		if (!this.update) return;
-		this._HandleParentZIndex = ((this.parent && this.parent._HandleParentZIndex) || 0) + this.zIndex;
-		this._HandleZIndex = renderArray.push(this);
-	},
-	renderUpdate(Context) {
-		if (this.alpha == 0) return true;
-		let alpha = Math.min(1, this.alpha);
-		if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
-		Context.setTransform.apply(Context, this.matrix);
-	},
-});
-export function ContainerFactory() {
-	return class Container extends Factory(ContainerData, ContainerOptions) {};
-}
-export function SpriteFactory() {
-	return class Sprite extends Factory(ContainerData, ContainerOptions) {
+export function SpriteFactory(Container) {
+	return class Sprite extends Container {
 		constructor(texture, options) {
 			super((options = Object.assign(typeof texture == 'string' ? { texture } : texture, options)));
 			this.texture = null;
@@ -138,13 +127,14 @@ export function SpriteFactory() {
 		}
 	};
 }
-
-let RectData = {};
-Minix(RectData, ContainerData);
-Minix(RectData, Style.data);
-let RectOptions = ContainerOptions.concat([Style.option]);
-export function RectFactory() {
-	return class Rect extends Factory(RectData, RectOptions) {
+export function RectFactory(Container) {
+	class Rect extends Container {
+		static defaultStyle = Style.option();
+		constructor(options) {
+			super(options);
+			this.style = Object.assign({}, Text.defaultFont);
+			if (options) this.setStyle(options.style);
+		}
 		update(Context) {
 			if (this.style.lineWidth && !this.style.strokeUp) {
 				Context.lineWidth = this.style.lineWidth;
@@ -161,23 +151,27 @@ export function RectFactory() {
 				Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
 			}
 		}
-	};
+	}
+	Minix(Rect.prototype, Style.data);
+	return Rect;
 }
 
-let TextData = {};
-Minix(TextData, ContainerData);
-Minix(TextData, Font.data);
-Minix(TextData, Style.data);
-Minix(TextData, Padding.data);
-let TextOptions = ContainerOptions.concat([Font.option, Style.option, Padding.option]);
 const AlignWidth = { left: 0, center: 0.5, right: 1 };
 const AlignHeight = { top: 0, middle: 0.5, bottom: 1, hanging: 0, alphabetic: 1, ideographic: 1 };
-export function TextFactory(GetCanvas2D) {
-	return class Text extends Factory(TextData, TextOptions) {
-		static defaultFont = Font.defaultFont;
+export function TextFactory(Container, GetCanvas2D) {
+	class Text extends Container {
+		static defaultFont = Font.option();
+		static defaultStyle = Style.option({ fillStyle: '#FFFFFF' });
 		constructor(options) {
 			super(options);
 			this.context = GetCanvas2D();
+			this.style = Object.assign({}, Text.defaultFont);
+			this.font = Object.assign({}, Text.defaultFont);
+			if (options) {
+				Padding.option(options);
+				this.setStyle(options.style);
+				this.setFont(options.font);
+			}
 			this._value = '';
 			if (options.value) this._value = options.value;
 		}
@@ -305,5 +299,9 @@ export function TextFactory(GetCanvas2D) {
 			if (!this.context || !this.context.canvs) return;
 			Context.drawImage(this.context.canvs, -this.anchorX, -this.anchorX, this.width, this.height);
 		}
-	};
+	}
+	Minix(Text.prototype, Style.data);
+	Minix(Text.prototype, Font.data);
+	Minix(Text.prototype, Padding.data);
+	return Text;
 }

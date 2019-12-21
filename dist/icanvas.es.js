@@ -1081,7 +1081,7 @@ function () {
   return Clock;
 }();
 
-function Factory(prototype, source) {
+function Factory$1(prototype, source) {
   var keys = Object.keys(source);
 
   for (var i = 0; i < keys.length; ++i) {
@@ -1337,23 +1337,21 @@ var Children = /*#__PURE__*/Object.freeze({
 	data: data$3
 });
 
-var defaultFont = {
-  family: '微软雅黑,黑体',
-  //字体
-  size: 26,
-  //字号px
-  weight: '',
-  //字宽
-  align: 'center',
-  //横向对齐方式
-  baseline: 'middle',
-  //纵向对齐方式
-  lineHeight: 0,
-  wrapWidth: 0
-};
 function option$4(options) {
-  if (!this.font) this.font = Object.assign({}, defaultFont);
-  if (options.font) this.setFont(options.font);
+  return Object.assign({
+    family: '微软雅黑,黑体',
+    //字体
+    size: 26,
+    //字号px
+    weight: '',
+    //字宽
+    align: 'center',
+    //横向对齐方式
+    baseline: 'middle',
+    //纵向对齐方式
+    lineHeight: 0,
+    wrapWidth: 0
+  }, options);
 }
 var data$4 = {
   /**
@@ -1404,6 +1402,7 @@ var data$4 = {
   },
 
   setFont: function setFont(font) {
+    if (!font) return this;
     Object.assign(this.font, font);
     return this;
   }
@@ -1751,19 +1750,17 @@ var Size = /*#__PURE__*/Object.freeze({
 	data: data$8
 });
 
-var defaultStyle = {
-  strokeUp: false,
-  //首先填充
-  fillStyle: '',
-  //填充色
-  lineWidth: 0,
-  //线宽
-  strokeStyle: '#FFFFFF' //线框色
-
-};
 function option$9(options) {
-  if (!this.style) this.style = Object.assign({}, defaultStyle);
-  if (options.style) this.setFont(options.style);
+  return Object.assign({
+    strokeUp: false,
+    //首先填充
+    fillStyle: '',
+    //填充色
+    lineWidth: 0,
+    //线宽
+    strokeStyle: '#FFFFFF' //线框色
+
+  }, options);
 }
 var data$9 = {
   /**
@@ -1801,8 +1798,8 @@ var data$9 = {
     return this.style.strokeStyle;
   },
 
-  setStyle: function setStyle() {
-    var style = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  setStyle: function setStyle(style) {
+    if (!style) return this;
     Object.assign(this.style, style);
     return this;
   }
@@ -1846,105 +1843,98 @@ var ZIndex = /*#__PURE__*/Object.freeze({
 	data: data$b
 });
 
-function Factory$1() {
-  var source = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+function ContainerFactory() {
+  var ContainerProperties = [Children, Visible, Position$1, Scale, Angle, ZIndex, Size, Anchor, Alpha];
 
-  var _setOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-
-  var Component =
+  var Container =
   /*#__PURE__*/
   function () {
-    function Component() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    function Container(options) {
+      _classCallCheck(this, Container);
 
-      _classCallCheck(this, Component);
-
-      this.id = Factory$1.ID ? ++Factory$1.ID : Factory$1.ID = 1;
+      this.id = Factory.ID ? ++Factory.ID : Factory.ID = 1;
       this.touchChildren = true; //是否允许点击子元素
 
       this.touchStop = false; //点击是否不冒泡到父元素
 
       this.matrix = new Matrix3(); //计算矩阵
 
-      this.setOptions(options);
+      if (options) {
+        for (var i = 0; i < ContainerProperties.length; i++) {
+          ContainerProperties[i].option.call(this, options);
+        }
+      }
     }
 
-    _createClass(Component, [{
-      key: "setOptions",
-      value: function setOptions(options) {
-        if (!options) return this;
-        if (!_setOptions.length) return this;
+    _createClass(Container, [{
+      key: "setAnchorSize",
+      value: function setAnchorSize() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
+        this.anchor.x = this.width * x;
+        this.anchor.y = this.height * y;
+        return this;
+      }
+    }, {
+      key: "hitMe",
+      value: function hitMe(touch) {
+        return touch.x >= -this.anchorX - this.paddingLeft && touch.y >= -this.anchorY - this.paddingTop && touch.x <= this.width - this.anchorX + this.paddingRight && touch.x <= this.height - this.anchorY + this.paddingBottom;
+      }
+    }, {
+      key: "renderPreUpdate",
+      value: function renderPreUpdate(renderArray) {
+        if (!this.visible) return true;
+      }
+    }, {
+      key: "renderPreUpdated",
+      value: function renderPreUpdated(renderArray) {
+        this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
+        this.matrix.translate(this.x, this.y).rotate(this.radian).scale(this.scaleX, this.scaleY);
+        if (!this.update) return;
+        this._HandleParentZIndex = (this.parent && this.parent._HandleParentZIndex || 0) + this.zIndex;
+        this._HandleZIndex = renderArray.push(this);
+      }
+    }, {
+      key: "renderUpdate",
+      value: function renderUpdate(Context) {
+        if (this.alpha == 0) return true;
+        var alpha = Math.min(1, this.alpha);
+        if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
+        Context.setTransform.apply(Context, this.matrix);
 
-        for (var i = 0; i < _setOptions.length; i++) {
-          _setOptions[i].call(this, options);
+        if (this.cache.context) {
+          Context.drawImage(this.cache.context.canvas, 0, 0);
+          return true;
+        }
+      }
+    }, {
+      key: "cache",
+      value: function cache(context) {
+        if (context !== true) this.cache.context = context;
+
+        if (this.cache.context) {
+          if (!ContainerFactory.Render) ContainerFactory.Render = new Render();
+          ContainerFactory.Render.Update(this, this.cache.context);
         }
 
         return this;
       }
     }]);
 
-    return Component;
+    return Container;
   }();
 
-  if (source) Factory(Component.prototype, source);
-  return Component;
-}
-var ContainerProperties = [Children, Visible, Position$1, Scale, Angle, ZIndex, Size, Anchor, Alpha];
-var ContainerData = {};
-var ContainerOptions = [];
-ContainerProperties.forEach(function (p) {
-  Factory(ContainerData, p.data);
-  ContainerOptions.push(p.option);
-});
-Object.assign(ContainerData, {
-  setAnchorSize: function setAnchorSize() {
-    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
-    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
-    this.anchor.x = this.width * x;
-    this.anchor.y = this.height * y;
-    return this;
-  },
-  hitMe: function hitMe(touch) {
-    return touch.x >= -this.anchorX - this.paddingLeft && touch.y >= -this.anchorY - this.paddingTop && touch.x <= this.width - this.anchorX + this.paddingRight && touch.x <= this.height - this.anchorY + this.paddingBottom;
-  },
-  renderPreUpdate: function renderPreUpdate(renderArray) {
-    if (!this.visible) return true;
-  },
-  renderPreUpdated: function renderPreUpdated(renderArray) {
-    this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
-    this.matrix.translate(this.x, this.y).rotate(this.radian).scale(this.scaleX, this.scaleY);
-    if (!this.update) return;
-    this._HandleParentZIndex = (this.parent && this.parent._HandleParentZIndex || 0) + this.zIndex;
-    this._HandleZIndex = renderArray.push(this);
-  },
-  renderUpdate: function renderUpdate(Context) {
-    if (this.alpha == 0) return true;
-    var alpha = Math.min(1, this.alpha);
-    if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
-    Context.setTransform.apply(Context, this.matrix);
+  for (var i = 0; i < ContainerProperties.length; i++) {
+    Factory$1(Container.prototype, ContainerProperties[i].data);
   }
-});
-function ContainerFactory() {
-  return (
-    /*#__PURE__*/
-    function (_Factory) {
-      _inherits(Container, _Factory);
 
-      function Container() {
-        _classCallCheck(this, Container);
-
-        return _possibleConstructorReturn(this, _getPrototypeOf(Container).apply(this, arguments));
-      }
-
-      return Container;
-    }(Factory$1(ContainerData, ContainerOptions))
-  );
+  return Container;
 }
-function SpriteFactory() {
+function SpriteFactory(Container) {
   return (
     /*#__PURE__*/
-    function (_Factory2) {
-      _inherits(Sprite, _Factory2);
+    function (_Container) {
+      _inherits(Sprite, _Container);
 
       function Sprite(texture, options) {
         var _this;
@@ -2025,57 +2015,56 @@ function SpriteFactory() {
       }]);
 
       return Sprite;
-    }(Factory$1(ContainerData, ContainerOptions))
+    }(Container)
   );
 }
-var RectData = {};
-Factory(RectData, ContainerData);
-Factory(RectData, data$9);
-var RectOptions = ContainerOptions.concat([option$9]);
-function RectFactory() {
-  return (
-    /*#__PURE__*/
-    function (_Factory3) {
-      _inherits(Rect, _Factory3);
+function RectFactory(Container) {
+  var Rect =
+  /*#__PURE__*/
+  function (_Container2) {
+    _inherits(Rect, _Container2);
 
-      function Rect() {
-        _classCallCheck(this, Rect);
+    function Rect(options) {
+      var _this2;
 
-        return _possibleConstructorReturn(this, _getPrototypeOf(Rect).apply(this, arguments));
-      }
+      _classCallCheck(this, Rect);
 
-      _createClass(Rect, [{
-        key: "update",
-        value: function update(Context) {
-          if (this.style.lineWidth && !this.style.strokeUp) {
-            Context.lineWidth = this.style.lineWidth;
-            Context.strokeStyle = this.style.fillStyle;
-            Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
-          }
+      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, options));
+      _this2.style = Object.assign({}, Text.defaultFont);
+      if (options) _this2.setStyle(options.style);
+      return _this2;
+    }
 
-          if (this.style.fillStyle) {
-            Context.fillStyle = this.style.fillStyle;
-            Context.fillRect(-this.anchorX, -this.anchorX, this.width, this.height);
-          }
-
-          if (this.style.lineWidth && this.style.strokeUp) {
-            Context.lineWidth = this.style.lineWidth;
-            Context.strokeStyle = this.style.fillStyle;
-            Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
-          }
+    _createClass(Rect, [{
+      key: "update",
+      value: function update(Context) {
+        if (this.style.lineWidth && !this.style.strokeUp) {
+          Context.lineWidth = this.style.lineWidth;
+          Context.strokeStyle = this.style.fillStyle;
+          Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
         }
-      }]);
 
-      return Rect;
-    }(Factory$1(RectData, RectOptions))
-  );
+        if (this.style.fillStyle) {
+          Context.fillStyle = this.style.fillStyle;
+          Context.fillRect(-this.anchorX, -this.anchorX, this.width, this.height);
+        }
+
+        if (this.style.lineWidth && this.style.strokeUp) {
+          Context.lineWidth = this.style.lineWidth;
+          Context.strokeStyle = this.style.fillStyle;
+          Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
+        }
+      }
+    }]);
+
+    return Rect;
+  }(Container);
+
+  _defineProperty(Rect, "defaultStyle", option$9());
+
+  Factory$1(Rect.prototype, data$9);
+  return Rect;
 }
-var TextData = {};
-Factory(TextData, ContainerData);
-Factory(TextData, data$4);
-Factory(TextData, data$9);
-Factory(TextData, data$5);
-var TextOptions = ContainerOptions.concat([option$4, option$9, option$5]);
 var AlignWidth = {
   left: 0,
   center: 0.5,
@@ -2089,24 +2078,33 @@ var AlignHeight = {
   alphabetic: 1,
   ideographic: 1
 };
-function TextFactory(GetCanvas2D) {
-  var _class, _temp;
-
-  return _temp = _class =
+function TextFactory(Container, GetCanvas2D) {
+  var Text =
   /*#__PURE__*/
-  function (_Factory4) {
-    _inherits(Text, _Factory4);
+  function (_Container3) {
+    _inherits(Text, _Container3);
 
     function Text(options) {
-      var _this2;
+      var _this3;
 
       _classCallCheck(this, Text);
 
-      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, options));
-      _this2.context = GetCanvas2D();
-      _this2._value = '';
-      if (options.value) _this2._value = options.value;
-      return _this2;
+      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, options));
+      _this3.context = GetCanvas2D();
+      _this3.style = Object.assign({}, Text.defaultFont);
+      _this3.font = Object.assign({}, Text.defaultFont);
+
+      if (options) {
+        option$5(options);
+
+        _this3.setStyle(options.style);
+
+        _this3.setFont(options.font);
+      }
+
+      _this3._value = '';
+      if (options.value) _this3._value = options.value;
+      return _this3;
     }
 
     _createClass(Text, [{
@@ -2123,7 +2121,7 @@ function TextFactory(GetCanvas2D) {
     }, {
       key: "separate",
       value: function separate(Context, value) {
-        var _this3 = this;
+        var _this4 = this;
 
         var tags = {};
         var taglength = 0;
@@ -2224,7 +2222,7 @@ function TextFactory(GetCanvas2D) {
         });
         this.width = Math.max.apply(null, widths);
         this.height = lines.content.reduce(function (r, line) {
-          return r + Math.max(line.height, _this3.lineHeight);
+          return r + Math.max(line.height, _this4.lineHeight);
         }, 0);
         Context.canvas.width = this.width + this.paddingLeft + this.paddingRight;
         var lastSubHeight = Math.max(0, this.lineHeight - lines.content[lines.content.length - 1].height);
@@ -2243,9 +2241,9 @@ function TextFactory(GetCanvas2D) {
 
         var y = this.paddingTop;
         lines.content.forEach(function (line) {
-          var x = _this3.paddingLeft + AlignWidth[_this3.textAlign] * (_this3.width - line.width);
-          var lineY = y + Math.max(line.height, _this3.lineHeight);
-          y += AlignWidth[_this3.textAlign] * (line.height - _this3.fontSize);
+          var x = _this4.paddingLeft + AlignWidth[_this4.textAlign] * (_this4.width - line.width);
+          var lineY = y + Math.max(line.height, _this4.lineHeight);
+          y += AlignWidth[_this4.textAlign] * (line.height - _this4.fontSize);
           line.content.forEach(function (cont) {
             if (cont.fillStyle) {
               Context.fillStyle = cont.color;
@@ -2266,13 +2264,13 @@ function TextFactory(GetCanvas2D) {
             } else if (cont.font) {
               Context.font = cont.font;
             } else if (cont.texture) {
-              Context.drawImage(cont.texture, x, y - AlignHeight[_this3.textBaseline] * (cont.texture.height - _this3.fontSize));
+              Context.drawImage(cont.texture, x, y - AlignHeight[_this4.textBaseline] * (cont.texture.height - _this4.fontSize));
               x += cont.texture.width;
             } else if (cont.value) {
-              var fontY = y - AlignHeight[_this3.textBaseline] * (cont.height - _this3.fontSize);
-              if (lineWidth && strokeStyle && !_this3.style.strokeUp) Context.strokeText(cont.value, x, fontY);
+              var fontY = y - AlignHeight[_this4.textBaseline] * (cont.height - _this4.fontSize);
+              if (lineWidth && strokeStyle && !_this4.style.strokeUp) Context.strokeText(cont.value, x, fontY);
               Context.fillText(cont.value, x, fontY);
-              if (lineWidth && strokeStyle && _this3.style.strokeUp) Context.strokeText(cont.value, x, fontY);
+              if (lineWidth && strokeStyle && _this4.style.strokeUp) Context.strokeText(cont.value, x, fontY);
               x += cont.width;
             }
           });
@@ -2300,7 +2298,18 @@ function TextFactory(GetCanvas2D) {
     }]);
 
     return Text;
-  }(Factory$1(TextData, TextOptions)), _defineProperty(_class, "defaultFont", defaultFont), _temp;
+  }(Container);
+
+  _defineProperty(Text, "defaultFont", option$4());
+
+  _defineProperty(Text, "defaultStyle", option$9({
+    fillStyle: '#FFFFFF'
+  }));
+
+  Factory$1(Text.prototype, data$9);
+  Factory$1(Text.prototype, data$4);
+  Factory$1(Text.prototype, data$5);
+  return Text;
 }
 
 var canvas2d = {
@@ -2449,7 +2458,7 @@ var canvas2d = {
   }
 };
 
-var Render =
+var Render$1 =
 /*#__PURE__*/
 function () {
   function Render() {
@@ -2775,4 +2784,4 @@ function PointInRect(x, y, bx, by, bw, bh) {
   return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
 }
 
-export { ContainerFactory as Container, Factory$1 as Factory, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Position as MathPosition, Random as MathRandom, Time as MathTime, Vector as MathVector, Vector2 as MathVector2, RectFactory as Rect, SpriteFactory as Sprite, TextFactory as Text, canvas2d as UtilCanvas2D, Collision as UtilCollsion, Loader as UtilLoader, PointInRect as UtilPointInRect, RecursiveMap as UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch };
+export { ContainerFactory as Container, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Position as MathPosition, Random as MathRandom, Time as MathTime, Vector as MathVector, Vector2 as MathVector2, RectFactory as Rect, SpriteFactory as Sprite, TextFactory as Text, canvas2d as UtilCanvas2D, Collision as UtilCollsion, Loader as UtilLoader, PointInRect as UtilPointInRect, RecursiveMap as UtilRecursiveMap, Render$1 as UtilRender, Touch as UtilTouch };

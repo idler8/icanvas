@@ -1,12 +1,13 @@
-const defaultStyle = {
-	strokeUp: false, //首先填充
-	fillStyle: '', //填充色
-	lineWidth: 0, //线宽
-	strokeStyle: '#FFFFFF', //线框色
-};
 export function option(options) {
-	if (!this.style) this.style = Object.assign({}, defaultStyle);
-	if (options.style) this.setFont(options.style);
+	return Object.assign(
+		{
+			strokeUp: false, //首先填充
+			fillStyle: '', //填充色
+			lineWidth: 0, //线宽
+			strokeStyle: '#FFFFFF', //线框色
+		},
+		options,
+	);
 }
 export const data = {
 	/**
@@ -36,7 +37,8 @@ export const data = {
 	get strokeStyle() {
 		return this.style.strokeStyle;
 	},
-	setStyle(style = {}) {
+	setStyle(style) {
+		if (!style) return this;
 		Object.assign(this.style, style);
 		return this;
 	},
