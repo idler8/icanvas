@@ -1,6 +1,6 @@
 import Vector2 from '../../maths/lib/vector2.js';
 export function option(options) {
-	this.scale = new Vector2();
+	this.scale = new Vector2(1, 1);
 	if (options.scale) {
 		if (options.scale.x != undefined) this.scaleY = options.scale.x;
 		if (options.scale.y != undefined) this.scaleY = options.scale.y;

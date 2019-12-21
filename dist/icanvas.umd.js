@@ -1821,7 +1821,7 @@
   });
 
   function option$7(options) {
-    this.scale = new Vector2();
+    this.scale = new Vector2(1, 1);
 
     if (options.scale) {
       if (options.scale.x != undefined) this.scaleY = options.scale.x;
@@ -2198,10 +2198,30 @@
             if (!this.texture) return;
 
             if (this.useClip) {
-              Context.drawImage(this.texture, this.clipPosition.x, this.clipPosition.y, this.clipSize.x, this.clipSize.y, -this.anchorX, -this.anchorX, this.width * this.clipSize.x / this.texture.width, this.height * this.clipSize.y / this.texture.height);
+              Context.drawImage(this.texture, this.clipX, this.clipY, this.clipWidth, this.clipHeight, -this.anchorX, -this.anchorX, this.width, this.height);
             } else {
               Context.drawImage(this.texture, -this.anchorX, -this.anchorX, this.width, this.height);
             }
+          }
+        }, {
+          key: "clipX",
+          get: function get() {
+            return this.clipPosition.x;
+          }
+        }, {
+          key: "clipY",
+          get: function get() {
+            return this.clipPosition.y;
+          }
+        }, {
+          key: "clipWidth",
+          get: function get() {
+            return this.clipSize.x;
+          }
+        }, {
+          key: "clipHeight",
+          get: function get() {
+            return this.clipSize.y;
           }
         }]);
 

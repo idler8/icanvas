@@ -108,6 +108,18 @@ export function SpriteFactory() {
 			this.size.setTo(width, height);
 			return this;
 		}
+		get clipX() {
+			return this.clipPosition.x;
+		}
+		get clipY() {
+			return this.clipPosition.y;
+		}
+		get clipWidth() {
+			return this.clipSize.x;
+		}
+		get clipHeight() {
+			return this.clipSize.y;
+		}
 		setTexture(texture) {
 			if (!texture.width || !texture.height) texture = null;
 			this.texture = texture;
@@ -119,17 +131,7 @@ export function SpriteFactory() {
 		update(Context) {
 			if (!this.texture) return;
 			if (this.useClip) {
-				Context.drawImage(
-					this.texture,
-					this.clipPosition.x,
-					this.clipPosition.y,
-					this.clipSize.x,
-					this.clipSize.y,
-					-this.anchorX,
-					-this.anchorX,
-					(this.width * this.clipSize.x) / this.texture.width,
-					(this.height * this.clipSize.y) / this.texture.height,
-				);
+				Context.drawImage(this.texture, this.clipX, this.clipY, this.clipWidth, this.clipHeight, -this.anchorX, -this.anchorX, this.width, this.height);
 			} else {
 				Context.drawImage(this.texture, -this.anchorX, -this.anchorX, this.width, this.height);
 			}
