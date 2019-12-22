@@ -22,6 +22,7 @@ export function ContainerFactory() {
 			this.id = ContainerFactory.ID ? ++ContainerFactory.ID : (ContainerFactory.ID = 1);
 			this.touchChildren = true; //是否允许点击子元素
 			this.touchStop = false; //点击是否不冒泡到父元素
+			this.debug = ''; //测试边框
 			this.matrix = new Matrix3(); //计算矩阵
 			for (let i = 0; i < ContainerProperties.length; i++) {
 				ContainerProperties[i].option.call(this, options);
@@ -58,6 +59,11 @@ export function ContainerFactory() {
 			let alpha = Math.min(1, this.alpha);
 			if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
 			Context.setTransform.apply(Context, this.matrix);
+			if (this.debug) {
+				Context.lineWidth = 3;
+				Context.strokeStyle = this.debug;
+				Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
+			}
 			if (this.cache.context) {
 				Context.drawImage(this.cache.context.canvas, 0, 0);
 				return true;
@@ -118,9 +124,9 @@ export function SpriteFactory(Container) {
 		update(Context) {
 			if (!this.texture) return;
 			if (this.useClip) {
-				Context.drawImage(this.texture, this.clipX, this.clipY, this.clipWidth, this.clipHeight, -this.anchorX, -this.anchorX, this.width, this.height);
+				Context.drawImage(this.texture, this.clipX, this.clipY, this.clipWidth, this.clipHeight, -this.anchorX, -this.anchorY, this.width, this.height);
 			} else {
-				Context.drawImage(this.texture, -this.anchorX, -this.anchorX, this.width, this.height);
+				Context.drawImage(this.texture, -this.anchorX, -this.anchorY, this.width, this.height);
 			}
 		}
 	};
@@ -137,16 +143,16 @@ export function RectFactory(Container) {
 			if (this.style.lineWidth && !this.style.strokeUp) {
 				Context.lineWidth = this.style.lineWidth;
 				Context.strokeStyle = this.style.fillStyle;
-				Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
+				Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
 			}
 			if (this.style.fillStyle) {
 				Context.fillStyle = this.style.fillStyle;
-				Context.fillRect(-this.anchorX, -this.anchorX, this.width, this.height);
+				Context.fillRect(-this.anchorX, -this.anchorY, this.width, this.height);
 			}
 			if (this.style.lineWidth && this.style.strokeUp) {
 				Context.lineWidth = this.style.lineWidth;
 				Context.strokeStyle = this.style.fillStyle;
-				Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
+				Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
 			}
 		}
 	}
@@ -156,14 +162,13 @@ export function RectFactory(Container) {
 
 const AlignWidth = { left: 0, center: 0.5, right: 1 };
 const AlignHeight = { top: 0, middle: 0.5, bottom: 1, hanging: 0, alphabetic: 1, ideographic: 1 };
-export function TextFactory(Container, GetCanvas2D) {
+export function TextFactory(Container, TestContext) {
 	class Text extends Container {
 		static defaultFont = Font.option();
 		static defaultStyle = Style.option({ fillStyle: '#FFFFFF' });
 		constructor(options) {
 			super(options);
-			this.context = GetCanvas2D();
-			this.style = Object.assign({}, Text.defaultFont);
+			this.style = Object.assign({}, Text.defaultStyle);
 			this.font = Object.assign({}, Text.defaultFont);
 			if (options) {
 				Padding.option.call(this, options);
@@ -171,6 +176,7 @@ export function TextFactory(Container, GetCanvas2D) {
 				this.setFont(options.font);
 			}
 			this._value = '';
+			this.Lines = [];
 			if (options.value) this.value = options.value;
 		}
 		set value(v) {
@@ -178,7 +184,7 @@ export function TextFactory(Container, GetCanvas2D) {
 			if (!v && v !== 0) v = '';
 			if (typeof v != 'string') v = v.toString();
 			this._value = v;
-			this.separate(this.context, v);
+			this.separate(v);
 		}
 		get value() {
 			return this._value;
@@ -190,7 +196,8 @@ export function TextFactory(Container, GetCanvas2D) {
 		getValue() {
 			return this.value;
 		}
-		separate(Context, value) {
+		separate(value) {
+			this.Lines.length = 0;
 			let tags = {};
 			let taglength = 0;
 			let string = value.replace(/\<(fillStyle|strokeStyle|lineWidth|family|weight|size|i)\=(\S+?)\>/g, function(tag, action, arg, index) {
@@ -199,8 +206,7 @@ export function TextFactory(Container, GetCanvas2D) {
 				return '';
 			});
 			let font = { weight: this.font.weight, size: this.fontSize, family: this.font.family };
-			Context.font = `${font.weight} ${font.size}px ${font.family}`;
-			let lines = { index: 0, content: [] };
+			TestContext.font = `${font.weight} ${font.size}px ${font.family}`;
 			let line = { index: 0, width: 0, height: font.size, content: [] };
 			for (let i = 0, len = string.length; i <= len; i++) {
 				if (tags[i]) {
@@ -208,14 +214,14 @@ export function TextFactory(Container, GetCanvas2D) {
 						line.index = line.content.push({ [tags[i].action]: tags[i].arg });
 					} else if (tags[i].action == 'size' || tags[i].action == 'family' || tags[i].action == 'weight') {
 						font[tags[i].action] = tags[i].arg == '@' ? this.font[tags[i].action] : tags[i].arg;
-						Context.font = `${font.weight} ${font.size}px ${font.family}`;
-						line.index = line.content.push({ font: Context.font });
+						TestContext.font = `${font.weight} ${font.size}px ${font.family}`;
+						line.index = line.content.push({ font: TestContext.font });
 						if (font.size > line.height) line.height = font.size;
 					} else if (tags[i].action == 'i') {
 						if (this.special && this.special[tags[i].arg] && this.special[tags[i].arg].width) {
 							let texture = this.special[tags[i].arg];
 							if (this.wrapWidth > 0 && line.width + texture.width > this.wrapWidth) {
-								lines.index = lines.content.push(line);
+								this.Lines.push(line);
 								line = { index: 0, width: 0, height: font.size, content: [] };
 							}
 							line.width += texture.width;
@@ -226,12 +232,12 @@ export function TextFactory(Container, GetCanvas2D) {
 				}
 				let v = string[i];
 				if (i === len || v === '\n') {
-					lines.index = lines.content.push(line);
+					this.Lines.push(line);
 					line = { index: 0, width: 0, content: [] };
 				} else {
-					let width = Context.measureText(v).width;
+					let width = TestContext.measureText(v).width;
 					if (this.wrapWidth > 0 && line.width + width > this.wrapWidth) {
-						lines.index = lines.content.push(line);
+						this.Lines.push(line);
 						line = { index: 0, width: 0, height: font.size, content: [] };
 					}
 					line.width += width;
@@ -240,12 +246,14 @@ export function TextFactory(Container, GetCanvas2D) {
 					line.content[line.index].value += v;
 				}
 			}
-			let widths = lines.content.map(l => l.width);
+			let widths = this.Lines.map(l => l.width);
 			this.width = Math.max.apply(null, widths);
-			this.height = lines.content.reduce((r, line) => r + Math.max(line.height, this.lineHeight), 0);
-			Context.canvas.width = this.width + this.paddingLeft + this.paddingRight;
-			let lastSubHeight = Math.max(0, this.lineHeight - lines.content[lines.content.length - 1].height);
-			Context.canvas.height = this.height - lastSubHeight + this.paddingTop + this.paddingBottom;
+			this.height = this.Lines.reduce((r, line) => r + Math.max(line.height, this.lineHeight), 0);
+			this.setAnchorSize(AlignHeight[this.textAlign], AlignHeight[this.textBaseline]);
+		}
+		update(Context) {
+			if (!this.Lines || !this.Lines.length) return;
+
 			Context.textAlign = 'left';
 			Context.textBaseline = 'top';
 			Context.fillStyle = this.style.fillStyle;
@@ -257,9 +265,9 @@ export function TextFactory(Container, GetCanvas2D) {
 				Context.lineWidth = lineWidth;
 				Context.strokeStyle = strokeStyle;
 			}
-			let y = this.paddingTop;
-			lines.content.forEach(line => {
-				let x = this.paddingLeft + AlignWidth[this.textAlign] * (this.width - line.width);
+			let y = -this.anchorY;
+			this.Lines.forEach(line => {
+				let x = AlignWidth[this.textAlign] * (this.width - line.width) - this.anchorX;
 				let lineY = y + Math.max(line.height, this.lineHeight);
 				y += AlignWidth[this.textAlign] * (line.height - this.fontSize);
 				line.content.forEach(cont => {
@@ -292,11 +300,6 @@ export function TextFactory(Container, GetCanvas2D) {
 				});
 				y = lineY;
 			});
-			this.setAnchorSize(AlignHeight[this.textAlign], AlignHeight[this.textBaseline]);
-		}
-		update(Context) {
-			if (!this.context || !this.context.canvas) return;
-			Context.drawImage(this.context.canvas, -this.anchorX, -this.anchorX, this.width, this.height);
 		}
 	}
 	Minix(Text.prototype, Style.data);

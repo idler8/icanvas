@@ -2060,6 +2060,8 @@
 
         this.touchStop = false; //点击是否不冒泡到父元素
 
+        this.debug = ''; //测试边框
+
         this.matrix = new Matrix3(); //计算矩阵
 
         for (var i = 0; i < ContainerProperties.length; i++) {
@@ -2102,6 +2104,12 @@
           var alpha = Math.min(1, this.alpha);
           if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
           Context.setTransform.apply(Context, this.matrix);
+
+          if (this.debug) {
+            Context.lineWidth = 3;
+            Context.strokeStyle = this.debug;
+            Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
+          }
 
           if (this.cache.context) {
             Context.drawImage(this.cache.context.canvas, 0, 0);
@@ -2188,9 +2196,9 @@
             if (!this.texture) return;
 
             if (this.useClip) {
-              Context.drawImage(this.texture, this.clipX, this.clipY, this.clipWidth, this.clipHeight, -this.anchorX, -this.anchorX, this.width, this.height);
+              Context.drawImage(this.texture, this.clipX, this.clipY, this.clipWidth, this.clipHeight, -this.anchorX, -this.anchorY, this.width, this.height);
             } else {
-              Context.drawImage(this.texture, -this.anchorX, -this.anchorX, this.width, this.height);
+              Context.drawImage(this.texture, -this.anchorX, -this.anchorY, this.width, this.height);
             }
           }
         }, {
@@ -2242,18 +2250,18 @@
           if (this.style.lineWidth && !this.style.strokeUp) {
             Context.lineWidth = this.style.lineWidth;
             Context.strokeStyle = this.style.fillStyle;
-            Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
+            Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
           }
 
           if (this.style.fillStyle) {
             Context.fillStyle = this.style.fillStyle;
-            Context.fillRect(-this.anchorX, -this.anchorX, this.width, this.height);
+            Context.fillRect(-this.anchorX, -this.anchorY, this.width, this.height);
           }
 
           if (this.style.lineWidth && this.style.strokeUp) {
             Context.lineWidth = this.style.lineWidth;
             Context.strokeStyle = this.style.fillStyle;
-            Context.strokeRect(-this.anchorX, -this.anchorX, this.width, this.height);
+            Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
           }
         }
       }]);
@@ -2279,7 +2287,7 @@
     alphabetic: 1,
     ideographic: 1
   };
-  function TextFactory(Container, GetCanvas2D) {
+  function TextFactory(Container, TestContext) {
     var Text =
     /*#__PURE__*/
     function (_Container3) {
@@ -2291,8 +2299,7 @@
         classCallCheck(this, Text);
 
         _this3 = possibleConstructorReturn(this, getPrototypeOf(Text).call(this, options));
-        _this3.context = GetCanvas2D();
-        _this3.style = Object.assign({}, Text.defaultFont);
+        _this3.style = Object.assign({}, Text.defaultStyle);
         _this3.font = Object.assign({}, Text.defaultFont);
 
         if (options) {
@@ -2304,6 +2311,7 @@
         }
 
         _this3._value = '';
+        _this3.Lines = [];
         if (options.value) _this3.value = options.value;
         return _this3;
       }
@@ -2321,9 +2329,10 @@
         }
       }, {
         key: "separate",
-        value: function separate(Context, value) {
+        value: function separate(value) {
           var _this4 = this;
 
+          this.Lines.length = 0;
           var tags = {};
           var taglength = 0;
           var string = value.replace(/\<(fillStyle|strokeStyle|lineWidth|family|weight|size|i)\=(\S+?)\>/g, function (tag, action, arg, index) {
@@ -2339,11 +2348,7 @@
             size: this.fontSize,
             family: this.font.family
           };
-          Context.font = "".concat(font.weight, " ").concat(font.size, "px ").concat(font.family);
-          var lines = {
-            index: 0,
-            content: []
-          };
+          TestContext.font = "".concat(font.weight, " ").concat(font.size, "px ").concat(font.family);
           var line = {
             index: 0,
             width: 0,
@@ -2357,9 +2362,9 @@
                 line.index = line.content.push(defineProperty({}, tags[i].action, tags[i].arg));
               } else if (tags[i].action == 'size' || tags[i].action == 'family' || tags[i].action == 'weight') {
                 font[tags[i].action] = tags[i].arg == '@' ? this.font[tags[i].action] : tags[i].arg;
-                Context.font = "".concat(font.weight, " ").concat(font.size, "px ").concat(font.family);
+                TestContext.font = "".concat(font.weight, " ").concat(font.size, "px ").concat(font.family);
                 line.index = line.content.push({
-                  font: Context.font
+                  font: TestContext.font
                 });
                 if (font.size > line.height) line.height = font.size;
               } else if (tags[i].action == 'i') {
@@ -2367,7 +2372,7 @@
                   var texture = this.special[tags[i].arg];
 
                   if (this.wrapWidth > 0 && line.width + texture.width > this.wrapWidth) {
-                    lines.index = lines.content.push(line);
+                    this.Lines.push(line);
                     line = {
                       index: 0,
                       width: 0,
@@ -2388,17 +2393,17 @@
             var v = string[i];
 
             if (i === len || v === '\n') {
-              lines.index = lines.content.push(line);
+              this.Lines.push(line);
               line = {
                 index: 0,
                 width: 0,
                 content: []
               };
             } else {
-              var width = Context.measureText(v).width;
+              var width = TestContext.measureText(v).width;
 
               if (this.wrapWidth > 0 && line.width + width > this.wrapWidth) {
-                lines.index = lines.content.push(line);
+                this.Lines.push(line);
                 line = {
                   index: 0,
                   width: 0,
@@ -2418,16 +2423,21 @@
             }
           }
 
-          var widths = lines.content.map(function (l) {
+          var widths = this.Lines.map(function (l) {
             return l.width;
           });
           this.width = Math.max.apply(null, widths);
-          this.height = lines.content.reduce(function (r, line) {
+          this.height = this.Lines.reduce(function (r, line) {
             return r + Math.max(line.height, _this4.lineHeight);
           }, 0);
-          Context.canvas.width = this.width + this.paddingLeft + this.paddingRight;
-          var lastSubHeight = Math.max(0, this.lineHeight - lines.content[lines.content.length - 1].height);
-          Context.canvas.height = this.height - lastSubHeight + this.paddingTop + this.paddingBottom;
+          this.setAnchorSize(AlignHeight[this.textAlign], AlignHeight[this.textBaseline]);
+        }
+      }, {
+        key: "update",
+        value: function update(Context) {
+          var _this5 = this;
+
+          if (!this.Lines || !this.Lines.length) return;
           Context.textAlign = 'left';
           Context.textBaseline = 'top';
           Context.fillStyle = this.style.fillStyle;
@@ -2440,11 +2450,11 @@
             Context.strokeStyle = strokeStyle;
           }
 
-          var y = this.paddingTop;
-          lines.content.forEach(function (line) {
-            var x = _this4.paddingLeft + AlignWidth[_this4.textAlign] * (_this4.width - line.width);
-            var lineY = y + Math.max(line.height, _this4.lineHeight);
-            y += AlignWidth[_this4.textAlign] * (line.height - _this4.fontSize);
+          var y = -this.anchorY;
+          this.Lines.forEach(function (line) {
+            var x = AlignWidth[_this5.textAlign] * (_this5.width - line.width) - _this5.anchorX;
+            var lineY = y + Math.max(line.height, _this5.lineHeight);
+            y += AlignWidth[_this5.textAlign] * (line.height - _this5.fontSize);
             line.content.forEach(function (cont) {
               if (cont.fillStyle) {
                 Context.fillStyle = cont.color;
@@ -2465,25 +2475,18 @@
               } else if (cont.font) {
                 Context.font = cont.font;
               } else if (cont.texture) {
-                Context.drawImage(cont.texture, x, y - AlignHeight[_this4.textBaseline] * (cont.texture.height - _this4.fontSize));
+                Context.drawImage(cont.texture, x, y - AlignHeight[_this5.textBaseline] * (cont.texture.height - _this5.fontSize));
                 x += cont.texture.width;
               } else if (cont.value) {
-                var fontY = y - AlignHeight[_this4.textBaseline] * (cont.height - _this4.fontSize);
-                if (lineWidth && strokeStyle && !_this4.style.strokeUp) Context.strokeText(cont.value, x, fontY);
+                var fontY = y - AlignHeight[_this5.textBaseline] * (cont.height - _this5.fontSize);
+                if (lineWidth && strokeStyle && !_this5.style.strokeUp) Context.strokeText(cont.value, x, fontY);
                 Context.fillText(cont.value, x, fontY);
-                if (lineWidth && strokeStyle && _this4.style.strokeUp) Context.strokeText(cont.value, x, fontY);
+                if (lineWidth && strokeStyle && _this5.style.strokeUp) Context.strokeText(cont.value, x, fontY);
                 x += cont.width;
               }
             });
             y = lineY;
           });
-          this.setAnchorSize(AlignHeight[this.textAlign], AlignHeight[this.textBaseline]);
-        }
-      }, {
-        key: "update",
-        value: function update(Context) {
-          if (!this.context || !this.context.canvas) return;
-          Context.drawImage(this.context.canvas, -this.anchorX, -this.anchorX, this.width, this.height);
         }
       }, {
         key: "value",
@@ -2492,7 +2495,7 @@
           if (!v && v !== 0) v = '';
           if (typeof v != 'string') v = v.toString();
           this._value = v;
-          this.separate(this.context, v);
+          this.separate(v);
         },
         get: function get() {
           return this._value;
