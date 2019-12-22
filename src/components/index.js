@@ -86,7 +86,7 @@ export function SpriteFactory(Container) {
 			this.useClip = false; //是否切割源图
 			this.clipPosition = new Vector2(); //切割位置
 			this.clipSize = new Vector2(); //切割大小
-			if (options.clip) this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
+			if (options && options.clip) this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
 			this.setTexture(texture);
 		}
 		checkPoint(touch) {

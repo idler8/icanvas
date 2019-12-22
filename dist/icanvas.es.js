@@ -1961,7 +1961,7 @@ function SpriteFactory(Container) {
 
         _this.clipSize = new Vector2(); //切割大小
 
-        if (options.clip) _this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
+        if (options && options.clip) _this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
 
         _this.setTexture(texture);
 
