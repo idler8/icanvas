@@ -1823,12 +1823,16 @@
     this.scale = new Vector2(1, 1);
 
     if (options.scale) {
-      if (options.scale.x != undefined) this.scaleY = options.scale.x;
-      if (options.scale.y != undefined) this.scaleY = options.scale.y;
+      if (typeof options.scale == 'number') {
+        this.scaleX = this.scaleY = options.scale;
+      } else {
+        if (options.scale.x) this.scaleX = options.scale.x;
+        if (options.scale.y) this.scaleY = options.scale.y;
+      }
     }
 
-    if (options.scaleX !== undefined) this.scaleX = options.scaleX;
-    if (options.scaleY !== undefined) this.scaleY = options.scaleY;
+    if (options.scaleX) this.scaleX = options.scaleX;
+    if (options.scaleY) this.scaleY = options.scaleY;
   }
   var data$7 = {
     get scaleX() {
