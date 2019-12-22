@@ -2150,7 +2150,7 @@
 
           classCallCheck(this, Sprite);
 
-          _this = possibleConstructorReturn(this, getPrototypeOf(Sprite).call(this, options = Object.assign(_typeof_1(texture) == 'object' ? texture : {
+          _this = possibleConstructorReturn(this, getPrototypeOf(Sprite).call(this, options = Object.assign(texture && _typeof_1(texture) == 'object' ? texture : {
             texture: texture
           }, options)));
           _this.texture = null;

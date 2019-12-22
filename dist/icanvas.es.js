@@ -1949,7 +1949,7 @@ function SpriteFactory(Container) {
 
         _classCallCheck(this, Sprite);
 
-        _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options = Object.assign(_typeof(texture) == 'object' ? texture : {
+        _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options = Object.assign(texture && _typeof(texture) == 'object' ? texture : {
           texture: texture
         }, options)));
         _this.texture = null;
