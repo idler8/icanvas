@@ -1949,9 +1949,9 @@ function SpriteFactory(Container) {
 
         _classCallCheck(this, Sprite);
 
-        _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options = Object.assign(typeof texture == 'string' ? {
+        _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options = Object.assign(_typeof(texture) == 'object' ? texture : {
           texture: texture
-        } : texture, options)));
+        }, options)));
         _this.texture = null;
         _this.useClip = false; //是否切割源图
 

@@ -2150,9 +2150,9 @@
 
           classCallCheck(this, Sprite);
 
-          _this = possibleConstructorReturn(this, getPrototypeOf(Sprite).call(this, options = Object.assign(typeof texture == 'string' ? {
+          _this = possibleConstructorReturn(this, getPrototypeOf(Sprite).call(this, options = Object.assign(_typeof_1(texture) == 'object' ? texture : {
             texture: texture
-          } : texture, options)));
+          }, options)));
           _this.texture = null;
           _this.useClip = false; //是否切割源图
 

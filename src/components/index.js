@@ -81,7 +81,7 @@ export function ContainerFactory() {
 export function SpriteFactory(Container) {
 	return class Sprite extends Container {
 		constructor(texture, options) {
-			super((options = Object.assign(typeof texture == 'string' ? { texture } : texture, options)));
+			super((options = Object.assign(typeof texture == 'object' ? texture : { texture }, options)));
 			this.texture = null;
 			this.useClip = false; //是否切割源图
 			this.clipPosition = new Vector2(); //切割位置
