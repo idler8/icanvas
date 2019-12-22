@@ -2192,7 +2192,7 @@
         }, {
           key: "setTexture",
           value: function setTexture(texture) {
-            if (!texture.width || !texture.height) texture = null;
+            if (!texture || !texture.width || !texture.height) texture = null;
             this.texture = texture;
             if (!this.texture) return this;
             this.useClip = false;
