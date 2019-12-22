@@ -33,13 +33,8 @@ export function ContainerFactory() {
 			this.anchor.y = this.height * y;
 			return this;
 		}
-		hitMe(touch) {
-			return (
-				touch.x >= -this.anchorX - this.paddingLeft &&
-				touch.y >= -this.anchorY - this.paddingTop &&
-				touch.x <= this.width - this.anchorX + this.paddingRight &&
-				touch.x <= this.height - this.anchorY + this.paddingBottom
-			);
+		checkPoint(touch) {
+			return true;
 		}
 		renderPreUpdate(renderArray) {
 			if (!this.visible) return true;
@@ -94,6 +89,9 @@ export function SpriteFactory(Container) {
 			if (options.clip) this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
 			this.setTexture(texture);
 		}
+		checkPoint(touch) {
+			return touch.x >= -this.anchorX && touch.y >= -this.anchorY && touch.x <= this.width - this.anchorX && touch.y <= this.height - this.anchorY;
+		}
 		setClip(x = 0, y = 0, width, height) {
 			this.useClip = true;
 			this.clipPosition.setTo(x, y);
@@ -139,6 +137,9 @@ export function RectFactory(Container) {
 			this.style = Object.assign({}, Text.defaultFont);
 			if (options) this.setStyle(options.style);
 		}
+		checkPoint(touch) {
+			return touch.x >= -this.anchorX && touch.y >= -this.anchorY && touch.x <= this.width - this.anchorX && touch.y <= this.height - this.anchorY;
+		}
 		update(Context) {
 			if (this.style.lineWidth && !this.style.strokeUp) {
 				Context.lineWidth = this.style.lineWidth;
@@ -170,19 +171,27 @@ export function TextFactory(Container, TestContext) {
 			super(options);
 			this.style = Object.assign({}, Text.defaultStyle);
 			this.font = Object.assign({}, Text.defaultFont);
+			this._value = '';
+			this.Lines = [];
 			if (options) {
 				Padding.option.call(this, options);
 				this.setStyle(options.style);
 				this.setFont(options.font);
+				if (options.value) this.value = options.value;
 			}
-			this._value = '';
-			this.Lines = [];
-			if (options.value) this.value = options.value;
+		}
+		checkPoint(touch) {
+			return (
+				touch.x >= -this.anchorX - this.paddingLeft &&
+				touch.y >= -this.anchorY - this.paddingTop &&
+				touch.x <= this.width - this.anchorX + this.paddingRight &&
+				touch.x <= this.height - this.anchorY + this.paddingBottom
+			);
 		}
 		set value(v) {
-			if (this._value === v) return;
 			if (!v && v !== 0) v = '';
 			if (typeof v != 'string') v = v.toString();
+			if (this._value === v) return;
 			this._value = v;
 			this.separate(v);
 		}

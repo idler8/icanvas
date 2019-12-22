@@ -2,7 +2,9 @@ export default class Render {
 	/**
 	 * 渲染列表中间缓存
 	 */
-	renderArray = [];
+	constructor() {
+		this.renderArray = [];
+	}
 	/**
 	 *
 	 * @param {Component} Stage 舞台

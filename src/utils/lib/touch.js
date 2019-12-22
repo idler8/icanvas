@@ -1,10 +1,10 @@
+import Vector2 from '../../maths/lib/vector2.js';
 import Event from 'eventemitter3';
 export default class Touch extends Event {
-	constructor(Position, Size) {
+	constructor() {
 		super();
-		if (!Position || !Size) return console.error('缺少触摸范围定义');
-		this.Position = Position;
-		this.Size = Size;
+		this.Position = new Vector2();
+		this.Size = new Vector2();
 		this.Touches = {};
 	}
 	onTouchStart(e) {

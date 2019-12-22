@@ -2079,9 +2079,9 @@
           return this;
         }
       }, {
-        key: "hitMe",
-        value: function hitMe(touch) {
-          return touch.x >= -this.anchorX - this.paddingLeft && touch.y >= -this.anchorY - this.paddingTop && touch.x <= this.width - this.anchorX + this.paddingRight && touch.x <= this.height - this.anchorY + this.paddingBottom;
+        key: "checkPoint",
+        value: function checkPoint(touch) {
+          return true;
         }
       }, {
         key: "renderPreUpdate",
@@ -2168,6 +2168,11 @@
         }
 
         createClass(Sprite, [{
+          key: "checkPoint",
+          value: function checkPoint(touch) {
+            return touch.x >= -this.anchorX && touch.y >= -this.anchorY && touch.x <= this.width - this.anchorX && touch.y <= this.height - this.anchorY;
+          }
+        }, {
           key: "setClip",
           value: function setClip() {
             var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
@@ -2245,6 +2250,11 @@
       }
 
       createClass(Rect, [{
+        key: "checkPoint",
+        value: function checkPoint(touch) {
+          return touch.x >= -this.anchorX && touch.y >= -this.anchorY && touch.x <= this.width - this.anchorX && touch.y <= this.height - this.anchorY;
+        }
+      }, {
         key: "update",
         value: function update(Context) {
           if (this.style.lineWidth && !this.style.strokeUp) {
@@ -2301,6 +2311,8 @@
         _this3 = possibleConstructorReturn(this, getPrototypeOf(Text).call(this, options));
         _this3.style = Object.assign({}, Text.defaultStyle);
         _this3.font = Object.assign({}, Text.defaultFont);
+        _this3._value = '';
+        _this3.Lines = [];
 
         if (options) {
           option$5.call(assertThisInitialized(_this3), options);
@@ -2308,15 +2320,19 @@
           _this3.setStyle(options.style);
 
           _this3.setFont(options.font);
+
+          if (options.value) _this3.value = options.value;
         }
 
-        _this3._value = '';
-        _this3.Lines = [];
-        if (options.value) _this3.value = options.value;
         return _this3;
       }
 
       createClass(Text, [{
+        key: "checkPoint",
+        value: function checkPoint(touch) {
+          return touch.x >= -this.anchorX - this.paddingLeft && touch.y >= -this.anchorY - this.paddingTop && touch.x <= this.width - this.anchorX + this.paddingRight && touch.x <= this.height - this.anchorY + this.paddingBottom;
+        }
+      }, {
         key: "setValue",
         value: function setValue(v) {
           this.value = v;
@@ -2491,9 +2507,9 @@
       }, {
         key: "value",
         set: function set(v) {
-          if (this._value === v) return;
           if (!v && v !== 0) v = '';
           if (typeof v != 'string') v = v.toString();
+          if (this._value === v) return;
           this._value = v;
           this.separate(v);
         },
@@ -2666,21 +2682,24 @@
   var Render$1 =
   /*#__PURE__*/
   function () {
+    /**
+     * 渲染列表中间缓存
+     */
     function Render() {
       classCallCheck(this, Render);
 
-      defineProperty(this, "renderArray", []);
+      this.renderArray = [];
     }
+    /**
+     *
+     * @param {Component} Stage 舞台
+     * @param {CanvasRenderingContext2D} Context 渲染上下文
+     * @param {Boolean} Clear 是否清空上下文
+     */
+
 
     createClass(Render, [{
       key: "Update",
-
-      /**
-       *
-       * @param {Component} Stage 舞台
-       * @param {CanvasRenderingContext2D} Context 渲染上下文
-       * @param {Boolean} Clear 是否清空上下文
-       */
       value: function Update(Stage, Context, Clear) {
         this.PreUpdate(Stage);
         this.renderArray.sort(function (a, b) {
@@ -3077,7 +3096,7 @@
   function (_Event) {
     inherits(Touch, _Event);
 
-    function Touch(Position, Size) {
+    function Touch() {
       var _this;
 
       classCallCheck(this, Touch);
@@ -3086,9 +3105,8 @@
 
       defineProperty(assertThisInitialized(_this), "onTouchCancel", _this.onTouchEnd);
 
-      if (!Position || !Size) return possibleConstructorReturn(_this, console.error('缺少触摸范围定义'));
-      _this.Position = Position;
-      _this.Size = Size;
+      _this.Position = new Vector2();
+      _this.Size = new Vector2();
       _this.Touches = {};
       return _this;
     }
@@ -3156,31 +3174,22 @@
   /*#__PURE__*/
   function () {
     //触发流程
-    function Collision(MatrixHandle, TouchHandle) {
+    function Collision() {
       classCallCheck(this, Collision);
 
-      if (!MatrixHandle) throw Error('缺少碰撞矩阵');
-      if (!TouchHandle) throw Error('缺少碰撞坐标');
-      this.MatrixHandle = MatrixHandle;
-      this.TouchHandle = TouchHandle;
+      this.MatrixHandle = new Matrix3();
+      this.TouchHandle = new Vector2();
     }
 
     createClass(Collision, [{
       key: "InComponent",
       value: function InComponent(Component, touch) {
-        if (!Component._visible) return false;
-
-        if (Component.matrix) {
-          this.MatrixHandle.setToArray(Component.matrix).invert();
-        } else {
-          this.MatrixHandle.identity();
-        }
-
+        if (!Component.visible) return false;
+        this.MatrixHandle.setToArray(Component.matrix).invert();
         this.TouchHandle.x = this.MatrixHandle.a * touch.x + this.MatrixHandle.c * touch.y + this.MatrixHandle.tx;
         this.TouchHandle.y = this.MatrixHandle.b * touch.x + this.MatrixHandle.d * touch.y + this.MatrixHandle.ty;
-        if (Component.offsetTouch) Component.offsetTouch(this.TouchHandle);
-        if (!Component.hitMe) return this.TouchHandle;
-        if (Component.hitMe(this.TouchHandle.x, this.TouchHandle.y)) return this.TouchHandle;
+        if (!Component.checkPoint) return true;
+        if (Component.checkPoint(this.TouchHandle)) return true;
       } //TODO 使用event
 
     }, {
@@ -3194,11 +3203,11 @@
             if (this.Recursive(Component[i], touch, Action)) return true;
           }
         } else {
-          if (!Component._visible) return false;
+          if (!Component.visible) return false;
           if (Component.touchChildren && Component.children.length && this.Recursive(Component.children, touch, Action)) return true;
           if (!this.InComponent(Component, touch)) return false;
           if (!Component[Action]) return Component.touchStop;
-          var Result = Component[Action](this.TouchHandle.x, this.TouchHandle.y);
+          var Result = Component[Action](this.TouchHandle);
           return Result === undefined ? true : Result;
         }
       }
@@ -3213,20 +3222,12 @@
     inherits(Loader, _Event);
 
     function Loader() {
-      var _getPrototypeOf2;
-
       var _this;
 
       classCallCheck(this, Loader);
 
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this = possibleConstructorReturn(this, (_getPrototypeOf2 = getPrototypeOf(Loader)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      defineProperty(assertThisInitialized(_this), "resources", {});
-
+      _this = possibleConstructorReturn(this, getPrototypeOf(Loader).call(this));
+      _this.resources = {};
       return _this;
     }
 
@@ -3279,11 +3280,11 @@
           } else if (typeof map[k] == 'string') {
             if (exts.indexOf(map[k]) == -1) return;
 
-            var _key2 = perfix + k;
+            var _key = perfix + k;
 
             var _url = root + perfix + k + '.' + map[k];
 
-            Result[_key2] = _url;
+            Result[_key] = _url;
           } else {
             Object.assign(Result, _this4.loadMap(map[k], root, perfix + k + '/', exts));
           }

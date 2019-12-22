@@ -1,9 +1,12 @@
 import Event from 'eventemitter3';
 export default class Loader extends Event {
+	constructor() {
+		super();
+		this.resources = {};
+	}
 	Set(url) {
 		throw Error('请先挂载加载函数(Set)');
 	}
-	resources = {};
 	load(key, url) {
 		this.emit('load', key, url);
 		return this.Set(url).then(res => {
