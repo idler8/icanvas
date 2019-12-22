@@ -81,7 +81,7 @@ export function ContainerFactory() {
 export function SpriteFactory(Container) {
 	return class Sprite extends Container {
 		constructor(texture, options) {
-			super((options = Object.assign(texture && typeof texture == 'object' ? texture : { texture }, options)));
+			super(options);
 			this.texture = null;
 			this.useClip = false; //是否切割源图
 			this.clipPosition = new Vector2(); //切割位置
@@ -315,4 +315,19 @@ export function TextFactory(Container, TestContext) {
 	Minix(Text.prototype, Font.data);
 	Minix(Text.prototype, Padding.data);
 	return Text;
+}
+export function ScrollFactory(Sprite, GetContext) {
+	return class Scroll extends Sprite {
+		constructor(director, options) {
+			super(options);
+			this.director = director;
+		}
+		refresh() {
+			this.director.cache(this.director.cache.context ? true : GetContext());
+			this.texture = this.director.cache.context;
+			return this;
+		}
+		touchMoveX(x) {}
+		touchMoveY(y) {}
+	};
 }

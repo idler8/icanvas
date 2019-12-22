@@ -11,9 +11,13 @@ export default class Touch extends Event {
 		let now = Date.now();
 		for (let i = 0, l = e.changedTouches.length; i < l; i++) {
 			let touch = e.changedTouches[i];
-			let touchTip = (this.Touches[touch.identifier] = {});
-			touchTip.startX = touchTip.endX = touch.clientX * this.Size.x - this.Position.x;
-			touchTip.startY = touchTip.endY = touch.clientY * this.Size.y - this.Position.y;
+			let touchTip = (this.Touches[touch.identifier] = { moveX: 0, moveY: 0 });
+			let x = touch.clientX * this.Size.x - this.Position.x;
+			let y = touch.clientY * this.Size.y - this.Position.y;
+			touchTip.moveX = 0;
+			touchTip.moveY = 0;
+			touchTip.startX = touchTip.endX = touchTip.x = x;
+			touchTip.startY = touchTip.endY = touchTip.y = y;
 			touchTip.startTime = now;
 			touchTip.state = 1;
 			this.emit('touchStart', touchTip);
@@ -25,10 +29,12 @@ export default class Touch extends Event {
 			let touch = e.changedTouches[i];
 			let touchTip = this.Touches[touch.identifier];
 			if (!touchTip) continue;
-			touchTip.moveX = touchTip.endX;
-			touchTip.moveY = touchTip.endY;
-			touchTip.endX = touch.clientX * this.Size.x - this.Position.x;
-			touchTip.endY = touch.clientY * this.Size.y - this.Position.y;
+			let x = touch.clientX * this.Size.x - this.Position.x;
+			let y = touch.clientY * this.Size.y - this.Position.y;
+			touchTip.moveX = x - touchTip.x;
+			touchTip.moveY = y - touchTip.y;
+			touchTip.endX = touchTip.x = x;
+			touchTip.endY = touchTip.y = y;
 			touchTip.state = 2;
 			this.emit('touchMove', touchTip);
 		}
@@ -42,8 +48,12 @@ export default class Touch extends Event {
 			let touchTip = this.Touches[touch.identifier];
 			if (!touchTip) continue;
 			delete this.Touches[touch.identifier];
-			touchTip.endX = touch.clientX * this.Size.x - this.Position.x;
-			touchTip.endY = touch.clientY * this.Size.y - this.Position.y;
+			let x = touch.clientX * this.Size.x - this.Position.x;
+			let y = touch.clientY * this.Size.y - this.Position.y;
+			touchTip.moveX = x - touchTip.x;
+			touchTip.moveY = y - touchTip.y;
+			touchTip.endX = touchTip.x = x;
+			touchTip.endY = touchTip.y = y;
 			touchTip.endTime = now;
 			touchTip.state = 3;
 			this.emit('touchEnd', touchTip);
