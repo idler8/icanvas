@@ -315,7 +315,7 @@ export function TextFactory(Container, TestContext) {
 	Minix(Text.prototype, Padding.data);
 	return Text;
 }
-export function ScrollFactory(Sprite) {
+export function ScrollFactory(Sprite, GetContext) {
 	let Cache = new Render();
 	return class Scroll extends Sprite {
 		get realWidth() {
@@ -360,7 +360,7 @@ export function ScrollFactory(Sprite) {
 			this.touchMoveY(touch.moveY);
 		}
 		setTexture(director) {
-			if (!this.context) this.context = GAME.Api.Canvas().getContext('2d');
+			if (!this.context) this.context = GetContext();
 			this.director = director;
 			this.texture = this.context.canvas;
 			return this;

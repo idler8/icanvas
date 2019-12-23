@@ -2596,7 +2596,7 @@
     Factory(Text.prototype, data$5);
     return Text;
   }
-  function ScrollFactory(Sprite) {
+  function ScrollFactory(Sprite, GetContext) {
     var Cache = new Render();
     return (
       /*#__PURE__*/
@@ -2648,7 +2648,7 @@
         }, {
           key: "setTexture",
           value: function setTexture(director) {
-            if (!this.context) this.context = GAME.Api.Canvas().getContext('2d');
+            if (!this.context) this.context = GetContext();
             this.director = director;
             this.texture = this.context.canvas;
             return this;
