@@ -1,5 +1,6 @@
 import Minix from '../utils/lib/minix.js';
 import Render from '../utils/lib/render.js';
+import Collision from '../utils/lib/collision.js';
 import Vector2 from '../maths/lib/vector2.js';
 import Matrix3 from '../maths/lib/matrix3.js';
 import * as Alpha from './lib/alpha.js';
@@ -317,6 +318,7 @@ export function TextFactory(Container, TestContext) {
 }
 export function ScrollFactory(Sprite, GetContext) {
 	let Cache = new Render();
+	let Collision = new Collision();
 	return class Scroll extends Sprite {
 		get realWidth() {
 			return this.texture.width;
@@ -377,7 +379,7 @@ export function ScrollFactory(Sprite, GetContext) {
 			if (res == 'refresh') this.refresh();
 		}
 		touchTap(touch) {
-			this.touchDirector(GAME.Collsion.Recursive(this.director, { x: touch.x + this.clipX, y: touch.y + this.clipY }));
+			this.touchDirector(Collision.Recursive(this.director, { x: touch.x + this.clipX, y: touch.y + this.clipY }));
 		}
 	};
 }
