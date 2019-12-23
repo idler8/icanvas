@@ -16,7 +16,7 @@ export { default as Touch } from './lib/touch.js';
  * 碰撞检测类
  * 将点和界面组件进行比较判断碰撞
  */
-export { default as Collsion } from './lib/collision.js';
+export { default as Collision } from './lib/collision.js';
 /**
  * 资源文件夹结构转化成一维键值对
  */

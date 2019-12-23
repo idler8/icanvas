@@ -23,7 +23,7 @@ export {
 	PointInRect as UtilPointInRect,
 	RecursiveMap as UtilRecursiveMap,
 	Loader as UtilLoader,
-	Collsion as UtilCollsion,
+	Collision as UtilCollision,
 	Touch as UtilTouch,
 	Render as UtilRender,
 	Canvas2D as UtilCanvas2D,
