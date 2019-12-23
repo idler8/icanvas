@@ -2658,8 +2658,8 @@
           value: function refresh() {
             var width = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
             var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-            if (width != this.context.canvas.width) this.context.canvas.width = width;
-            if (height != this.context.canvas.height) this.context.canvas.height = height;
+            if (width && width != this.context.canvas.width) this.context.canvas.width = width;
+            if (height && height != this.context.canvas.height) this.context.canvas.height = height;
             Cache.Update(this.director, this.context, true);
             this.touchMoveX(0);
             this.touchMoveY(0);

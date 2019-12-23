@@ -366,8 +366,8 @@ export function ScrollFactory(Sprite, GetContext) {
 			return this;
 		}
 		refresh(width = 0, height = 0) {
-			if (width != this.context.canvas.width) this.context.canvas.width = width;
-			if (height != this.context.canvas.height) this.context.canvas.height = height;
+			if (width && width != this.context.canvas.width) this.context.canvas.width = width;
+			if (height && height != this.context.canvas.height) this.context.canvas.height = height;
 			Cache.Update(this.director, this.context, true);
 			this.touchMoveX(0);
 			this.touchMoveY(0);
