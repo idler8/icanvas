@@ -1091,6 +1091,76 @@ function Factory(prototype, source) {
   }
 }
 
+var Render =
+/*#__PURE__*/
+function () {
+  /**
+   * 渲染列表中间缓存
+   */
+  function Render() {
+    _classCallCheck(this, Render);
+
+    this.renderArray = [];
+  }
+  /**
+   *
+   * @param {Component} Stage 舞台
+   * @param {CanvasRenderingContext2D} Context 渲染上下文
+   * @param {Boolean} Clear 是否清空上下文
+   */
+
+
+  _createClass(Render, [{
+    key: "Update",
+    value: function Update(Stage, Context, Clear) {
+      this.PreUpdate(Stage);
+      this.renderArray.sort(function (a, b) {
+        return a._HandleParentZIndex - b._HandleParentZIndex || a._HandleZIndex - b._HandleZIndex;
+      });
+      this.Updating(Context, Clear);
+      this.renderArray.length = 0;
+    }
+    /**
+     * 渲染前
+     * @param {Component} Component
+     */
+
+  }, {
+    key: "PreUpdate",
+    value: function PreUpdate(Component) {
+      if (!Component) return;
+
+      if (Component instanceof Array) {
+        for (var i = 0, l = Component.length; i < l; i++) {
+          this.PreUpdate(Component[i]);
+        }
+      } else {
+        if (Component.preUpdate(this)) return;
+        if (Component.children.length) this.PreUpdate(Component.children);
+      }
+    }
+    /**
+     * 渲染中
+     * @param {CanvasRenderingContext2D} Context 渲染上下文
+     * @param {Boolean} Clear 是否清空
+     */
+
+  }, {
+    key: "Updating",
+    value: function Updating(Context) {
+      var Clear = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      if (Clear) Context.clearRect(0, 0, Context.canvas.width, Context.canvas.height);
+      this.renderArray.forEach(function (Component) {
+        if (Component.beforeUpdate(Context)) return;
+        Component.update(Context);
+      });
+      Context.setTransform(1, 0, 0, 1, 0, 0);
+    }
+  }]);
+
+  return Render;
+}();
+
 function option(options) {
   this.alpha = options.alpha === undefined ? 1 : options.alpha;
 }
@@ -1887,22 +1957,18 @@ function ContainerFactory() {
         return true;
       }
     }, {
-      key: "renderPreUpdate",
-      value: function renderPreUpdate(renderArray) {
+      key: "preUpdate",
+      value: function preUpdate(renderer) {
         if (!this.visible) return true;
-      }
-    }, {
-      key: "renderPreUpdated",
-      value: function renderPreUpdated(renderArray) {
         this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
         this.matrix.translate(this.x, this.y).rotate(this.radian).scale(this.scaleX, this.scaleY);
         if (!this.update) return;
         this._HandleParentZIndex = (this.parent && this.parent._HandleParentZIndex || 0) + this.zIndex;
-        this._HandleZIndex = renderArray.push(this);
+        this._HandleZIndex = renderer.renderArray.push(this);
       }
     }, {
-      key: "renderUpdate",
-      value: function renderUpdate(Context) {
+      key: "beforeUpdate",
+      value: function beforeUpdate(Context) {
         if (this.alpha == 0) return true;
         var alpha = Math.min(1, this.alpha);
         if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
@@ -1913,23 +1979,6 @@ function ContainerFactory() {
           Context.strokeStyle = this.debug;
           Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
         }
-
-        if (this.cache.context) {
-          Context.drawImage(this.cache.context.canvas, 0, 0);
-          return true;
-        }
-      }
-    }, {
-      key: "cache",
-      value: function cache(context) {
-        if (context !== true) this.cache.context = context;
-
-        if (this.cache.context) {
-          if (!ContainerFactory.Render) ContainerFactory.Render = new Render();
-          ContainerFactory.Render.Update(this, this.cache.context);
-        }
-
-        return this;
       }
     }]);
 
@@ -1955,15 +2004,16 @@ function SpriteFactory(Container) {
 
         _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options));
         _this.texture = null;
-        _this.useClip = false; //是否切割源图
+
+        _this.setTexture(texture);
 
         _this.clipPosition = new Vector2(); //切割位置
 
         _this.clipSize = new Vector2(); //切割大小
 
-        if (options && options.clip) _this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
-
-        _this.setTexture(texture);
+        if (options) {
+          if (options.clip) _this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
+        }
 
         return _this;
       }
@@ -1971,7 +2021,7 @@ function SpriteFactory(Container) {
       _createClass(Sprite, [{
         key: "checkPoint",
         value: function checkPoint(touch) {
-          return touch.x >= -this.anchorX && touch.y >= -this.anchorY && touch.x <= this.width - this.anchorX && touch.y <= this.height - this.anchorY;
+          return touch.x >= 0 && touch.y >= 0 && touch.x <= this.width && touch.y <= this.height;
         }
       }, {
         key: "setClip",
@@ -2009,21 +2059,33 @@ function SpriteFactory(Container) {
         }
       }, {
         key: "clipX",
+        set: function set(v) {
+          this.clipPosition.x = v;
+        },
         get: function get() {
           return this.clipPosition.x;
         }
       }, {
         key: "clipY",
+        set: function set(v) {
+          this.clipPosition.y = v;
+        },
         get: function get() {
           return this.clipPosition.y;
         }
       }, {
         key: "clipWidth",
+        set: function set(v) {
+          this.clipSize.x = v;
+        },
         get: function get() {
           return this.clipSize.x;
         }
       }, {
         key: "clipHeight",
+        set: function set(v) {
+          this.clipSize.y = v;
+        },
         get: function get() {
           return this.clipSize.y;
         }
@@ -2053,7 +2115,7 @@ function RectFactory(Container) {
     _createClass(Rect, [{
       key: "checkPoint",
       value: function checkPoint(touch) {
-        return touch.x >= -this.anchorX && touch.y >= -this.anchorY && touch.x <= this.width - this.anchorX && touch.y <= this.height - this.anchorY;
+        return touch.x >= 0 && touch.y >= 0 && touch.x <= this.width && touch.y <= this.height;
       }
     }, {
       key: "update",
@@ -2131,7 +2193,7 @@ function TextFactory(Container, TestContext) {
     _createClass(Text, [{
       key: "checkPoint",
       value: function checkPoint(touch) {
-        return touch.x >= -this.anchorX - this.paddingLeft && touch.y >= -this.anchorY - this.paddingTop && touch.x <= this.width - this.anchorX + this.paddingRight && touch.x <= this.height - this.anchorY + this.paddingBottom;
+        return touch.x >= -this.paddingLeft && touch.y >= -this.paddingTop && touch.x <= this.width + this.paddingRight && touch.x <= this.height + this.paddingBottom;
       }
     }, {
       key: "setValue",
@@ -2333,6 +2395,115 @@ function TextFactory(Container, TestContext) {
   Factory(Text.prototype, data$5);
   return Text;
 }
+function ScrollFactory(Sprite) {
+  var Cache = new Render();
+  return (
+    /*#__PURE__*/
+    function (_Sprite) {
+      _inherits(Scroll, _Sprite);
+
+      function Scroll() {
+        _classCallCheck(this, Scroll);
+
+        return _possibleConstructorReturn(this, _getPrototypeOf(Scroll).apply(this, arguments));
+      }
+
+      _createClass(Scroll, [{
+        key: "touchMoveX",
+
+        /**
+         * 横向移动
+         * @param {Number} mx 轴X移动量
+         */
+        value: function touchMoveX(mx) {
+          var X = this.clipX;
+          var Max = this.scrollWidth;
+          this.clipX -= mx;
+          if (this.clipX > Max) this.clipX = Max;
+          if (this.clipX < 0) this.clipX = 0;
+          return this.clipX != X;
+        }
+        /**
+         * 纵向移动
+         * @param {Number} my 轴Y移动量
+         */
+
+      }, {
+        key: "touchMoveY",
+        value: function touchMoveY(my) {
+          var Y = this.clipY;
+          var Max = this.scrollHeight;
+          this.clipY -= my;
+          if (this.clipY > Max) this.clipY = Max;
+          if (this.clipY < 0) this.clipY = 0;
+          return this.clipY != Y;
+        }
+      }, {
+        key: "touchMove",
+        value: function touchMove(touch) {
+          this.touchMoveX(touch.moveX);
+          this.touchMoveY(touch.moveY);
+        }
+      }, {
+        key: "setTexture",
+        value: function setTexture(director) {
+          if (!this.context) this.context = GAME.Api.Canvas().getContext('2d');
+          this.director = director;
+          this.texture = this.context.canvas;
+          return this;
+        }
+      }, {
+        key: "refresh",
+        value: function refresh() {
+          var width = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+          var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+          if (width != this.context.canvas.width) this.context.canvas.width = width;
+          if (height != this.context.canvas.height) this.context.canvas.height = height;
+          Cache.Update(this.director, this.context, true);
+          this.touchMoveX(0);
+          this.touchMoveY(0);
+          return this;
+        }
+      }, {
+        key: "touchDirector",
+        value: function touchDirector(res) {
+          if (res == 'refresh') this.refresh();
+        }
+      }, {
+        key: "touchTap",
+        value: function touchTap(touch) {
+          this.touchDirector(GAME.Collsion.Recursive(this.director, {
+            x: touch.x + this.clipX,
+            y: touch.y + this.clipY
+          }));
+        }
+      }, {
+        key: "realWidth",
+        get: function get() {
+          return this.texture.width;
+        }
+      }, {
+        key: "realHeight",
+        get: function get() {
+          return this.texture.height;
+        } //滚动位置
+
+      }, {
+        key: "scrollHeight",
+        get: function get() {
+          return this.realHeight - this.clipHeight;
+        }
+      }, {
+        key: "scrollWidth",
+        get: function get() {
+          return this.realWidth - this.clipWidth;
+        }
+      }]);
+
+      return Scroll;
+    }(Sprite)
+  );
+}
 
 var canvas2d = {
   SetTransform: function SetTransform(matrix) {
@@ -2480,80 +2651,6 @@ var canvas2d = {
   }
 };
 
-var Render$1 =
-/*#__PURE__*/
-function () {
-  /**
-   * 渲染列表中间缓存
-   */
-  function Render() {
-    _classCallCheck(this, Render);
-
-    this.renderArray = [];
-  }
-  /**
-   *
-   * @param {Component} Stage 舞台
-   * @param {CanvasRenderingContext2D} Context 渲染上下文
-   * @param {Boolean} Clear 是否清空上下文
-   */
-
-
-  _createClass(Render, [{
-    key: "Update",
-    value: function Update(Stage, Context, Clear) {
-      this.PreUpdate(Stage);
-      this.renderArray.sort(function (a, b) {
-        return a._HandleParentZIndex - b._HandleParentZIndex || a._HandleZIndex - b._HandleZIndex;
-      });
-      this.Updating(Context, Clear);
-      this.renderArray.length = 0;
-    }
-    /**
-     * 渲染前
-     * @param {Component} Component
-     */
-
-  }, {
-    key: "PreUpdate",
-    value: function PreUpdate(Component) {
-      if (!Component) return;
-
-      if (Component instanceof Array) {
-        for (var i = 0, l = Component.length; i < l; i++) {
-          this.PreUpdate(Component[i]);
-        }
-      } else {
-        if (Component.renderPreUpdate(this.renderArray)) return;
-        if (Component.preUpdate) Component.preUpdate();
-        if (Component.renderPreUpdated(this.renderArray)) return;
-        if (Component.preUpdated) Component.preUpdated();
-        if (Component.children.length) this.PreUpdate(Component.children);
-      }
-    }
-    /**
-     * 渲染中
-     * @param {CanvasRenderingContext2D} Context 渲染上下文
-     * @param {Boolean} Clear 是否清空
-     */
-
-  }, {
-    key: "Updating",
-    value: function Updating(Context) {
-      var Clear = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      if (Clear) Context.clearRect(0, 0, Context.canvas.width, Context.canvas.height);
-      this.renderArray.forEach(function (Component) {
-        if (Component.beforeUpdate) Component.beforeUpdate(Context);
-        if (Component.renderUpdate(Context)) return;
-        if (Component.update) Component.update(Context);
-      });
-      Context.setTransform(1, 0, 0, 1, 0, 0);
-    }
-  }]);
-
-  return Render;
-}();
-
 var Touch =
 /*#__PURE__*/
 function (_Event) {
@@ -2665,6 +2762,7 @@ function () {
       this.TouchHandle.x = this.MatrixHandle.a * touch.x + this.MatrixHandle.c * touch.y + this.MatrixHandle.tx;
       this.TouchHandle.y = this.MatrixHandle.b * touch.x + this.MatrixHandle.d * touch.y + this.MatrixHandle.ty;
       if (!Component.checkPoint) return true;
+      this.TouchHandle.addTo(Component.anchorX, Component.anchorY);
       if (Component.checkPoint(this.TouchHandle)) return true;
     } //TODO 使用event
 
@@ -2676,11 +2774,18 @@ function () {
 
       if (Component instanceof Array) {
         for (var i = Component.length - 1; i >= 0; i--) {
-          if (this.Recursive(Component[i], touch, Action)) return true;
+          var Res = this.Recursive(Component[i], touch, Action);
+          if (Res) return Res;
         }
       } else {
         if (!Component.visible) return false;
-        if (Component.touchChildren && Component.children.length && this.Recursive(Component.children, touch, Action)) return true;
+
+        if (Component.touchChildren && Component.children.length) {
+          var _Res = this.Recursive(Component.children, touch, Action);
+
+          if (_Res) return _Res;
+        }
+
         if (!this.InComponent(Component, touch)) return false;
         if (!Component[Action]) return Component.touchStop;
         var Result = Component[Action](this.TouchHandle);
@@ -2804,4 +2909,4 @@ function PointInRect(x, y, bx, by, bw, bh) {
   return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
 }
 
-export { ContainerFactory as Container, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Position as MathPosition, Random as MathRandom, Time as MathTime, Vector as MathVector, Vector2 as MathVector2, RectFactory as Rect, SpriteFactory as Sprite, TextFactory as Text, canvas2d as UtilCanvas2D, Collision as UtilCollsion, Loader as UtilLoader, PointInRect as UtilPointInRect, RecursiveMap as UtilRecursiveMap, Render$1 as UtilRender, Touch as UtilTouch };
+export { ContainerFactory as Container, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Position as MathPosition, Random as MathRandom, Time as MathTime, Vector as MathVector, Vector2 as MathVector2, RectFactory as Rect, ScrollFactory as Scroll, SpriteFactory as Sprite, TextFactory as Text, canvas2d as UtilCanvas2D, Collision as UtilCollsion, Loader as UtilLoader, PointInRect as UtilPointInRect, RecursiveMap as UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch };

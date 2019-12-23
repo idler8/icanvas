@@ -1,7 +1,7 @@
 import Minix from '../utils/lib/minix.js';
+import Render from '../utils/lib/render.js';
 import Vector2 from '../maths/lib/vector2.js';
 import Matrix3 from '../maths/lib/matrix3.js';
-// import Render from '../utils/lib/render.js';
 import * as Alpha from './lib/alpha.js';
 import * as Anchor from './lib/anchor.js';
 import * as Angle from './lib/angle.js';
@@ -36,10 +36,8 @@ export function ContainerFactory() {
 		checkPoint(touch) {
 			return true;
 		}
-		renderPreUpdate(renderArray) {
+		preUpdate(renderer) {
 			if (!this.visible) return true;
-		}
-		renderPreUpdated(renderArray) {
 			this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
 			this.matrix
 				.translate(this.x, this.y)
@@ -47,9 +45,9 @@ export function ContainerFactory() {
 				.scale(this.scaleX, this.scaleY);
 			if (!this.update) return;
 			this._HandleParentZIndex = ((this.parent && this.parent._HandleParentZIndex) || 0) + this.zIndex;
-			this._HandleZIndex = renderArray.push(this);
+			this._HandleZIndex = renderer.renderArray.push(this);
 		}
-		renderUpdate(Context) {
+		beforeUpdate(Context) {
 			if (this.alpha == 0) return true;
 			let alpha = Math.min(1, this.alpha);
 			if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
@@ -59,18 +57,6 @@ export function ContainerFactory() {
 				Context.strokeStyle = this.debug;
 				Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
 			}
-			if (this.cache.context) {
-				Context.drawImage(this.cache.context.canvas, 0, 0);
-				return true;
-			}
-		}
-		cache(context) {
-			if (context !== true) this.cache.context = context;
-			if (this.cache.context) {
-				if (!ContainerFactory.Render) ContainerFactory.Render = new Render();
-				ContainerFactory.Render.Update(this, this.cache.context);
-			}
-			return this;
 		}
 	}
 	for (let i = 0; i < ContainerProperties.length; i++) {
@@ -83,14 +69,15 @@ export function SpriteFactory(Container) {
 		constructor(texture, options) {
 			super(options);
 			this.texture = null;
-			this.useClip = false; //是否切割源图
+			this.setTexture(texture);
 			this.clipPosition = new Vector2(); //切割位置
 			this.clipSize = new Vector2(); //切割大小
-			if (options && options.clip) this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
-			this.setTexture(texture);
+			if (options) {
+				if (options.clip) this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
+			}
 		}
 		checkPoint(touch) {
-			return touch.x >= -this.anchorX && touch.y >= -this.anchorY && touch.x <= this.width - this.anchorX && touch.y <= this.height - this.anchorY;
+			return touch.x >= 0 && touch.y >= 0 && touch.x <= this.width && touch.y <= this.height;
 		}
 		setClip(x = 0, y = 0, width, height) {
 			this.useClip = true;
@@ -99,14 +86,26 @@ export function SpriteFactory(Container) {
 			this.size.setTo(width, height);
 			return this;
 		}
+		set clipX(v) {
+			this.clipPosition.x = v;
+		}
 		get clipX() {
 			return this.clipPosition.x;
+		}
+		set clipY(v) {
+			this.clipPosition.y = v;
 		}
 		get clipY() {
 			return this.clipPosition.y;
 		}
+		set clipWidth(v) {
+			this.clipSize.x = v;
+		}
 		get clipWidth() {
 			return this.clipSize.x;
+		}
+		set clipHeight(v) {
+			this.clipSize.y = v;
 		}
 		get clipHeight() {
 			return this.clipSize.y;
@@ -138,7 +137,7 @@ export function RectFactory(Container) {
 			if (options) this.setStyle(options.style);
 		}
 		checkPoint(touch) {
-			return touch.x >= -this.anchorX && touch.y >= -this.anchorY && touch.x <= this.width - this.anchorX && touch.y <= this.height - this.anchorY;
+			return touch.x >= 0 && touch.y >= 0 && touch.x <= this.width && touch.y <= this.height;
 		}
 		update(Context) {
 			if (this.style.lineWidth && !this.style.strokeUp) {
@@ -182,10 +181,10 @@ export function TextFactory(Container, TestContext) {
 		}
 		checkPoint(touch) {
 			return (
-				touch.x >= -this.anchorX - this.paddingLeft &&
-				touch.y >= -this.anchorY - this.paddingTop &&
-				touch.x <= this.width - this.anchorX + this.paddingRight &&
-				touch.x <= this.height - this.anchorY + this.paddingBottom
+				touch.x >= -this.paddingLeft &&
+				touch.y >= -this.paddingTop &&
+				touch.x <= this.width + this.paddingRight &&
+				touch.x <= this.height + this.paddingBottom
 			);
 		}
 		set value(v) {
@@ -316,18 +315,69 @@ export function TextFactory(Container, TestContext) {
 	Minix(Text.prototype, Padding.data);
 	return Text;
 }
-export function ScrollFactory(Sprite, GetContext) {
+export function ScrollFactory(Sprite) {
+	let Cache = new Render();
 	return class Scroll extends Sprite {
-		constructor(director, options) {
-			super(options);
-			this.director = director;
+		get realWidth() {
+			return this.texture.width;
 		}
-		refresh() {
-			this.director.cache(this.director.cache.context ? true : GetContext());
-			this.texture = this.director.cache.context;
+		get realHeight() {
+			return this.texture.height;
+		}
+		//滚动位置
+		get scrollHeight() {
+			return this.realHeight - this.clipHeight;
+		}
+		get scrollWidth() {
+			return this.realWidth - this.clipWidth;
+		}
+		/**
+		 * 横向移动
+		 * @param {Number} mx 轴X移动量
+		 */
+		touchMoveX(mx) {
+			let X = this.clipX;
+			let Max = this.scrollWidth;
+			this.clipX -= mx;
+			if (this.clipX > Max) this.clipX = Max;
+			if (this.clipX < 0) this.clipX = 0;
+			return this.clipX != X;
+		}
+		/**
+		 * 纵向移动
+		 * @param {Number} my 轴Y移动量
+		 */
+		touchMoveY(my) {
+			let Y = this.clipY;
+			let Max = this.scrollHeight;
+			this.clipY -= my;
+			if (this.clipY > Max) this.clipY = Max;
+			if (this.clipY < 0) this.clipY = 0;
+			return this.clipY != Y;
+		}
+		touchMove(touch) {
+			this.touchMoveX(touch.moveX);
+			this.touchMoveY(touch.moveY);
+		}
+		setTexture(director) {
+			if (!this.context) this.context = GAME.Api.Canvas().getContext('2d');
+			this.director = director;
+			this.texture = this.context.canvas;
 			return this;
 		}
-		touchMoveX(x) {}
-		touchMoveY(y) {}
+		refresh(width = 0, height = 0) {
+			if (width != this.context.canvas.width) this.context.canvas.width = width;
+			if (height != this.context.canvas.height) this.context.canvas.height = height;
+			Cache.Update(this.director, this.context, true);
+			this.touchMoveX(0);
+			this.touchMoveY(0);
+			return this;
+		}
+		touchDirector(res) {
+			if (res == 'refresh') this.refresh();
+		}
+		touchTap(touch) {
+			this.touchDirector(GAME.Collsion.Recursive(this.director, { x: touch.x + this.clipX, y: touch.y + this.clipY }));
+		}
 	};
 }

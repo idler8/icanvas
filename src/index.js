@@ -15,7 +15,7 @@ export {
 /**
  * 界面组件包
  */
-export { ContainerFactory as Container, SpriteFactory as Sprite, RectFactory as Rect, TextFactory as Text } from './components/';
+export { ContainerFactory as Container, SpriteFactory as Sprite, RectFactory as Rect, TextFactory as Text, ScrollFactory as Scroll } from './components/';
 /**
  * 工具包
  */
