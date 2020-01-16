@@ -2,55 +2,87 @@ import _classCallCheck from '@babel/runtime/helpers/classCallCheck';
 import _createClass from '@babel/runtime/helpers/createClass';
 import _possibleConstructorReturn from '@babel/runtime/helpers/possibleConstructorReturn';
 import _getPrototypeOf from '@babel/runtime/helpers/getPrototypeOf';
-import _assertThisInitialized from '@babel/runtime/helpers/assertThisInitialized';
 import _inherits from '@babel/runtime/helpers/inherits';
-import _wrapNativeSuper from '@babel/runtime/helpers/wrapNativeSuper';
+import _get from '@babel/runtime/helpers/get';
 import _typeof from '@babel/runtime/helpers/typeof';
+import _assertThisInitialized from '@babel/runtime/helpers/assertThisInitialized';
+import _construct from '@babel/runtime/helpers/construct';
 import _defineProperty from '@babel/runtime/helpers/defineProperty';
-import Event from 'eventemitter3';
 
 /**
  * @class 扩展数组类
  */
-var BaseArray =
+var Vector =
 /*#__PURE__*/
-function (_Array) {
-  _inherits(BaseArray, _Array);
+function () {
+  _createClass(Vector, [{
+    key: "length",
+    get: function get() {
+      return this.elements ? this.elements.length : 0;
+    }
+  }]);
 
-  function BaseArray() {
-    var _this;
+  function Vector() {
+    _classCallCheck(this, Vector);
 
-    _classCallCheck(this, BaseArray);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(BaseArray).call(this, arguments.length));
-
-    _this.setTo.apply(_assertThisInitialized(_this), arguments);
-
-    return _this;
-  }
-  /**
-   * 将数组所有内容设置为同一个值
-   * @param {Any} n
-   */
+    this.elements = [];
+    if (arguments.length) for (var i = 0; i < arguments.length; i++) {
+      this.elements[i] = arguments[i];
+    }
+  } //向量置零
 
 
-  _createClass(BaseArray, [{
-    key: "set",
-    value: function set(n) {
+  _createClass(Vector, [{
+    key: "same",
+    value: function same(n) {
       for (var i = 0; i < this.length; i++) {
-        this[i] = n;
+        this.elements[i] = n;
+      }
+
+      return this;
+    } //类型变换
+
+  }, {
+    key: "typeTo",
+    value: function typeTo(superClass) {
+      this.elements = new superClass(this.elements);
+      return this;
+    } //向量归一化
+
+  }, {
+    key: "normalize",
+    value: function normalize() {
+      var total = 0;
+
+      for (var i = 0, len = this.length; i < len; i++) {
+        total += this.elements[i] * this.elements[i];
+      }
+
+      total = Math.sqrt(total);
+      if (!total) return this.same(0);
+      if (total == 1) return this;
+
+      for (var _i = 0; _i < this.length; _i++) {
+        this.elements[_i] /= total;
       }
 
       return this;
     }
     /**
-     * 将数组内容分别设置为各参数值
+     * 将数组所有内容设置为同一个值
+     * @param {Any} n
      */
 
   }, {
-    key: "setTo",
-    value: function setTo() {
-      return this.setToArray(arguments);
+    key: "set",
+    value: function set() {
+      if (!arguments.length) return this;
+
+      for (var i = 0; i < arguments.length; i++) {
+        this.elements[i] = arguments[i];
+      }
+
+      return this;
     }
     /**
      * 将数组参数分别设置为float数组的值
@@ -58,15 +90,10 @@ function (_Array) {
      */
 
   }, {
-    key: "setToArray",
-    value: function setToArray(_float) {
-      if (_float === this) return this;
-
-      for (var i = 0; i < _float.length; i++) {
-        this[i] = _float[i];
-      }
-
-      return this;
+    key: "setApply",
+    value: function setApply(vector) {
+      if (vector === this) return this;
+      return this.set.apply(this, vector.elements || vector);
     }
     /**
      * 拷贝本类
@@ -75,7 +102,7 @@ function (_Array) {
   }, {
     key: "clone",
     value: function clone() {
-      return new this.constructor().setToArray(this);
+      return new this.constructor().setApply(this);
     }
     /**
      * 判断数组长度和内部值全部相同
@@ -85,13 +112,13 @@ function (_Array) {
 
   }, {
     key: "equals",
-    value: function equals(_float2) {
+    value: function equals(_float) {
       var absolute = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      if (absolute && this.length != _float2.length) return false;
-      var length = absolute ? this.length : Math.min(this.length, _float2.length);
+      if (absolute && this.length != _float.length) return false;
+      var length = absolute ? this.length : Math.min(this.length, _float.length);
 
       for (var i = 0; i < length; i++) {
-        if (this[i] != _float2[i]) return false;
+        if (this[i] != _float[i]) return false;
       }
 
       return true;
@@ -101,195 +128,94 @@ function (_Array) {
      */
 
   }, {
-    key: "equalsSome",
-    value: function equalsSome() {
+    key: "equalsApply",
+    value: function equalsApply() {
       return this.equals(arguments);
     }
     /**
-     * 获取各种TypeArray
+     * 向量加法
      */
 
   }, {
-    key: "Int8Array",
-    get: function get() {
-      return new Int8Array(this);
-    }
-  }, {
-    key: "Uint8Array",
-    get: function get() {
-      return new Uint8Array(this);
-    }
-  }, {
-    key: "Uint8ClampedArray",
-    get: function get() {
-      return new Uint8ClampedArray(this);
-    }
-  }, {
-    key: "Int16Array",
-    get: function get() {
-      return new Int16Array(this);
-    }
-  }, {
-    key: "Uint16Array",
-    get: function get() {
-      return new Uint16Array(this);
-    }
-  }, {
-    key: "Int32Array",
-    get: function get() {
-      return new Int32Array(this);
-    }
-  }, {
-    key: "Uint32Array",
-    get: function get() {
-      return new Uint32Array(this);
-    }
-  }, {
-    key: "Float32Array",
-    get: function get() {
-      return new Float32Array(this);
-    }
-  }, {
-    key: "Float64Array",
-    get: function get() {
-      return new Float64Array(this);
-    }
-  }, {
-    key: "BigInt64Array",
-    get: function get() {
-      return new BigInt64Array(this);
-    }
-  }, {
-    key: "BigUint64Array",
-    get: function get() {
-      return new BigUint64Array(this);
-    }
-  }]);
-
-  return BaseArray;
-}(_wrapNativeSuper(Array));
-
-var Vector =
-/*#__PURE__*/
-function (_BaseArray) {
-  _inherits(Vector, _BaseArray);
-
-  function Vector() {
-    _classCallCheck(this, Vector);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(Vector).apply(this, arguments));
-  }
-
-  _createClass(Vector, [{
     key: "add",
-    //向量加
-    value: function add(n) {
-      for (var i = 0; i < this.length; i++) {
-        this[i] += n;
+    value: function add() {
+      if (!arguments.length) return this;
+
+      for (var i = 0; i < arguments.length; i++) {
+        this.elements[i] += arguments[i];
       }
 
       return this;
     }
   }, {
-    key: "addTo",
-    value: function addTo() {
-      return this.addToVector(arguments);
+    key: "addApply",
+    value: function addApply(vector) {
+      return this.add.apply(this, vector.elements || vector);
     }
-  }, {
-    key: "addToVector",
-    value: function addToVector(vector) {
-      for (var i = 0; i < vector.length; i++) {
-        this[i] += vector[i];
-      }
-
-      return this;
-    } //向量减
+    /**
+     * 向量减法
+     */
 
   }, {
     key: "sub",
-    value: function sub(n) {
-      for (var i = 0; i < this.length; i++) {
-        this[i] -= n;
+    value: function sub() {
+      if (!arguments.length) return this;
+
+      for (var i = 0; i < arguments.length; i++) {
+        this.elements[i] -= arguments[i];
       }
 
       return this;
     }
   }, {
-    key: "subTo",
-    value: function subTo() {
-      return this.subToVector(arguments);
+    key: "subApply",
+    value: function subApply(vector) {
+      return this.sub.apply(this, vector.elements || vector);
     }
-  }, {
-    key: "subToVector",
-    value: function subToVector(vector) {
-      for (var i = 0; i < vector.length; i++) {
-        this[i] -= vector[i];
-      }
-
-      return this;
-    } //向量乘
+    /**
+     * 向量乘法
+     */
 
   }, {
     key: "mult",
-    value: function mult(n) {
-      for (var i = 0; i < this.length; i++) {
-        this[i] *= n;
+    value: function mult() {
+      if (!arguments.length) return this;
+
+      for (var i = 0; i < arguments.length; i++) {
+        this.elements[i] *= arguments[i];
       }
 
       return this;
     }
   }, {
-    key: "multTo",
-    value: function multTo() {
-      return this.multToVector(arguments);
+    key: "multApply",
+    value: function multApply(vector) {
+      return this.mult.apply(this, vector.elements || vector);
     }
-  }, {
-    key: "multToVector",
-    value: function multToVector(vector) {
-      for (var i = 0; i < vector.length; i++) {
-        this[i] *= vector[i];
-      }
-
-      return this;
-    } //向量除
+    /**
+     * 向量除法
+     */
 
   }, {
     key: "div",
-    value: function div(n) {
-      for (var i = 0; i < this.length; i++) {
-        this[i] /= n;
+    value: function div() {
+      if (!arguments.length) return this;
+
+      for (var i = 0; i < arguments.length; i++) {
+        this.elements[i] /= arguments[i];
       }
 
       return this;
     }
   }, {
-    key: "divTo",
-    value: function divTo() {
-      return this.divToVector(arguments);
-    }
-  }, {
-    key: "divToVector",
-    value: function divToVector(vector) {
-      for (var i = 0; i < vector.length; i++) {
-        this[i] /= vector[i];
-      }
-
-      return this;
-    } //向量置零
-
-  }, {
-    key: "zero",
-    value: function zero() {
-      for (var i = 0; i < this.length; i++) {
-        this[i] = 0;
-      }
-
-      return this;
+    key: "divApply",
+    value: function divApply(vector) {
+      return this.div.apply(this, vector.elements || vector);
     }
   }]);
 
   return Vector;
-}(BaseArray);
+}();
 
 var Vector2 =
 /*#__PURE__*/
@@ -319,37 +245,25 @@ function (_Vector) {
 
   }, {
     key: "dist",
-    value: function dist(vector2) {
-      return this.distTo(vector2.x, vector2.y);
-    }
-  }, {
-    key: "distTo",
-    value: function distTo(x, y) {
+    value: function dist() {
+      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var dx = this.x - x;
       var dy = this.y - y;
       return Math.sqrt(dx * dx + dy * dy);
-    } //计算向量到0的长度
+    }
+  }, {
+    key: "distVector",
+    value: function distVector(vector2) {
+      return this.dist(vector2.x, vector2.y);
+    } //计算夹角
 
   }, {
-    key: "mag",
-    value: function mag() {
-      return Math.sqrt(this.x * this.x + this.y * this.y);
-    } //比较并设置为最小向量
-
-  }, {
-    key: "min",
-    value: function min(vector2) {
-      if (vector2.x < this.x) this.x = vector2.x;
-      if (vector2.y < this.y) this.y = vector2.y;
-      return this;
-    } //比较并设置为最大向量
-
-  }, {
-    key: "max",
-    value: function max(vector2) {
-      if (vector2.x > this.x) this.x = vector2.x;
-      if (vector2.y > this.y) this.y = vector2.y;
-      return this;
+    key: "angle",
+    value: function angle(vector2) {
+      var mag = this.dist() * vector2.dist();
+      var dot = this.x * vector2.x + this.y * vector2.y;
+      return Math.acos(dot / mag);
     } //判断不规则碰撞
 
   }, {
@@ -364,354 +278,637 @@ function (_Vector) {
             yi = vs[i].y,
             xj = vs[j].x,
             yj = vs[j].y,
-            intersect = yi > this[1] != yj > this[1] && this[0] < (xj - xi) * (this[1] - yi) / (yj - yi) + xi;
+            intersect = yi > this.y != yj > this.y && this.x < (xj - xi) * (this.y - yi) / (yj - yi) + xi;
         if (intersect) inside = !inside;
       }
 
       return inside;
     }
   }, {
-    key: "dot",
-    value: function dot(vector2) {
-      return this.x * vector2.x + this.y * vector2.y;
-    } // dotCoords(x, y) {
-    // 	return this.x * x + this.y + y;
-    // }
-    // normalize() {
-    // 	var m = this.mag();
-    // 	if (m != 0 && m != 1) {
-    // 		this.div(m);
-    // 	}
-    // 	return this;
-    // }
-    // limit(max) {
-    // 	if (this.mag() > max) {
-    // 		this.normalize();
-    // 		this.mult(max);
-    // 	}
-    // 	return this;
-    // }
-    // heading2d() {
-    // 	var angle = Math.atan2(-y, x);
-    // 	return -1 * angle;
-    // }
-
-  }, {
-    key: "angle",
-    value: function angle(vector) {
-      return Math.acos(this.dot(vector) / (this.mag() * vector.mag()));
-    } // normal() {
-    // 	var temp = this.vector.x;
-    // 	this.x = -this.vector.y;
-    // 	this.y = temp;
-    // 	return this;
-    // }
-    // random(mag) {
-    // 	this.x = Math.random();
-    // 	this.y = Math.random();
-    // 	if (mag) this.scale(mag);
-    // 	return this;
-    // }
-
+    key: "multiplyMatrix4",
+    value: function multiplyMatrix4(matrix4) {
+      var e = matrix4.elements;
+      var p = this.elements;
+      var w = 1 / (e[3] * p[0] + e[7] * p[1] + e[15]);
+      return this.set((e[0] * p[0] + e[4] * p[1] + e[12]) * w, (e[1] * p[0] + e[5] * p[1] + e[13]) * w);
+    }
   }, {
     key: "x",
     get: function get() {
-      return this[0];
+      return this.elements[0];
     },
     set: function set(x) {
-      this[0] = x;
+      this.elements[0] = x;
     }
   }, {
     key: "y",
     get: function get() {
-      return this[1];
+      return this.elements[1];
     },
     set: function set(y) {
-      this[1] = y;
+      this.elements[1] = y;
     }
   }]);
 
   return Vector2;
 }(Vector);
 
-var Matrix3 =
+var Vector3 =
 /*#__PURE__*/
-function (_BaseArray) {
-  _inherits(Matrix3, _BaseArray);
+function (_Vector) {
+  _inherits(Vector3, _Vector);
 
-  _createClass(Matrix3, [{
-    key: "a",
+  function Vector3() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+    _classCallCheck(this, Vector3);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(Vector3).call(this, x, y, z));
+  }
+
+  _createClass(Vector3, [{
+    key: "dist",
+    //距离计算
+    value: function dist() {
+      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+      var dx = this.x - x;
+      var dy = this.y - y;
+      var dz = this.z - z;
+      return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+  }, {
+    key: "distVector",
+    value: function distVector(vector3) {
+      return this.dist(vector3.x, vector3.y, vector3.z);
+    } //计算夹角
+
+  }, {
+    key: "angle",
+    value: function angle(vector3) {
+      var mag = this.dist() * vector3.dist();
+      var dot = this.x * vector3.x + this.y * vector3.y + this.z * vector3.z;
+      return Math.acos(dot / mag);
+    }
+  }, {
+    key: "multiplyMatrix4",
+    value: function multiplyMatrix4(matrix4) {
+      var p = this.elements;
+      var e = matrix4.elements;
+      var w = 1 / (e[3] * p[0] + e[7] * p[1] + e[11] * p[2] + e[15]);
+      return this.set((e[0] * p[0] + e[4] * p[1] + e[8] * p[2] + e[12]) * w, (e[1] * p[0] + e[5] * p[1] + e[9] * p[2] + e[13]) * w, (e[2] * p[0] + e[6] * p[1] + e[10] * p[2] + e[14]) * w);
+    }
+  }, {
+    key: "x",
     get: function get() {
-      return this[0];
+      return this.elements[0];
     },
     set: function set(x) {
-      this[0] = x;
+      this.elements[0] = x;
     }
   }, {
-    key: "b",
+    key: "y",
     get: function get() {
-      return this[1];
+      return this.elements[1];
     },
     set: function set(y) {
-      this[1] = y;
+      this.elements[1] = y;
     }
   }, {
-    key: "c",
+    key: "z",
     get: function get() {
-      return this[2];
+      return this.elements[2];
     },
-    set: function set(x) {
-      this[2] = x;
-    }
-  }, {
-    key: "d",
-    get: function get() {
-      return this[3];
-    },
-    set: function set(y) {
-      this[3] = y;
-    }
-  }, {
-    key: "tx",
-    get: function get() {
-      return this[4];
-    },
-    set: function set(x) {
-      this[4] = x;
-    }
-  }, {
-    key: "ty",
-    get: function get() {
-      return this[5];
-    },
-    set: function set(y) {
-      this[5] = y;
+    set: function set(z) {
+      this.elements[2] = z;
     }
   }]);
 
-  function Matrix3() {
-    var a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-    var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var c = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-    var d = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
-    var tx = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-    var ty = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+  return Vector3;
+}(Vector);
 
-    _classCallCheck(this, Matrix3);
+var Matrix4 =
+/*#__PURE__*/
+function (_Vector) {
+  _inherits(Matrix4, _Vector);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(Matrix3).call(this, a, b, c, d, tx, ty, 0, 0, 1));
-  } //重置矩阵
+  function Matrix4(vector) {
+    var _this;
+
+    _classCallCheck(this, Matrix4);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Matrix4).call(this, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
+    if (vector) _this.setApply(vector);
+    return _this;
+  } //重置为单位矩阵
 
 
-  _createClass(Matrix3, [{
+  _createClass(Matrix4, [{
     key: "identity",
     value: function identity() {
-      return this.setTo(1, 0, 0, 1, 0, 0, 0, 0, 1);
-    } //位移
+      return this.set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    } //乘以Matrix4
 
   }, {
-    key: "translate",
-    value: function translate(x, y) {
-      this[4] = this[0] * x + this[2] * y + this[4];
-      this[5] = this[1] * x + this[3] * y + this[5];
+    key: "multiply",
+    value: function multiply(matrix4) {
+      var i, e, a, b, ai0, ai1, ai2, ai3; // Calculate e = a * b
+
+      e = this.elements;
+      a = this.elements;
+      b = matrix4.elements; // If e equals b, copy b to temporary matrix.
+
+      if (e === b) {
+        b = new Float32Array(16);
+
+        for (i = 0; i < 16; ++i) {
+          b[i] = e[i];
+        }
+      }
+
+      for (i = 0; i < 4; i++) {
+        ai0 = a[i];
+        ai1 = a[i + 4];
+        ai2 = a[i + 8];
+        ai3 = a[i + 12];
+        e[i] = ai0 * b[0] + ai1 * b[1] + ai2 * b[2] + ai3 * b[3];
+        e[i + 4] = ai0 * b[4] + ai1 * b[5] + ai2 * b[6] + ai3 * b[7];
+        e[i + 8] = ai0 * b[8] + ai1 * b[9] + ai2 * b[10] + ai3 * b[11];
+        e[i + 12] = ai0 * b[12] + ai1 * b[13] + ai2 * b[14] + ai3 * b[15];
+      }
+
       return this;
-    } //旋转
+    }
+    /**
+     * 乘以一个点返回一个新点
+     */
 
   }, {
-    key: "rotate",
-    value: function rotate(a) {
-      var s = Math.sin(a),
-          c = Math.cos(a);
-      var a0 = this[0],
-          a1 = this[1],
-          a2 = this[2],
-          a3 = this[3];
-      this[0] = a0 * c + a2 * s;
-      this[1] = a1 * c + a3 * s;
-      this[2] = a0 * -s + a2 * c;
-      this[3] = a1 * -s + a3 * c;
-      return this;
-    } //缩放
+    key: "multiplyVector3",
+    value: function multiplyVector3(vector3) {
+      var e = this.elements;
+      var p = vector3.elements;
+      var x = p[0] * e[0] + p[1] * e[4] + p[2] * e[8] + e[12];
+      var y = p[0] * e[1] + p[1] * e[5] + p[2] * e[9] + e[13];
+      var z = p[0] * e[2] + p[1] * e[6] + p[2] * e[10] + e[14];
+      vector3.x = x;
+      vector3.y = y;
+      vector3.z = z;
+      return vector3;
+    } // multiplyVector4(vector4) {
+    // 	var e = this.elements;
+    // 	var p = vector4.elements;
+    // 	return new Vector4(
+    // 		p[0] * e[0] + p[1] * e[4] + p[2] * e[8] + p[3] * e[12],
+    // 		p[0] * e[1] + p[1] * e[5] + p[2] * e[9] + p[3] * e[13],
+    // 		p[0] * e[2] + p[1] * e[6] + p[2] * e[10] + p[3] * e[14],
+    // 		p[0] * e[3] + p[1] * e[7] + p[2] * e[11] + p[3] * e[15],
+    // 	);
+    // }
+
+    /**
+     * 转置矩阵
+     */
 
   }, {
-    key: "scale",
-    value: function scale(x, y) {
-      this[0] *= x;
-      this[1] *= x;
-      this[2] *= y;
-      this[3] *= y;
-      return this;
-    } //斜切
-
-  }, {
-    key: "skew",
-    value: function skew(x, y) {
-      var tanX = Math.tan(x),
-          tanY = Math.tan(y),
-          mx0 = this[0],
-          mx1 = this[1];
-      this[0] += tanY * this[2];
-      this[1] += tanY * this[3];
-      this[2] += tanX * mx0;
-      this[3] += tanX * mx1;
-      return this;
-    } //倒置
+    key: "transpose",
+    value: function transpose() {
+      var e = this.elements;
+      return this.set(e[0], e[4], e[8], e[12], e[1], e[5], e[9], e[13], e[2], e[6], e[10], e[14], e[3], e[7], e[11], e[15]);
+    }
+    /**
+     * 设置为逆矩阵
+     */
 
   }, {
     key: "invert",
-    value: function invert() {
-      var aa = this[0],
-          ab = this[1],
-          ac = this[2],
-          ad = this[3],
-          atx = this[4],
-          aty = this[5];
-      var det = aa * ad - ab * ac;
-      if (!det) return this;
-      det = 1.0 / det;
-      this[0] = ad * det;
-      this[1] = -ab * det;
-      this[2] = -ac * det;
-      this[3] = aa * det;
-      this[4] = (ac * aty - ad * atx) * det;
-      this[5] = (ab * atx - aa * aty) * det;
-      return this;
-    }
-  }, {
-    key: "append",
-    value: function append(matrix) {
-      var a1 = this.a;
-      var b1 = this.b;
-      var c1 = this.c;
-      var d1 = this.d;
-      this.a = matrix.a * a1 + matrix.b * c1;
-      this.b = matrix.a * b1 + matrix.b * d1;
-      this.c = matrix.c * a1 + matrix.d * c1;
-      this.d = matrix.c * b1 + matrix.d * d1;
-      this.tx = matrix.tx * a1 + matrix.ty * c1 + this.tx;
-      this.ty = matrix.tx * b1 + matrix.ty * d1 + this.ty;
-      return this;
-    }
-  }, {
-    key: "prepend",
-    value: function prepend(matrix) {
-      var tx1 = this.tx;
+    value: function invert(matrix4) {
+      var i, s, d, inv, det;
+      s = matrix4 ? matrix4.elements || matrix4 : this.elements;
+      d = this.elements;
+      inv = Matrix4.invertHandle || (Matrix4.invertHandle = []);
+      inv[0] = s[5] * s[10] * s[15] - s[5] * s[11] * s[14] - s[9] * s[6] * s[15] + s[9] * s[7] * s[14] + s[13] * s[6] * s[11] - s[13] * s[7] * s[10];
+      inv[4] = -s[4] * s[10] * s[15] + s[4] * s[11] * s[14] + s[8] * s[6] * s[15] - s[8] * s[7] * s[14] - s[12] * s[6] * s[11] + s[12] * s[7] * s[10];
+      inv[8] = s[4] * s[9] * s[15] - s[4] * s[11] * s[13] - s[8] * s[5] * s[15] + s[8] * s[7] * s[13] + s[12] * s[5] * s[11] - s[12] * s[7] * s[9];
+      inv[12] = -s[4] * s[9] * s[14] + s[4] * s[10] * s[13] + s[8] * s[5] * s[14] - s[8] * s[6] * s[13] - s[12] * s[5] * s[10] + s[12] * s[6] * s[9];
+      inv[1] = -s[1] * s[10] * s[15] + s[1] * s[11] * s[14] + s[9] * s[2] * s[15] - s[9] * s[3] * s[14] - s[13] * s[2] * s[11] + s[13] * s[3] * s[10];
+      inv[5] = s[0] * s[10] * s[15] - s[0] * s[11] * s[14] - s[8] * s[2] * s[15] + s[8] * s[3] * s[14] + s[12] * s[2] * s[11] - s[12] * s[3] * s[10];
+      inv[9] = -s[0] * s[9] * s[15] + s[0] * s[11] * s[13] + s[8] * s[1] * s[15] - s[8] * s[3] * s[13] - s[12] * s[1] * s[11] + s[12] * s[3] * s[9];
+      inv[13] = s[0] * s[9] * s[14] - s[0] * s[10] * s[13] - s[8] * s[1] * s[14] + s[8] * s[2] * s[13] + s[12] * s[1] * s[10] - s[12] * s[2] * s[9];
+      inv[2] = s[1] * s[6] * s[15] - s[1] * s[7] * s[14] - s[5] * s[2] * s[15] + s[5] * s[3] * s[14] + s[13] * s[2] * s[7] - s[13] * s[3] * s[6];
+      inv[6] = -s[0] * s[6] * s[15] + s[0] * s[7] * s[14] + s[4] * s[2] * s[15] - s[4] * s[3] * s[14] - s[12] * s[2] * s[7] + s[12] * s[3] * s[6];
+      inv[10] = s[0] * s[5] * s[15] - s[0] * s[7] * s[13] - s[4] * s[1] * s[15] + s[4] * s[3] * s[13] + s[12] * s[1] * s[7] - s[12] * s[3] * s[5];
+      inv[14] = -s[0] * s[5] * s[14] + s[0] * s[6] * s[13] + s[4] * s[1] * s[14] - s[4] * s[2] * s[13] - s[12] * s[1] * s[6] + s[12] * s[2] * s[5];
+      inv[3] = -s[1] * s[6] * s[11] + s[1] * s[7] * s[10] + s[5] * s[2] * s[11] - s[5] * s[3] * s[10] - s[9] * s[2] * s[7] + s[9] * s[3] * s[6];
+      inv[7] = s[0] * s[6] * s[11] - s[0] * s[7] * s[10] - s[4] * s[2] * s[11] + s[4] * s[3] * s[10] + s[8] * s[2] * s[7] - s[8] * s[3] * s[6];
+      inv[11] = -s[0] * s[5] * s[11] + s[0] * s[7] * s[9] + s[4] * s[1] * s[11] - s[4] * s[3] * s[9] - s[8] * s[1] * s[7] + s[8] * s[3] * s[5];
+      inv[15] = s[0] * s[5] * s[10] - s[0] * s[6] * s[9] - s[4] * s[1] * s[10] + s[4] * s[2] * s[9] + s[8] * s[1] * s[6] - s[8] * s[2] * s[5];
+      det = s[0] * inv[0] + s[1] * inv[4] + s[2] * inv[8] + s[3] * inv[12];
+      if (det === 0) return this;
+      det = 1 / det;
 
-      if (matrix.a !== 1 || matrix.b !== 0 || matrix.c !== 0 || matrix.d !== 1) {
-        var a1 = this.a;
-        var c1 = this.c;
-        this.a = a1 * matrix.a + this.b * matrix.c;
-        this.b = a1 * matrix.b + this.b * matrix.d;
-        this.c = c1 * matrix.a + this.d * matrix.c;
-        this.d = c1 * matrix.b + this.d * matrix.d;
+      for (i = 0; i < 16; i++) {
+        d[i] = inv[i] * det;
       }
 
-      this.tx = tx1 * matrix.a + this.ty * matrix.c + matrix.tx;
-      this.ty = tx1 * matrix.b + this.ty * matrix.d + matrix.ty;
       return this;
-    } // determinant(a) {
-    //  return a[0] * a[3] - a[1] * a[2];
+    } // /**
+    //  * 设置正交投影
+    //  */
+
+  }, {
+    key: "setOrtho",
+    value: function setOrtho(left, right, bottom, top, near, far) {
+      var e, rw, rh, rd;
+
+      if (left === right || bottom === top || near === far) {
+        throw 'null frustum';
+      }
+
+      rw = 1 / (right - left);
+      rh = 1 / (top - bottom);
+      rd = 1 / (far - near);
+      e = this.elements;
+      e[0] = 2 * rw;
+      e[1] = 0;
+      e[2] = 0;
+      e[3] = 0;
+      e[4] = 0;
+      e[5] = 2 * rh;
+      e[6] = 0;
+      e[7] = 0;
+      e[8] = 0;
+      e[9] = 0;
+      e[10] = -2 * rd;
+      e[11] = 0;
+      e[12] = -(right + left) * rw;
+      e[13] = -(top + bottom) * rh;
+      e[14] = -(far + near) * rd;
+      e[15] = 1;
+      return this;
+    } // ortho(left, right, bottom, top, near, far) {
+    //     return this.multiply(new Matrix4().setOrtho(left, right, bottom, top, near, far));
     // }
-    // multiply(out, a, b) {
-    // 	let a0 = a[0],
-    // 		a1 = a[1],
-    // 		a2 = a[2],
-    // 		a3 = a[3],
-    // 		a4 = a[4],
-    // 		a5 = a[5];
-    // 	let b0 = b[0],
-    // 		b1 = b[1],
-    // 		b2 = b[2],
-    // 		b3 = b[3],
-    // 		b4 = b[4],
-    // 		b5 = b[5];
-    // 	out[0] = a0 * b0 + a2 * b1;
-    // 	out[1] = a1 * b0 + a3 * b1;
-    // 	out[2] = a0 * b2 + a2 * b3;
-    // 	out[3] = a1 * b2 + a3 * b3;
-    // 	out[4] = a0 * b4 + a2 * b5 + a4;
-    // 	out[5] = a1 * b4 + a3 * b5 + a5;
-    // 	return out;
+    // /**
+    //  * 设置透视投影
+    //  */
+    // setFrustum(left, right, bottom, top, near, far) {
+    //     var e, rw, rh, rd;
+    //     if (left === right || top === bottom || near === far) {
+    //         throw 'null frustum';
+    //     }
+    //     if (near <= 0) {
+    //         throw 'near <= 0';
+    //     }
+    //     if (far <= 0) {
+    //         throw 'far <= 0';
+    //     }
+    //     rw = 1 / (right - left);
+    //     rh = 1 / (top - bottom);
+    //     rd = 1 / (far - near);
+    //     e = this.elements;
+    //     e[0] = 2 * near * rw;
+    //     e[1] = 0;
+    //     e[2] = 0;
+    //     e[3] = 0;
+    //     e[4] = 0;
+    //     e[5] = 2 * near * rh;
+    //     e[6] = 0;
+    //     e[7] = 0;
+    //     e[8] = (right + left) * rw;
+    //     e[9] = (top + bottom) * rh;
+    //     e[10] = -(far + near) * rd;
+    //     e[11] = -1;
+    //     e[12] = 0;
+    //     e[13] = 0;
+    //     e[14] = -2 * near * far * rd;
+    //     e[15] = 0;
+    //     return this;
+    // }
+    // frustum (left, right, bottom, top, near, far) {
+    //     return this.multiply(new Matrix4().setFrustum(left, right, bottom, top, near, far));
+    // }
+    // /**
+    //  * 通过视锥角度和长宽比设置透视投影
+    //  */
+    // setPerspective = function(fovy, aspect, near, far) {
+    //     var e, rd, s, ct;
+    //     if (near === far || aspect === 0) {
+    //         throw 'null frustum';
+    //     }
+    //     if (near <= 0) {
+    //         throw 'near <= 0';
+    //     }
+    //     if (far <= 0) {
+    //         throw 'far <= 0';
+    //     }
+    //     fovy = (Math.PI * fovy) / 180 / 2;
+    //     s = Math.sin(fovy);
+    //     if (s === 0) {
+    //         throw 'null frustum';
+    //     }
+    //     rd = 1 / (far - near);
+    //     ct = Math.cos(fovy) / s;
+    //     e = this.elements;
+    //     e[0] = ct / aspect;
+    //     e[1] = 0;
+    //     e[2] = 0;
+    //     e[3] = 0;
+    //     e[4] = 0;
+    //     e[5] = ct;
+    //     e[6] = 0;
+    //     e[7] = 0;
+    //     e[8] = 0;
+    //     e[9] = 0;
+    //     e[10] = -(far + near) * rd;
+    //     e[11] = -1;
+    //     e[12] = 0;
+    //     e[13] = 0;
+    //     e[14] = -2 * near * far * rd;
+    //     e[15] = 0;
+    //     return this;
+    // }
+    // perspective (fovy, aspect, near, far) {
+    //     return this.multiply(new Matrix4().setPerspective(fovy, aspect, near, far));
+    // }
+
+    /**
+     * 矩阵缩放
+     */
+
+  }, {
+    key: "setScale",
+    value: function setScale() {
+      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+      var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+      return this.set(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
+    }
+  }, {
+    key: "scale",
+    value: function scale() {
+      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+      var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+      return this.mult(x, x, x, x, y, y, y, y, z, z, z, z);
+    }
+    /**
+     * 矩阵移动
+     */
+
+  }, {
+    key: "setTranslate",
+    value: function setTranslate() {
+      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+      return this.set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1);
+    }
+  }, {
+    key: "translate",
+    value: function translate() {
+      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+      var e = this.elements;
+      e[12] += e[0] * x + e[4] * y + e[8] * z;
+      e[13] += e[1] * x + e[5] * y + e[9] * z;
+      e[14] += e[2] * x + e[6] * y + e[10] * z;
+      e[15] += e[3] * x + e[7] * y + e[11] * z;
+      return this;
+    }
+    /**
+     * 矩阵旋转(弧度)
+     */
+
+  }, {
+    key: "setRotate",
+    value: function setRotate(angle, x, y, z) {
+      var s, c, len, rlen, nc, xy, yz, zx, xs, ys, zs, e;
+      e = this.elements;
+      s = Math.sin(angle);
+      c = Math.cos(angle);
+
+      if (0 !== x && 0 === y && 0 === z) {
+        if (x < 0) s = -s;
+        return this.set(1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0, 0, 0, 0, 1);
+      } else if (0 === x && 0 !== y && 0 === z) {
+        if (y < 0) s = -s;
+        return this.set(c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1);
+      } else if (0 === x && 0 === y && 0 !== z) {
+        if (z < 0) s = -s;
+        return this.set(c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+      } else {
+        len = Math.sqrt(x * x + y * y + z * z);
+
+        if (len !== 1) {
+          rlen = 1 / len;
+          x *= rlen;
+          y *= rlen;
+          z *= rlen;
+        }
+
+        nc = 1 - c;
+        xy = x * y;
+        yz = y * z;
+        zx = z * x;
+        xs = x * s;
+        ys = y * s;
+        zs = z * s;
+        return this.set(x * x * nc + c, xy * nc + zs, zx * nc - ys, 0, xy * nc - zs, y * y * nc + c, yz * nc + xs, 0, zx * nc + ys, yz * nc - xs, z * z * nc + c, 0, 0, 0, 0, 1);
+      }
+    }
+  }, {
+    key: "rotate",
+    value: function rotate(angle, x, y, z) {
+      return this.multiply(new Matrix4().setRotate(angle, x, y, z));
+    } // /**
+    //  * 设置矩阵视角
+    //  */
+    // setLookAt = function(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
+    // 	var e, fx, fy, fz, rlf, sx, sy, sz, rls, ux, uy, uz;
+    // 	fx = centerX - eyeX;
+    // 	fy = centerY - eyeY;
+    // 	fz = centerZ - eyeZ;
+    // 	// Normalize f.
+    // 	rlf = 1 / Math.sqrt(fx * fx + fy * fy + fz * fz);
+    // 	fx *= rlf;
+    // 	fy *= rlf;
+    // 	fz *= rlf;
+    // 	// Calculate cross product of f and up.
+    // 	sx = fy * upZ - fz * upY;
+    // 	sy = fz * upX - fx * upZ;
+    // 	sz = fx * upY - fy * upX;
+    // 	// Normalize s.
+    // 	rls = 1 / Math.sqrt(sx * sx + sy * sy + sz * sz);
+    // 	sx *= rls;
+    // 	sy *= rls;
+    // 	sz *= rls;
+    // 	// Calculate cross product of s and f.
+    // 	ux = sy * fz - sz * fy;
+    // 	uy = sz * fx - sx * fz;
+    // 	uz = sx * fy - sy * fx;
+    // 	return this.set(sx, ux, -fx, 0, sy, uy, -fy, 0, sz, uz, -fz, 0, 0, 0, 0, 1).translate(-eyeX, -eyeY, -eyeZ);
+    // };
+    // lookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
+    // 	return this.multiply(new Matrix4().setLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ));
+    // }
+    // /**
+    //  * Multiply the matrix for project vertex to plane from the right.
+    //  * @param plane The array[A, B, C, D] of the equation of plane "Ax + By + Cz + D = 0".
+    //  * @param light The array which stored coordinates of the light. if light[3]=0, treated as parallel light.
+    //  * @return this
+    //  */
+    // dropShadow(plane, light) {
+    // 	var mat = new Matrix4();
+    // 	var e = mat.elements;
+    // 	var dot = plane[0] * light[0] + plane[1] * light[1] + plane[2] * light[2] + plane[3] * light[3];
+    // 	e[0] = dot - light[0] * plane[0];
+    // 	e[1] = -light[1] * plane[0];
+    // 	e[2] = -light[2] * plane[0];
+    // 	e[3] = -light[3] * plane[0];
+    // 	e[4] = -light[0] * plane[1];
+    // 	e[5] = dot - light[1] * plane[1];
+    // 	e[6] = -light[2] * plane[1];
+    // 	e[7] = -light[3] * plane[1];
+    // 	e[8] = -light[0] * plane[2];
+    // 	e[9] = -light[1] * plane[2];
+    // 	e[10] = dot - light[2] * plane[2];
+    // 	e[11] = -light[3] * plane[2];
+    // 	e[12] = -light[0] * plane[3];
+    // 	e[13] = -light[1] * plane[3];
+    // 	e[14] = -light[2] * plane[3];
+    // 	e[15] = dot - light[3] * plane[3];
+    // 	return this.concat(mat);
+    // }
+    // /**
+    //  * Multiply the matrix for project vertex to plane from the right.(Projected by parallel light.)
+    //  * @param normX, normY, normZ The normal vector of the plane.(Not necessary to be normalized.)
+    //  * @param planeX, planeY, planeZ The coordinate of arbitrary points on a plane.
+    //  * @param lightX, lightY, lightZ The vector of the direction of light.(Not necessary to be normalized.)
+    //  * @return this
+    //  */
+    // ropShadowDirectionally(normX, normY, normZ, planeX, planeY, planeZ, lightX, lightY, lightZ) {
+    // 	var a = planeX * normX + planeY * normY + planeZ * normZ;
+    // 	return this.dropShadow([normX, normY, normZ, -a], [lightX, lightY, lightZ, 0]);
     // }
 
   }]);
 
-  return Matrix3;
-}(BaseArray);
+  return Matrix4;
+}(Vector);
 
-/**
- * 获取随机值
- * @param {Number} a 随机范围从0到a(不包含a)
- * @param {Number} b 随机结果增加值
- * @return {Number} 一个随机值
- */
-var Random = function Random() {
-  var a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
-  var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  return (Math.random() * a | 0) + b;
-};
-/**
- * 获取随机值
- * @param {Number} min 最小值
- * @param {Number} max 最大值
- * @return {Number} 一个随机值
- */
+function hex2rgb(hex, out) {
+  out = out || [];
+  out[0] = (hex >> 16 & 0xff) / 255;
+  out[1] = (hex >> 8 & 0xff) / 255;
+  out[2] = (hex & 0xff) / 255;
+  return out;
+}
 
+function hex2string(hex) {
+  hex = hex.toString(16);
+  hex = '000000'.substr(0, 6 - hex.length) + hex;
+  return "#".concat(hex);
+}
 
-Random.To = function (min, max) {
-  return Random(max - min, min);
-};
-/**
- * 从数组获取随机项
- * @param {Array} a 源数组
- * @return {*} a中的随机值
- */
-
-
-Random.Array = function (a) {
-  return a[Random(a.length)];
-};
-/**
- * 从键值对获取任意随机项键的数组
- * @param {Array|Object} a 数据源
- * @param {Number} b 获取数量
- * @return {Array[*]} b个不重复的a中的键组成的数组
- */
-
-
-Random.Array.Keys = Random.Keys = function (a) {
-  var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-  if (!a || !b) return [];
-  var out = [];
-  var keys = Object.keys(a);
-
-  while (keys.length > 0 && out.length < b) {
-    out.push(keys.splice(Random(keys.length), 1)[0]);
+function string2hex(string) {
+  if (typeof string === 'string' && string[0] === '#') {
+    string = string.substr(1);
   }
 
-  return out;
-};
-/**
- * 从键值对获取任意随机项值的数组
- * @param {Array|Object} a 数据源
- * @param {Number} b 获取数量
- * @return {Array[*]} b个不重复的a中的键组成的数组
- */
+  return parseInt(string, 16);
+}
 
+function rgb2hex(rgb) {
+  return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + (rgb[2] * 255 | 0);
+}
 
-Random.Array.Values = Random.Values = function (a) {
-  var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-  if (!a || !b) return [];
-  var out = [];
-  var keys = Object.keys(a);
+var Color =
+/*#__PURE__*/
+function (_Vector) {
+  _inherits(Color, _Vector);
 
-  while (keys.length > 0 && out.length < b) {
-    var key = keys.splice(Random(keys.length), 1)[0];
-    out.push(a[key]);
+  function Color(color) {
+    var _this;
+
+    _classCallCheck(this, Color);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Color).call(this, 1, 1, 1, 1));
+
+    _this.setApply(arguments.length > 1 ? arguments : color);
+
+    return _this;
   }
 
-  return out;
-};
+  _createClass(Color, [{
+    key: "setApply",
+    value: function setApply(vector) {
+      if (typeof vector == 'string') {
+        this.string = vector;
+      } else if (typeof vector == 'number') {
+        this.number = vector;
+      } else {
+        _get(_getPrototypeOf(Color.prototype), "setApply", this).call(this, vector);
+      }
+
+      return this;
+    }
+  }, {
+    key: "number",
+    set: function set(n) {
+      hex2rgb(n, this.elements);
+    },
+    get: function get() {
+      return rgb2hex(this.elements);
+    }
+  }, {
+    key: "string",
+    set: function set(s) {
+      hex2rgb(string2hex(s), this.elements);
+    },
+    get: function get() {
+      return hex2string(rgb2hex(this.elements));
+    }
+  }, {
+    key: "red",
+    get: function get() {
+      return this.elements[0];
+    },
+    set: function set(x) {
+      this.elements[0] = x;
+    }
+  }, {
+    key: "green",
+    get: function get() {
+      return this.elements[1];
+    },
+    set: function set(y) {
+      this.elements[1] = y;
+    }
+  }, {
+    key: "blue",
+    get: function get() {
+      return this.elements[2];
+    },
+    set: function set(z) {
+      this.elements[2] = z;
+    }
+  }, {
+    key: "alpha",
+    get: function get() {
+      return this.elements[3];
+    },
+    set: function set(z) {
+      this.elements[3] = z;
+    }
+  }]);
+
+  return Color;
+}(Vector);
 
 var Week = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -897,1862 +1094,97 @@ function () {
   return Time;
 }();
 
-var color = {
-  /**
-   * 16进制颜色转10进制颜色数组
-   * @param {*} hex
-   * @param {*} out
-   */
-  hex2rgb: function hex2rgb(hex, out) {
-    out = out || [];
-    out[0] = (hex >> 16 & 0xff) / 255;
-    out[1] = (hex >> 8 & 0xff) / 255;
-    out[2] = (hex & 0xff) / 255;
-    return out;
-  },
-
-  /**
-   * 16进制转16进制字符串颜色
-   * @param {*} hex
-   */
-  hex2string: function hex2string(hex) {
-    hex = hex.toString(16);
-    hex = '000000'.substr(0, 6 - hex.length) + hex;
-    return "#".concat(hex);
-  },
-
-  /**
-   * 16进制字符串颜色转16进制
-   * @param {*} string
-   */
-  string2hex: function string2hex(string) {
-    if (typeof string === 'string' && string[0] === '#') {
-      string = string.substr(1);
-    }
-
-    return parseInt(string, 16);
-  },
-
-  /**
-   * 10进制颜色数组转16进制
-   * @param {*} rgb
-   */
-  rgb2hex: function rgb2hex(rgb) {
-    return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + (rgb[2] * 255 | 0);
-  }
+/**
+ * 获取随机值
+ * @param {Number} a 随机范围从0到a(不包含a)
+ * @param {Number} b 随机结果增加值
+ * @return {Number} 一个随机值
+ */
+var Random = function Random() {
+  var a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
+  var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  return (Math.random() * a | 0) + b;
 };
-
-var Position =
-/*#__PURE__*/
-function () {
-  function Position() {
-    _classCallCheck(this, Position);
-
-    _defineProperty(this, "_options", {
-      left: 0,
-      top: 0,
-      right: 750,
-      bottom: 1334,
-      cacheY: {},
-      cacheX: {}
-    });
-  }
-
-  _createClass(Position, [{
-    key: "getX",
-
-    /**
-     * 获得总宽度的比例
-     * @param {Number} n 比例
-     */
-    value: function getX(n) {
-      if (this._options.cacheX[n]) return this._options.cacheX[n];
-      return this._options.cacheX[n] = this._options.right * n;
-    }
-    /**
-     * 获得总高度的比例
-     * @param {Number} n 比例
-     */
-
-  }, {
-    key: "getY",
-    value: function getY(n) {
-      if (this._options.cacheY[n]) return this._options.cacheY[n];
-      return this._options.cacheY[n] = this._options.bottom * n;
-    }
-    /**
-     * 获取半宽
-     */
-
-  }, {
-    key: "width",
-
-    /**
-     * 设置宽度
-     */
-    set: function set(right) {
-      this._options.right = right;
-      this._options.center = right / 2;
-      this._options.cacheX = {};
-    }
-    /**
-     * 获取宽度
-     */
-    ,
-    get: function get() {
-      return this._options.right;
-    }
-    /**
-     * 设置高度
-     */
-
-  }, {
-    key: "height",
-    set: function set(bottom) {
-      this._options.bottom = bottom;
-      this._options.middle = bottom / 2;
-      this._options.cacheY = {};
-    }
-    /**
-     * 获取宽
-     */
-    ,
-    get: function get() {
-      return this._options.bottom;
-    }
-  }, {
-    key: "center",
-    get: function get() {
-      return this.getX(0.5);
-    }
-    /**
-     * 获取半高
-     */
-
-  }, {
-    key: "middle",
-    get: function get() {
-      return this.getY(0.5);
-    }
-  }]);
-
-  return Position;
-}();
-
-var Clock =
-/*#__PURE__*/
-function () {
-  function Clock() {
-    _classCallCheck(this, Clock);
-
-    _defineProperty(this, "time", 0);
-
-    _defineProperty(this, "then", 0);
-
-    _defineProperty(this, "change", 0);
-
-    _defineProperty(this, "delta", 0);
-
-    _defineProperty(this, "interval", 1000 / 60);
-  }
-
-  _createClass(Clock, [{
-    key: "reset",
-    //步长
-    value: function reset() {
-      var interval = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.interval;
-      this.interval = interval;
-      this.then = this.time = Date.now();
-    }
-  }, {
-    key: "step",
-    value: function step() {
-      this.time = Date.now();
-      this.change = this.time - this.then;
-
-      if (this.change > this.interval) {
-        this.delta = this.change % this.interval;
-        this.then = this.time - this.delta;
-        return true;
-      }
-    }
-  }]);
-
-  return Clock;
-}();
-
-function Factory(prototype, source) {
-  var keys = Object.keys(source);
-
-  for (var i = 0; i < keys.length; ++i) {
-    var key = keys[i];
-    var property = Object.getOwnPropertyDescriptor(source, key);
-    Object.defineProperty(prototype, key, property);
-  }
-}
-
-var Render =
-/*#__PURE__*/
-function () {
-  /**
-   * 渲染列表中间缓存
-   */
-  function Render() {
-    _classCallCheck(this, Render);
-
-    this.renderArray = [];
-  }
-  /**
-   *
-   * @param {Component} Stage 舞台
-   * @param {CanvasRenderingContext2D} Context 渲染上下文
-   * @param {Boolean} Clear 是否清空上下文
-   */
+/**
+ * 获取随机值
+ * @param {Number} min 最小值
+ * @param {Number} max 最大值
+ * @return {Number} 一个随机值
+ */
 
 
-  _createClass(Render, [{
-    key: "Update",
-    value: function Update(Stage, Context, Clear) {
-      this.PreUpdate(Stage);
-      this.renderArray.sort(function (a, b) {
-        return a._HandleParentZIndex - b._HandleParentZIndex || a._HandleZIndex - b._HandleZIndex;
-      });
-      this.Updating(Context, Clear);
-      this.renderArray.length = 0;
-    }
-    /**
-     * 渲染前
-     * @param {Component} Component
-     */
-
-  }, {
-    key: "PreUpdate",
-    value: function PreUpdate(Component) {
-      if (!Component) return;
-
-      if (Component instanceof Array) {
-        for (var i = 0, l = Component.length; i < l; i++) {
-          this.PreUpdate(Component[i]);
-        }
-      } else {
-        if (Component.preUpdate(this)) return;
-        if (Component.children.length) this.PreUpdate(Component.children);
-      }
-    }
-    /**
-     * 渲染中
-     * @param {CanvasRenderingContext2D} Context 渲染上下文
-     * @param {Boolean} Clear 是否清空
-     */
-
-  }, {
-    key: "Updating",
-    value: function Updating(Context) {
-      var Clear = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      if (Clear) Context.clearRect(0, 0, Context.canvas.width, Context.canvas.height);
-      this.renderArray.forEach(function (Component) {
-        if (Component.beforeUpdate(Context)) return;
-        Component.update(Context);
-      });
-      Context.setTransform(1, 0, 0, 1, 0, 0);
-    }
-  }]);
-
-  return Render;
-}();
-
-function option(options) {
-  this.alpha = options.alpha === undefined ? 1 : options.alpha;
-}
-var data = {
-  set alpha(a) {
-    if (this._alpha < 0 && this.parent) return this.parent.alpha;
-    this._alpha = a;
-  },
-
-  get alpha() {
-    return this._alpha;
-  },
-
-  setAlpha: function setAlpha(a) {
-    this.alpha = a;
-    return this;
-  },
-  getAlpha: function getAlpha() {
-    return this.alpha;
-  }
+Random.To = function (min, max) {
+  return Random(max - min, min);
 };
+/**
+ * 从数组获取随机项
+ * @param {Array} a 源数组
+ * @return {*} a中的随机值
+ */
 
-var Alpha = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option,
-	data: data
-});
 
-function option$1(options) {
-  this.anchor = new Vector2();
-
-  if (options.anchor) {
-    if (options.anchor.x !== undefined) this.anchorX = options.anchor.x;
-    if (options.anchor.y !== undefined) this.anchorY = options.anchor.y;
-  }
-
-  if (options.anchorX !== undefined) this.anchorX = options.anchorX;
-  if (options.anchorY !== undefined) this.anchorY = options.anchorY;
-}
-var data$1 = {
-  get anchorX() {
-    return this.anchor.x;
-  },
-
-  set anchorX(x) {
-    this.anchor.x = x;
-  },
-
-  get anchorY() {
-    return this.anchor.y;
-  },
-
-  set anchorY(y) {
-    this.anchor.y = y;
-  },
-
-  setAnchor: function setAnchor(x, y) {
-    this.anchorX = x;
-    this.anchorY = y;
-    return this;
-  },
-  setAnchorX: function setAnchorX(x) {
-    this.anchorX = x;
-    return this;
-  },
-  setAnchorY: function setAnchorY(y) {
-    this.anchorY = y;
-    return this;
-  },
-  getAnchorX: function getAnchorX() {
-    return this.anchorX;
-  },
-  getAnchorY: function getAnchorY() {
-    return this.anchorY;
-  },
-  offsetTouch: function offsetTouch(touch) {
-    return touch.addToVector(this.anchor);
-  }
+Random.Array = function (a) {
+  return a[Random(a.length)];
 };
+/**
+ * 从键值对获取任意随机项键的数组
+ * @param {Array|Object} a 数据源
+ * @param {Number} b 获取数量
+ * @return {Array[*]} b个不重复的a中的键组成的数组
+ */
 
-var Anchor = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option$1,
-	data: data$1
-});
 
-function option$2(options) {
-  this.radian = options.radian !== undefined ? options.radian : 0;
-  if (options.angle !== undefined) this.angle = options.angle;
-}
-var data$2 = {
-  /**
-   * 角度控制
-   */
-  set angle(a) {
-    this.radian = a * Math.PI / 180;
-  },
+Random.Array.Keys = Random.Keys = function (a) {
+  var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  if (!a || !b) return [];
+  var out = [];
+  var keys = Object.keys(a);
 
-  get angle() {
-    return this.radian * 180 / Math.PI;
-  },
-
-  getRadian: function getRadian() {
-    return this.radian;
-  },
-  getAngle: function getAngle() {
-    return this.angle;
-  },
-  setRadian: function setRadian(r) {
-    this.radian = r;
-    return this;
-  },
-  setAngle: function setAngle(a) {
-    this.angle = a;
-    return this;
+  while (keys.length > 0 && out.length < b) {
+    out.push(keys.splice(Random(keys.length), 1)[0]);
   }
+
+  return out;
 };
+/**
+ * 从键值对获取任意随机项值的数组
+ * @param {Array|Object} a 数据源
+ * @param {Number} b 获取数量
+ * @return {Array[*]} b个不重复的a中的键组成的数组
+ */
 
-var Angle = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option$2,
-	data: data$2
-});
 
-function option$3(options) {
-  this.parent = null; //父元素
+Random.Array.Values = Random.Values = function (a) {
+  var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  if (!a || !b) return [];
+  var out = [];
+  var keys = Object.keys(a);
 
-  this.children = []; //子元素列表
-
-  if (options.children) this.addChild(options.children);
-}
-var data$3 = {
-  /**
-   * 将本组件加入某个组件下面
-   * @param {Component} Component 父级
-   * @param {Number} index 位置
-   * Component为空时，相当于从父组件卸载本组件
-   */
-  setParent: function setParent(Component) {
-    var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
-    if (!Component) return this.parent ? this.parent.removeChild(this) : this;
-    if (this.parent == Component) return this;
-    if (!this.parent) Component.addChildAt(this, index);
-    return this;
-  },
-
-  /**
-   * 在固定位置增加子组件
-   * @param {Component} Component 组件
-   * @param {Number} index 位置
-   */
-  addChildAt: function addChildAt(Component) {
-    var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    if (!Component) return this;
-    if (Component.create) Component.create();
-    Component.parent = this;
-
-    if (index == -1) {
-      this.children.push(Component);
-    } else if (index == 0) {
-      this.children.unshift(Component);
-    } else {
-      this.children.splice(index, 0, Component);
-    }
-
-    if (Component.created) Component.created();
-    return this;
-  },
-
-  /**
-   * 增加子组件
-   * @param {Component} Component 组件
-   */
-  addChild: function addChild(Component) {
-    if (arguments.length > 1) {
-      for (var i = 0; i < arguments.length; i++) {
-        this.addChild(arguments[i]);
-      }
-
-      return this;
-    }
-
-    if (!Component) return this;
-
-    if (Component instanceof Array) {
-      for (var _i = 0; _i < Component.length; _i++) {
-        this.addChild(Component[_i]);
-      }
-
-      return this;
-    }
-
-    return this.addChildAt(Component, -1);
-  },
-
-  /**
-   * 移除子组件
-   * @param {Component} Component 组件
-   */
-  removeChild: function removeChild(Component) {
-    if (arguments.length > 1) {
-      for (var i = 0; i < arguments.length; i++) {
-        this.removeChild(arguments[i]);
-      }
-
-      return this;
-    }
-
-    if (!Component) return this;
-
-    if (Component instanceof Array) {
-      for (var _i2 = 0; _i2 < Component.length; _i2++) {
-        this.removeChild(Component[_i2]);
-      }
-
-      return this;
-    }
-
-    if (Component.parent != this) return this;
-    Component.removeChildren();
-    if (Component.destroy) Component.destroy();
-    var index = this.children.indexOf(Component);
-    if (index >= 0) this.children.splice(index, 1);
-    Component.parent = null;
-    if (Component.destroyed) Component.destroyed();
-    return this;
-  },
-
-  /**
-   * 逐个移除所有子组件
-   */
-  removeChildren: function removeChildren() {
-    for (var i = this.children.length - 1; i >= 0; i--) {
-      this.removeChild(this.children[i]);
-    }
-
-    return this;
+  while (keys.length > 0 && out.length < b) {
+    var key = keys.splice(Random(keys.length), 1)[0];
+    out.push(a[key]);
   }
+
+  return out;
 };
-
-var Children = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option$3,
-	data: data$3
-});
-
-function option$4(options) {
-  return Object.assign({
-    family: '微软雅黑,黑体',
-    //字体
-    size: 26,
-    //字号px
-    weight: '',
-    //字宽
-    align: 'center',
-    //横向对齐方式
-    baseline: 'middle',
-    //纵向对齐方式
-    lineHeight: 0,
-    wrapWidth: 0
-  }, options);
-}
-var data$4 = {
-  /**
-   * 绘制样式控制
-   */
-  set wrapWidth(v) {
-    this.font.wrapWidth = v;
-  },
-
-  get wrapWidth() {
-    return this.font.wrapWidth;
-  },
-
-  set lineHeight(v) {
-    this.font.lineHeight = v;
-  },
-
-  get lineHeight() {
-    return this.font.lineHeight;
-  },
-
-  set fontSize(v) {
-    this.font.size = v;
-  },
-
-  get fontSize() {
-    return this.font.size;
-  },
-
-  set textAlign(v) {
-    this.font.textAlign = v;
-  },
-
-  get textAlign() {
-    return this.font.align;
-  },
-
-  set textBaseline(v) {
-    this.font.textBaseline = v;
-  },
-
-  get textBaseline() {
-    return this.font.baseline;
-  },
-
-  get family() {
-    return "".concat(this.font.weight, " ").concat(this.font.size, "px ").concat(this.font.family);
-  },
-
-  setFont: function setFont(font) {
-    if (!font) return this;
-    Object.assign(this.font, font);
-    return this;
-  }
-};
-
-var Padding =
-/*#__PURE__*/
-function (_Vector) {
-  _inherits(Padding, _Vector);
-
-  function Padding() {
-    var top = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var right = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var bottom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-    var left = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-
-    _classCallCheck(this, Padding);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(Padding).call(this, top, right, bottom, left));
-  }
-
-  _createClass(Padding, [{
-    key: "top",
-    get: function get() {
-      return this[0];
-    },
-    set: function set(x) {
-      this[0] = x;
-    }
-  }, {
-    key: "right",
-    get: function get() {
-      return this[1];
-    },
-    set: function set(y) {
-      this[1] = y;
-    }
-  }, {
-    key: "bottom",
-    get: function get() {
-      return this[2];
-    },
-    set: function set(y) {
-      this[2] = y;
-    }
-  }, {
-    key: "left",
-    get: function get() {
-      return this[3];
-    },
-    set: function set(y) {
-      this[3] = y;
-    }
-  }, {
-    key: "width",
-    get: function get() {
-      return this[1] + this[3];
-    }
-  }, {
-    key: "height",
-    get: function get() {
-      return this[0] + this[2];
-    }
-  }]);
-
-  return Padding;
-}(Vector);
-
-function option$5(options) {
-  this.padding = new Padding();
-  if (options.padding) typeof options.padding == 'string' ? this.setPadding(options.padding) : this.padding.setToArray(ptions.padding);
-  if (options.paddingLeft) this.paddingLeft = options.paddingLeft;
-  if (options.paddingRight) this.paddingRight = options.paddingRight;
-  if (options.paddingTop) this.paddingTop = options.paddingTop;
-  if (options.paddingBottom) this.paddingBottom = options.paddingBottom;
-}
-var data$5 = {
-  set paddingLeft(p) {
-    this.padding.left = p;
-  },
-
-  get paddingLeft() {
-    return this.padding.left;
-  },
-
-  set paddingRight(p) {
-    this.padding.right = p;
-  },
-
-  get paddingRight() {
-    return this.padding.right;
-  },
-
-  set paddingTop(p) {
-    this.padding.top = p;
-  },
-
-  get paddingTop() {
-    return this.padding.top;
-  },
-
-  set paddingBottom(p) {
-    this.padding.bottom = p;
-  },
-
-  get paddingBottom() {
-    return this.padding.bottom;
-  },
-
-  getPaddingRight: function getPaddingRight() {
-    return this.paddingRight;
-  },
-  setPaddingRight: function setPaddingRight(p) {
-    this.paddingRight = p;
-    return this;
-  },
-  getPaddingTop: function getPaddingTop() {
-    return this.paddingTop;
-  },
-  setPaddingTop: function setPaddingTop(p) {
-    this.paddingTop = p;
-    return this;
-  },
-  getPaddingLeft: function getPaddingLeft() {
-    return this.paddingLeft;
-  },
-  setPaddingLeft: function setPaddingLeft(p) {
-    this.paddingLeft = p;
-    return this;
-  },
-  getPaddingBottom: function getPaddingBottom() {
-    return this.paddingBottom;
-  },
-  setPaddingBottom: function setPaddingBottom(p) {
-    this.paddingBottom = p;
-    return this;
-  },
-  setPadding: function setPadding(string) {
-    try {
-      var p = string.toString().split(/[^0-9]+/).filter(function (s) {
-        return s !== '';
-      });
-
-      if (p.length == 0) {} else if (p.length == 1) {
-        this.padding.setTo(p[0], p[0], p[0], p[0]);
-      } else if (p.length == 2) {
-        this.padding.setTo(p[0], p[1], p[0], p[1]);
-      } else if (p.length == 3) {
-        this.padding.setTo(p[0], p[1], p[2], p[1]);
-      } else {
-        this.padding.setTo(p[0], p[1], p[2], p[3]);
-      }
-    } catch (e) {}
-
-    return this;
-  }
-};
-
-function option$6(options) {
-  this.position = new Vector2();
-
-  if (options.position) {
-    if (options.position.x !== undefined) this.x = options.position.x;
-    if (options.position.y !== undefined) this.y = options.position.y;
-  }
-
-  if (options.x !== undefined) this.x = options.x;
-  if (options.y !== undefined) this.y = options.y;
-}
-var data$6 = {
-  get x() {
-    return this.position.x;
-  },
-
-  set x(x) {
-    this.position.x = x;
-  },
-
-  get y() {
-    return this.position.y;
-  },
-
-  set y(y) {
-    this.position.y = y;
-  },
-
-  setPosition: function setPosition(x, y) {
-    this.x = x;
-    this.y = y;
-    return this;
-  },
-  setX: function setX(x) {
-    this.x = x;
-    return this;
-  },
-  setY: function setY(y) {
-    this.y = y;
-    return this;
-  },
-  getX: function getX() {
-    var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-    return this.x * n;
-  },
-  getY: function getY() {
-    var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-    return this.y * n;
-  }
-};
-
-var Position$1 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option$6,
-	data: data$6
-});
-
-function option$7(options) {
-  this.scale = new Vector2(1, 1);
-
-  if (options.scale) {
-    if (typeof options.scale == 'number') {
-      this.scaleX = this.scaleY = options.scale;
-    } else {
-      if (options.scale.x) this.scaleX = options.scale.x;
-      if (options.scale.y) this.scaleY = options.scale.y;
-    }
-  }
-
-  if (options.scaleX) this.scaleX = options.scaleX;
-  if (options.scaleY) this.scaleY = options.scaleY;
-}
-var data$7 = {
-  get scaleX() {
-    return this.scale.x;
-  },
-
-  set scaleX(x) {
-    this.scale.x = x;
-  },
-
-  get scaleY() {
-    return this.scale.y;
-  },
-
-  set scaleY(y) {
-    this.scale.y = y;
-  },
-
-  setScale: function setScale(x, y) {
-    this.scaleX = x;
-    this.scaleY = y;
-    return this;
-  },
-  setScaleX: function setScaleX(x) {
-    this.scaleX = x;
-    return this;
-  },
-  setScaleY: function setScaleY(y) {
-    this.scaleY = y;
-    return this;
-  },
-  getScaleX: function getScaleX() {
-    return this.scaleX;
-  },
-  getScaleY: function getScaleY() {
-    return this.scaleY;
-  }
-};
-
-var Scale = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option$7,
-	data: data$7
-});
-
-function option$8(options) {
-  this.size = new Vector2();
-  if (options.width !== undefined) this.width = options.width;
-  if (options.height !== undefined) this.height = options.height;
-}
-var data$8 = {
-  get width() {
-    return this.size.x;
-  },
-
-  set width(x) {
-    this.size.x = x;
-  },
-
-  get height() {
-    return this.size.y;
-  },
-
-  set height(y) {
-    this.size.y = y;
-  },
-
-  setSize: function setSize(x, y) {
-    this.width = x;
-    this.height = y;
-    return this;
-  },
-  setWidth: function setWidth(x) {
-    this.width = x;
-    return this;
-  },
-  setHeight: function setHeight(y) {
-    this.height = y;
-    return this;
-  },
-  getWidth: function getWidth() {
-    var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-    return this.width * n;
-  },
-  getHeight: function getHeight() {
-    var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-    return this.height * n;
-  },
-  setSizeLimit: function setSizeLimit(maxX, maxY, minX, minY) {
-    if (!this.height || !this.width) return this;
-    var lv = this.width / this.height;
-
-    if (maxX && this.width > maxX) {
-      this.width = maxX;
-      this.height = maxX / lv;
-    }
-
-    if (maxY && this.height > maxY) {
-      this.height = maxY;
-      this.width = maxY * lv;
-    }
-
-    if (minX && this.width < minX) {
-      this.width = minX;
-      this.height = maxX / lv;
-    }
-
-    if (minY && this.height < minY) {
-      this.height = maxY;
-      this.width = maxY * lv;
-    }
-
-    return this;
-  }
-};
-
-var Size = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option$8,
-	data: data$8
-});
-
-function option$9(options) {
-  return Object.assign({
-    strokeUp: false,
-    //首先填充
-    fillStyle: '',
-    //填充色
-    lineWidth: 0,
-    //线宽
-    strokeStyle: '#FFFFFF' //线框色
-
-  }, options);
-}
-var data$9 = {
-  /**
-   * 绘制样式控制
-   */
-  set strokeUp(v) {
-    this.style.strokeUp = v;
-  },
-
-  get strokeUp() {
-    return this.style.strokeUp;
-  },
-
-  set fillStyle(v) {
-    this.style.fillStyle = v;
-  },
-
-  get fillStyle() {
-    return this.style.fillStyle;
-  },
-
-  set lineWidth(v) {
-    this.style.lineWidth = v;
-  },
-
-  get lineWidth() {
-    return this.style.lineWidth;
-  },
-
-  set strokeStyle(v) {
-    this.style.strokeStyle = v;
-  },
-
-  get strokeStyle() {
-    return this.style.strokeStyle;
-  },
-
-  setStyle: function setStyle(style) {
-    if (!style) return this;
-    Object.assign(this.style, style);
-    return this;
-  }
-};
-
-function option$a(options) {
-  this.visible = options.visible === undefined ? true : options.visible;
-}
-var data$a = {
-  setVisible: function setVisible(a) {
-    this.visible = a;
-    return this;
-  },
-  getVisible: function getVisible() {
-    return this.visible;
-  }
-};
-
-var Visible = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option$a,
-	data: data$a
-});
-
-function option$b(options) {
-  this.zIndex = options.zIndex === undefined ? 0 : options.zIndex;
-}
-var data$b = {
-  setZIndex: function setZIndex(a) {
-    this.zIndex = a;
-    return this;
-  },
-  getZIndex: function getZIndex() {
-    return this.zIndex;
-  }
-};
-
-var ZIndex = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	option: option$b,
-	data: data$b
-});
-
-function ContainerFactory() {
-  var ContainerProperties = [Children, Visible, Position$1, Scale, Angle, ZIndex, Size, Anchor, Alpha];
-
-  var Container =
-  /*#__PURE__*/
-  function () {
-    function Container() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      _classCallCheck(this, Container);
-
-      this.id = ContainerFactory.ID ? ++ContainerFactory.ID : ContainerFactory.ID = 1;
-      this.touchChildren = true; //是否允许点击子元素
-
-      this.touchStop = false; //点击是否不冒泡到父元素
-
-      this.debug = ''; //测试边框
-
-      this.matrix = new Matrix3(); //计算矩阵
-
-      for (var i = 0; i < ContainerProperties.length; i++) {
-        ContainerProperties[i].option.call(this, options);
-      }
-    }
-
-    _createClass(Container, [{
-      key: "setAnchorSize",
-      value: function setAnchorSize() {
-        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.5;
-        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.5;
-        this.anchor.x = this.width * x;
-        this.anchor.y = this.height * y;
-        return this;
-      }
-    }, {
-      key: "checkPoint",
-      value: function checkPoint(touch) {
-        return true;
-      }
-    }, {
-      key: "preUpdate",
-      value: function preUpdate(renderer) {
-        if (!this.visible) return true;
-        this.parent ? this.matrix.setToArray(this.parent.matrix) : this.matrix.identity();
-        this.matrix.translate(this.x, this.y).rotate(this.radian).scale(this.scaleX, this.scaleY);
-        if (!this.update) return;
-        this._HandleParentZIndex = (this.parent && this.parent._HandleParentZIndex || 0) + this.zIndex;
-        this._HandleZIndex = renderer.renderArray.push(this);
-      }
-    }, {
-      key: "beforeUpdate",
-      value: function beforeUpdate(Context) {
-        if (this.alpha == 0) return true;
-        var alpha = Math.min(1, this.alpha);
-        if (alpha != Context.globalAlpha) Context.globalAlpha = alpha;
-        Context.setTransform.apply(Context, this.matrix);
-
-        if (this.debug) {
-          Context.lineWidth = 3;
-          Context.strokeStyle = this.debug;
-          Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
-        }
-      }
-    }]);
-
-    return Container;
-  }();
-
-  for (var i = 0; i < ContainerProperties.length; i++) {
-    Factory(Container.prototype, ContainerProperties[i].data);
-  }
-
-  return Container;
-}
-function SpriteFactory(Container) {
-  return (
-    /*#__PURE__*/
-    function (_Container) {
-      _inherits(Sprite, _Container);
-
-      function Sprite(texture, options) {
-        var _this;
-
-        _classCallCheck(this, Sprite);
-
-        _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options));
-        _this.texture = null;
-
-        _this.setTexture(texture);
-
-        _this.clipPosition = new Vector2(); //切割位置
-
-        _this.clipSize = new Vector2(); //切割大小
-
-        if (options) {
-          if (options.clip) _this.setClip(options.clip.x, options.clip.y, options.clip.width, options.clip.height);
-        }
-
-        return _this;
-      }
-
-      _createClass(Sprite, [{
-        key: "checkPoint",
-        value: function checkPoint(touch) {
-          return touch.x >= 0 && touch.y >= 0 && touch.x <= this.width && touch.y <= this.height;
-        }
-      }, {
-        key: "setClip",
-        value: function setClip() {
-          var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-          var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-          var width = arguments.length > 2 ? arguments[2] : undefined;
-          var height = arguments.length > 3 ? arguments[3] : undefined;
-          this.useClip = true;
-          this.clipPosition.setTo(x, y);
-          this.clipSize.setTo(width, height);
-          this.size.setTo(width, height);
-          return this;
-        }
-      }, {
-        key: "setTexture",
-        value: function setTexture(texture) {
-          if (!texture || !texture.width || !texture.height) texture = null;
-          this.texture = texture;
-          if (!this.texture) return this;
-          this.useClip = false;
-          this.size.setTo(this.texture.width, this.texture.height);
-          return this;
-        }
-      }, {
-        key: "update",
-        value: function update(Context) {
-          if (!this.texture) return;
-
-          if (this.useClip) {
-            Context.drawImage(this.texture, this.clipX, this.clipY, this.clipWidth, this.clipHeight, -this.anchorX, -this.anchorY, this.width, this.height);
-          } else {
-            Context.drawImage(this.texture, -this.anchorX, -this.anchorY, this.width, this.height);
-          }
-        }
-      }, {
-        key: "clipX",
-        set: function set(v) {
-          this.clipPosition.x = v;
-        },
-        get: function get() {
-          return this.clipPosition.x;
-        }
-      }, {
-        key: "clipY",
-        set: function set(v) {
-          this.clipPosition.y = v;
-        },
-        get: function get() {
-          return this.clipPosition.y;
-        }
-      }, {
-        key: "clipWidth",
-        set: function set(v) {
-          this.clipSize.x = v;
-        },
-        get: function get() {
-          return this.clipSize.x;
-        }
-      }, {
-        key: "clipHeight",
-        set: function set(v) {
-          this.clipSize.y = v;
-        },
-        get: function get() {
-          return this.clipSize.y;
-        }
-      }]);
-
-      return Sprite;
-    }(Container)
-  );
-}
-function RectFactory(Container) {
-  var Rect =
-  /*#__PURE__*/
-  function (_Container2) {
-    _inherits(Rect, _Container2);
-
-    function Rect(options) {
-      var _this2;
-
-      _classCallCheck(this, Rect);
-
-      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, options));
-      _this2.style = Object.assign({}, Text.defaultFont);
-      if (options) _this2.setStyle(options.style);
-      return _this2;
-    }
-
-    _createClass(Rect, [{
-      key: "checkPoint",
-      value: function checkPoint(touch) {
-        return touch.x >= 0 && touch.y >= 0 && touch.x <= this.width && touch.y <= this.height;
-      }
-    }, {
-      key: "update",
-      value: function update(Context) {
-        if (this.style.lineWidth && !this.style.strokeUp) {
-          Context.lineWidth = this.style.lineWidth;
-          Context.strokeStyle = this.style.fillStyle;
-          Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
-        }
-
-        if (this.style.fillStyle) {
-          Context.fillStyle = this.style.fillStyle;
-          Context.fillRect(-this.anchorX, -this.anchorY, this.width, this.height);
-        }
-
-        if (this.style.lineWidth && this.style.strokeUp) {
-          Context.lineWidth = this.style.lineWidth;
-          Context.strokeStyle = this.style.fillStyle;
-          Context.strokeRect(-this.anchorX, -this.anchorY, this.width, this.height);
-        }
-      }
-    }]);
-
-    return Rect;
-  }(Container);
-
-  _defineProperty(Rect, "defaultStyle", option$9());
-
-  Factory(Rect.prototype, data$9);
-  return Rect;
-}
-var AlignWidth = {
-  left: 0,
-  center: 0.5,
-  right: 1
-};
-var AlignHeight = {
-  top: 0,
-  middle: 0.5,
-  bottom: 1,
-  hanging: 0,
-  alphabetic: 1,
-  ideographic: 1
-};
-function TextFactory(Container, TestContext) {
-  var Text =
-  /*#__PURE__*/
-  function (_Container3) {
-    _inherits(Text, _Container3);
-
-    function Text(options) {
-      var _this3;
-
-      _classCallCheck(this, Text);
-
-      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, options));
-      _this3.style = Object.assign({}, Text.defaultStyle);
-      _this3.font = Object.assign({}, Text.defaultFont);
-      _this3._value = '';
-      _this3.Lines = [];
-
-      if (options) {
-        option$5.call(_assertThisInitialized(_this3), options);
-
-        _this3.setStyle(options.style);
-
-        _this3.setFont(options.font);
-
-        if (options.value) _this3.value = options.value;
-      }
-
-      return _this3;
-    }
-
-    _createClass(Text, [{
-      key: "checkPoint",
-      value: function checkPoint(touch) {
-        return touch.x >= -this.paddingLeft && touch.y >= -this.paddingTop && touch.x <= this.width + this.paddingRight && touch.x <= this.height + this.paddingBottom;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(v) {
-        this.value = v;
-        return this;
-      }
-    }, {
-      key: "getValue",
-      value: function getValue() {
-        return this.value;
-      }
-    }, {
-      key: "separate",
-      value: function separate(value) {
-        var _this4 = this;
-
-        this.Lines.length = 0;
-        var tags = {};
-        var taglength = 0;
-        var string = value.replace(/\<(fillStyle|strokeStyle|lineWidth|family|weight|size|i)\=(\S+?)\>/g, function (tag, action, arg, index) {
-          tags[index - taglength] = {
-            action: action,
-            arg: arg
-          };
-          taglength += tag.length;
-          return '';
-        });
-        var font = {
-          weight: this.font.weight,
-          size: this.fontSize,
-          family: this.font.family
-        };
-        TestContext.font = "".concat(font.weight, " ").concat(font.size, "px ").concat(font.family);
-        var line = {
-          index: 0,
-          width: 0,
-          height: font.size,
-          content: []
-        };
-
-        for (var i = 0, len = string.length; i <= len; i++) {
-          if (tags[i]) {
-            if (tags[i].action == 'fillStyle' || tags[i].action == 'strokeStyle' || tags[i].action == 'lineWidth') {
-              line.index = line.content.push(_defineProperty({}, tags[i].action, tags[i].arg));
-            } else if (tags[i].action == 'size' || tags[i].action == 'family' || tags[i].action == 'weight') {
-              font[tags[i].action] = tags[i].arg == '@' ? this.font[tags[i].action] : tags[i].arg;
-              TestContext.font = "".concat(font.weight, " ").concat(font.size, "px ").concat(font.family);
-              line.index = line.content.push({
-                font: TestContext.font
-              });
-              if (font.size > line.height) line.height = font.size;
-            } else if (tags[i].action == 'i') {
-              if (this.special && this.special[tags[i].arg] && this.special[tags[i].arg].width) {
-                var texture = this.special[tags[i].arg];
-
-                if (this.wrapWidth > 0 && line.width + texture.width > this.wrapWidth) {
-                  this.Lines.push(line);
-                  line = {
-                    index: 0,
-                    width: 0,
-                    height: font.size,
-                    content: []
-                  };
-                }
-
-                line.width += texture.width;
-                line.index = line.content.push({
-                  texture: texture
-                });
-                if (texture.height > line.height) line.height = texture.height;
-              }
-            }
-          }
-
-          var v = string[i];
-
-          if (i === len || v === '\n') {
-            this.Lines.push(line);
-            line = {
-              index: 0,
-              width: 0,
-              content: []
-            };
-          } else {
-            var width = TestContext.measureText(v).width;
-
-            if (this.wrapWidth > 0 && line.width + width > this.wrapWidth) {
-              this.Lines.push(line);
-              line = {
-                index: 0,
-                width: 0,
-                height: font.size,
-                content: []
-              };
-            }
-
-            line.width += width;
-            if (!line.content[line.index]) line.content[line.index] = {
-              value: '',
-              width: 0,
-              height: font.size
-            };
-            line.content[line.index].width += width;
-            line.content[line.index].value += v;
-          }
-        }
-
-        var widths = this.Lines.map(function (l) {
-          return l.width;
-        });
-        this.width = Math.max.apply(null, widths);
-        this.height = this.Lines.reduce(function (r, line) {
-          return r + Math.max(line.height, _this4.lineHeight);
-        }, 0);
-        this.setAnchorSize(AlignHeight[this.textAlign], AlignHeight[this.textBaseline]);
-      }
-    }, {
-      key: "update",
-      value: function update(Context) {
-        var _this5 = this;
-
-        if (!this.Lines || !this.Lines.length) return;
-        Context.textAlign = 'left';
-        Context.textBaseline = 'top';
-        Context.fillStyle = this.style.fillStyle;
-        Context.font = this.family;
-        var lineWidth = this.style.lineWidth;
-        var strokeStyle = this.style.strokeStyle;
-
-        if (lineWidth && strokeStyle) {
-          Context.lineWidth = lineWidth;
-          Context.strokeStyle = strokeStyle;
-        }
-
-        var y = -this.anchorY;
-        this.Lines.forEach(function (line) {
-          var x = AlignWidth[_this5.textAlign] * (_this5.width - line.width) - _this5.anchorX;
-          var lineY = y + Math.max(line.height, _this5.lineHeight);
-          y += AlignWidth[_this5.textAlign] * (line.height - _this5.fontSize);
-          line.content.forEach(function (cont) {
-            if (cont.fillStyle) {
-              Context.fillStyle = cont.color;
-            } else if (cont.lineWidth) {
-              lineWidth = cont.lineWidth;
-
-              if (lineWidth && strokeStyle) {
-                Context.lineWidth = lineWidth;
-                Context.strokeStyle = strokeStyle;
-              }
-            } else if (cont.strokeStyle) {
-              strokeStyle = cont.strokeStyle;
-
-              if (lineWidth && strokeStyle) {
-                Context.lineWidth = lineWidth;
-                Context.strokeStyle = strokeStyle;
-              }
-            } else if (cont.font) {
-              Context.font = cont.font;
-            } else if (cont.texture) {
-              Context.drawImage(cont.texture, x, y - AlignHeight[_this5.textBaseline] * (cont.texture.height - _this5.fontSize));
-              x += cont.texture.width;
-            } else if (cont.value) {
-              var fontY = y - AlignHeight[_this5.textBaseline] * (cont.height - _this5.fontSize);
-              if (lineWidth && strokeStyle && !_this5.style.strokeUp) Context.strokeText(cont.value, x, fontY);
-              Context.fillText(cont.value, x, fontY);
-              if (lineWidth && strokeStyle && _this5.style.strokeUp) Context.strokeText(cont.value, x, fontY);
-              x += cont.width;
-            }
-          });
-          y = lineY;
-        });
-      }
-    }, {
-      key: "value",
-      set: function set(v) {
-        if (!v && v !== 0) v = '';
-        if (typeof v != 'string') v = v.toString();
-        if (this._value === v) return;
-        this._value = v;
-        this.separate(v);
-      },
-      get: function get() {
-        return this._value;
-      }
-    }]);
-
-    return Text;
-  }(Container);
-
-  _defineProperty(Text, "defaultFont", option$4());
-
-  _defineProperty(Text, "defaultStyle", option$9({
-    fillStyle: '#FFFFFF'
-  }));
-
-  Factory(Text.prototype, data$9);
-  Factory(Text.prototype, data$4);
-  Factory(Text.prototype, data$5);
-  return Text;
-}
-function ScrollFactory(Sprite, GetContext) {
-  var Cache = new Render();
-  return (
-    /*#__PURE__*/
-    function (_Sprite) {
-      _inherits(Scroll, _Sprite);
-
-      function Scroll() {
-        _classCallCheck(this, Scroll);
-
-        return _possibleConstructorReturn(this, _getPrototypeOf(Scroll).apply(this, arguments));
-      }
-
-      _createClass(Scroll, [{
-        key: "touchMoveX",
-
-        /**
-         * 横向移动
-         * @param {Number} mx 轴X移动量
-         */
-        value: function touchMoveX(mx) {
-          var X = this.clipX;
-          var Max = this.scrollWidth;
-          this.clipX -= mx;
-          if (this.clipX > Max) this.clipX = Max;
-          if (this.clipX < 0) this.clipX = 0;
-          return this.clipX != X;
-        }
-        /**
-         * 纵向移动
-         * @param {Number} my 轴Y移动量
-         */
-
-      }, {
-        key: "touchMoveY",
-        value: function touchMoveY(my) {
-          var Y = this.clipY;
-          var Max = this.scrollHeight;
-          this.clipY -= my;
-          if (this.clipY > Max) this.clipY = Max;
-          if (this.clipY < 0) this.clipY = 0;
-          return this.clipY != Y;
-        }
-      }, {
-        key: "touchMove",
-        value: function touchMove(touch) {
-          this.touchMoveX(touch.moveX);
-          this.touchMoveY(touch.moveY);
-        }
-      }, {
-        key: "setTexture",
-        value: function setTexture(director) {
-          if (!this.context) this.context = GetContext();
-          this.director = director;
-          this.texture = this.context.canvas;
-          return this;
-        }
-      }, {
-        key: "refresh",
-        value: function refresh() {
-          var width = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-          var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-          if (width && width != this.context.canvas.width) this.context.canvas.width = width;
-          if (height && height != this.context.canvas.height) this.context.canvas.height = height;
-          Cache.Update(this.director, this.context, true);
-          this.touchMoveX(0);
-          this.touchMoveY(0);
-          return this;
-        }
-      }, {
-        key: "realWidth",
-        get: function get() {
-          return this.texture.width;
-        }
-      }, {
-        key: "realHeight",
-        get: function get() {
-          return this.texture.height;
-        } //滚动位置
-
-      }, {
-        key: "scrollHeight",
-        get: function get() {
-          return this.realHeight - this.clipHeight;
-        }
-      }, {
-        key: "scrollWidth",
-        get: function get() {
-          return this.realWidth - this.clipWidth;
-        }
-      }]);
-
-      return Scroll;
-    }(Sprite)
-  );
-}
-
-var canvas2d = {
-  SetTransform: function SetTransform(matrix) {
-    this.setTransform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
-    return this;
-  },
-  Transform: function Transform(matrix, r) {
-    if (r) {
-      this.transform(1 / matrix[0], -matrix[1], -matrix[2], 1 / matrix[3], -matrix[4], -matrix[5]);
-    } else {
-      this.transform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
-    }
-
-    return this;
-  },
-  //设置大小
-  SetSize: function SetSize(width, height) {
-    this.canvas.width = width;
-    this.canvas.height = height;
-    this.fillStyle = '#000000';
-    return this;
-  },
-  //清空
-  Clear: function Clear() {
-    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var w = arguments.length > 2 ? arguments[2] : undefined;
-    var h = arguments.length > 3 ? arguments[3] : undefined;
-    this.clearRect(x, y, w || this.canvas.width, h || this.canvas.height);
-    return this;
-  },
-  //填充
-  Fill: function Fill(fillStyle) {
-    if (fillStyle && this.fillStyle != fillStyle) this.fillStyle = fillStyle;
-    this.fill();
-    return this;
-  },
-  //描边
-  Stroke: function Stroke(strokeStyle, lineWidth) {
-    if (strokeStyle && this.strokeStyle != strokeStyle) this.strokeStyle = strokeStyle;
-    if (lineWidth && this.lineWidth != lineWidth) this.lineWidth = lineWidth;
-    this.stroke();
-    return this;
-  },
-  //多边形
-  Polygon: function Polygon() {
-    var _this = this;
-
-    var last1 = arguments[arguments.length - 1];
-    this.beginPath();
-    this.moveTo((last1.x + arguments[0].x) / 2, (last1.y + arguments[0].y) / 2);
-    var n = Array.prototype.reduce.call(arguments, function (n, p) {
-      return n.r ? _this.arcTo(n.x, n.y, p.x, p.y, n.r) : _this.lineTo(n.x, n.y), p;
-    });
-    var p = arguments[0];
-    n.r ? this.arcTo(n.x, n.y, p.x, p.y, n.r) : this.lineTo(n.x, n.y);
-    this.closePath();
-    return this;
-  },
-  //圆角矩形
-  ArcRect: function ArcRect(x, y, w, h) {
-    var r = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 8;
-    this.beginPath();
-    this.moveTo(x + r, y);
-    this.arcTo(x + w, y, x + w, y + h, r);
-    this.arcTo(x + w, y + h, x, y + h, r);
-    this.arcTo(x, y + h, x, y, r);
-    this.arcTo(x, y, x + w, y, r);
-    this.closePath();
-    return this;
-  },
-  //正多边形
-  PolygonTidy: function PolygonTidy() {
-    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var r = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 100;
-    var n = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 3;
-    var s = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-    var radius = arguments.length > 5 ? arguments[5] : undefined;
-
-    if (n instanceof Array) {
-      var vs = n.map(function (d, i) {
-        var newX = x + r * d * Math.cos((360 * i / n.length + s) * 2 * Math.PI / 360);
-        var newY = y + r * d * Math.sin((360 * i / n.length + s) * 2 * Math.PI / 360);
-        return {
-          x: newX,
-          y: newY,
-          r: radius
-        };
-      });
-      return this.Polygon.apply(this, vs);
-    } else {
-      var _vs = [];
-
-      for (var i = 0; i < n; i++) {
-        var newX = x + r * Math.cos((360 * i / n + s) * 2 * Math.PI / 360);
-        var newY = y + r * Math.sin((360 * i / n + s) * 2 * Math.PI / 360);
-
-        _vs.push({
-          x: newX,
-          y: newY,
-          r: radius
-        });
-      }
-
-      return this.Polygon.apply(this, _vs);
-    }
-  },
-  //虚线
-  DashLine: function DashLine(x1, y1, x2, y2, dashLength, emptyLength) {
-    var dashLen = dashLength || 12,
-        emptyLen = emptyLength || 3,
-        xpos = x2 - x1,
-        //得到横向的宽度;
-    ypos = y2 - y1,
-        //得到纵向的高度;
-    lineLen = Math.sqrt(xpos * xpos + ypos * ypos),
-        dashLv = dashLen / lineLen,
-        emptyLv = emptyLen / lineLen,
-        L = 0,
-        hasLine = true;
-    this.beginPath();
-    this.moveTo(x1, y1);
-
-    while (true) {
-      var Len = hasLine ? dashLen : emptyLen;
-      var Lv = hasLine ? dashLv : emptyLv;
-
-      if (L + Len > lineLen) {
-        Len = lineLen - L;
-        Lv = Len / lineLen;
-      }
-
-      x1 = x1 + xpos * Lv;
-      y1 = y1 + ypos * Lv;
-      this[hasLine ? 'lineTo' : 'moveTo'](x1, y1);
-      hasLine = !hasLine;
-      L += Len;
-
-      if (L >= lineLen) {
-        this.closePath();
-        return this;
-      }
-    }
-  }
-};
-
-var Touch =
-/*#__PURE__*/
-function (_Event) {
-  _inherits(Touch, _Event);
-
-  function Touch() {
-    var _this;
-
-    _classCallCheck(this, Touch);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Touch).call(this));
-
-    _defineProperty(_assertThisInitialized(_this), "onTouchCancel", _this.onTouchEnd);
-
-    _this.Position = new Vector2();
-    _this.Size = new Vector2();
-    _this.Touches = {};
-    return _this;
-  }
-
-  _createClass(Touch, [{
-    key: "onTouchStart",
-    value: function onTouchStart(e) {
-      var now = Date.now();
-
-      for (var i = 0, l = e.changedTouches.length; i < l; i++) {
-        var touch = e.changedTouches[i];
-        var touchTip = this.Touches[touch.identifier] = {
-          moveX: 0,
-          moveY: 0
-        };
-        var x = touch.clientX * this.Size.x - this.Position.x;
-        var y = touch.clientY * this.Size.y - this.Position.y;
-        touchTip.moveX = 0;
-        touchTip.moveY = 0;
-        touchTip.startX = touchTip.endX = touchTip.x = x;
-        touchTip.startY = touchTip.endY = touchTip.y = y;
-        touchTip.startTime = now;
-        touchTip.state = 1;
-        this.emit('touchStart', touchTip);
-      }
-
-      return this;
-    }
-  }, {
-    key: "onTouchMove",
-    value: function onTouchMove(e) {
-      for (var i = 0, l = e.changedTouches.length; i < l; i++) {
-        var touch = e.changedTouches[i];
-        var touchTip = this.Touches[touch.identifier];
-        if (!touchTip) continue;
-        var x = touch.clientX * this.Size.x - this.Position.x;
-        var y = touch.clientY * this.Size.y - this.Position.y;
-        touchTip.moveX = x - touchTip.x;
-        touchTip.moveY = y - touchTip.y;
-        touchTip.endX = touchTip.x = x;
-        touchTip.endY = touchTip.y = y;
-        touchTip.state = 2;
-        this.emit('touchMove', touchTip);
-      }
-
-      return this;
-    }
-  }, {
-    key: "onTouchEnd",
-    value: function onTouchEnd(e) {
-      //touchEndAll
-      var now = Date.now();
-
-      for (var i = 0, l = e.changedTouches.length; i < l; i++) {
-        var touch = e.changedTouches[i];
-        var touchTip = this.Touches[touch.identifier];
-        if (!touchTip) continue;
-        delete this.Touches[touch.identifier];
-        var x = touch.clientX * this.Size.x - this.Position.x;
-        var y = touch.clientY * this.Size.y - this.Position.y;
-        touchTip.moveX = x - touchTip.x;
-        touchTip.moveY = y - touchTip.y;
-        touchTip.endX = touchTip.x = x;
-        touchTip.endY = touchTip.y = y;
-        touchTip.endTime = now;
-        touchTip.state = 3;
-        this.emit('touchEnd', touchTip);
-      }
-
-      return this;
-    }
-  }]);
-
-  return Touch;
-}(Event);
 
 var Collision =
 /*#__PURE__*/
 function () {
-  //触发流程
   function Collision() {
     _classCallCheck(this, Collision);
 
-    this.MatrixHandle = new Matrix3();
-    this.TouchHandle = new Vector2();
+    this.TouchHandle = new Vector3();
   }
 
   _createClass(Collision, [{
     key: "InComponent",
     value: function InComponent(Component, touch) {
       if (!Component.visible) return false;
-      this.MatrixHandle.setToArray(Component.matrix).invert();
-      this.TouchHandle.x = this.MatrixHandle.a * touch.x + this.MatrixHandle.c * touch.y + this.MatrixHandle.tx;
-      this.TouchHandle.y = this.MatrixHandle.b * touch.x + this.MatrixHandle.d * touch.y + this.MatrixHandle.ty;
       if (!Component.checkPoint) return true;
-      this.TouchHandle.addTo(Component.anchorX, Component.anchorY);
-      if (Component.checkPoint(this.TouchHandle)) return true;
-    } //TODO 使用event
-
+      this.TouchHandle.setApply(touch);
+      if (Component.checkPoint(Component.getLocalVector(this.TouchHandle))) return true;
+    }
   }, {
     key: "Recursive",
     value: function Recursive(Component, touch) {
@@ -2783,6 +1215,236 @@ function () {
 
   return Collision;
 }();
+
+var Event =
+/*#__PURE__*/
+function () {
+  function Event() {
+    _classCallCheck(this, Event);
+
+    this._events = {};
+  }
+
+  _createClass(Event, [{
+    key: "listen",
+    value: function listen() {
+      for (var i = 0; i < arguments.length; i++) {
+        this.on(arguments[i]);
+      }
+
+      return this;
+    }
+  }, {
+    key: "on",
+    value: function on(evt, fn, context) {
+      var once = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+      if (!context) context = this;
+      if (!fn) fn = context[evt];
+      if (!fn) return this;
+      if (!this._events[evt]) this._events[evt] = [];
+
+      this._events[evt].push({
+        fn: fn,
+        context: context,
+        once: once
+      });
+
+      return this;
+    }
+  }, {
+    key: "once",
+    value: function once(evt, fn, context) {
+      return this.on(evt, fn, context, true);
+    }
+  }, {
+    key: "off",
+    value: function off(evt, fn, context) {
+      if (!this._events[evt]) return this;
+      if (!context) context = this;
+
+      var events = this._events[evt].filter(function (e) {
+        return e.context !== context && e.fn !== fn;
+      });
+
+      if (events.length) {
+        this._events[evt] = events;
+      } else {
+        delete this._events[evt];
+      }
+
+      return this;
+    }
+  }, {
+    key: "emit",
+    value: function emit(evt) {
+      if (!this._events[evt]) return this;
+      var listeners = this._events[evt];
+      var args = Array.prototype.splice.call(arguments, 1);
+
+      for (var i = 0; i < listeners.length; i++) {
+        var _listeners$i = listeners[i],
+            fn = _listeners$i.fn,
+            context = _listeners$i.context,
+            once = _listeners$i.once;
+        fn.apply(context, args);
+        if (once) listeners.splice(i--, 1);
+      }
+
+      if (!listeners.length) delete this._events[evt];
+      return this;
+    }
+  }]);
+
+  return Event;
+}();
+
+var TouchEvent =
+/*#__PURE__*/
+function (_Vector) {
+  _inherits(TouchEvent, _Vector);
+
+  function TouchEvent(time, x, y) {
+    var _this;
+
+    _classCallCheck(this, TouchEvent);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(TouchEvent).call(this, x, y)); //当前位置
+
+    _this.start = new Vector2(x, y); //起始位置
+
+    _this.tick = new Vector2(0, 0); //本帧移动
+
+    _this.begin = _this.over = time; //触摸时长
+
+    return _this;
+  }
+
+  _createClass(TouchEvent, [{
+    key: "set",
+    value: function set(x, y) {
+      this.tick.set(x - this.x, y - this.y);
+      return _get(_getPrototypeOf(TouchEvent.prototype), "set", this).call(this, x, y);
+    }
+  }, {
+    key: "long",
+    get: function get() {
+      return this.over - this.begin;
+    }
+  }, {
+    key: "startX",
+    get: function get() {
+      return this.start.x;
+    }
+  }, {
+    key: "startY",
+    get: function get() {
+      return this.start.y;
+    }
+  }, {
+    key: "endX",
+    get: function get() {
+      return this.x;
+    }
+  }, {
+    key: "endY",
+    get: function get() {
+      return this.y;
+    }
+  }, {
+    key: "moveX",
+    get: function get() {
+      return this.x - this.start.x;
+    }
+  }, {
+    key: "moveY",
+    get: function get() {
+      return this.y - this.start.y;
+    }
+  }, {
+    key: "distance",
+    get: function get() {
+      return this.distVector(this.start);
+    }
+  }]);
+
+  return TouchEvent;
+}(Vector2);
+
+var Touch =
+/*#__PURE__*/
+function (_Event) {
+  _inherits(Touch, _Event);
+
+  function Touch() {
+    var _this2;
+
+    _classCallCheck(this, Touch);
+
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Touch).call(this));
+    _this2.size = new Vector2();
+    _this2.offset = new Vector2();
+    _this2.touches = {};
+    return _this2;
+  }
+
+  _createClass(Touch, [{
+    key: "getX",
+    value: function getX(x) {
+      return (x - this.offset.x) * this.size.x;
+    }
+  }, {
+    key: "getY",
+    value: function getY(y) {
+      return (y - this.offset.y) * this.size.y;
+    }
+  }, {
+    key: "start",
+    value: function start(e) {
+      var now = Date.now();
+
+      for (var i = 0, l = e.changedTouches.length; i < l; i++) {
+        var touch = e.changedTouches[i];
+        var id = touch.identifier;
+        this.touches[id] = new TouchEvent(now, this.getX(touch.clientX), this.getY(touch.clientY));
+        this.emit('touchStart', this.touches[id]);
+      }
+
+      return this;
+    }
+  }, {
+    key: "move",
+    value: function move(e) {
+      for (var i = 0, l = e.changedTouches.length; i < l; i++) {
+        var touch = e.changedTouches[i];
+        var id = touch.identifier;
+        if (!this.touches[id]) continue;
+        this.touches[id].set(this.getX(touch.clientX), this.getY(touch.clientY));
+        this.emit('touchMove', this.touches[id]);
+      }
+
+      return this;
+    }
+  }, {
+    key: "end",
+    value: function end(e) {
+      var now = Date.now();
+
+      for (var i = 0, l = e.changedTouches.length; i < l; i++) {
+        var touch = e.changedTouches[i];
+        var id = touch.identifier;
+        if (!this.touches[id]) continue;
+        this.touches[id].over = now;
+        this.touches[id].set(this.getX(touch.clientX), this.getY(touch.clientY), now);
+        this.emit('touchEnd', this.touches[id]);
+        delete this.touches[id];
+      }
+
+      return this;
+    }
+  }]);
+
+  return Touch;
+}(Event);
 
 var Loader =
 /*#__PURE__*/
@@ -2864,36 +1526,1265 @@ function (_Event) {
   return Loader;
 }(Event);
 
-/**
- * Canvas2D上下文扩展函数
- */
-/**
- * 从键值对中递归获取某个值
- * @param {Object} root
- * @param {string} keys
- * @param {string} split
- */
+var Clock =
+/*#__PURE__*/
+function (_Event) {
+  _inherits(Clock, _Event);
 
-function RecursiveMap(root, keys) {
-  var split = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '.';
-  if (typeof key == 'string') keys = keys.split(split);
-  return keys.reduce(function (obj, key) {
-    if (!obj) return obj;
-    return obj[key];
-  }, root);
+  function Clock() {
+    var _this;
+
+    _classCallCheck(this, Clock);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Clock).call(this));
+    _this.time = _this.then = _this.history = Date.now();
+    _this.interval = 1000 / 60;
+    _this.tick = _this.move = 0;
+    return _this;
+  }
+
+  _createClass(Clock, [{
+    key: "step",
+    value: function step() {
+      this.time = Date.now(); //当前时间
+
+      var change = this.time - this.then; //当前时间和上一帧的差
+
+      if (change < this.interval) return false; //小于一帧
+
+      this.tick = change / this.interval | 0; //本次步进帧数
+
+      var delta = change % this.interval; //最多步进整数帧时长
+
+      this.then = this.time - delta; //记录本帧执行到的时间点
+
+      this.move = this.time - this.history; //真实变化时长
+
+      this.history = this.time; //记录上一次变化时间
+
+      return true; //真实变化时长
+    }
+  }, {
+    key: "run",
+    value: function run() {
+      var Interval = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000 / 60;
+      this.interval = Interval;
+      var render = this;
+
+      var HandleUpdate = function HandleUpdate() {
+        requestAnimationFrame(HandleUpdate);
+        if (!render.step()) return;
+        render.emit('start');
+        render.emit('tick');
+        render.emit('end');
+      };
+
+      requestAnimationFrame(HandleUpdate);
+      return this;
+    }
+  }]);
+
+  return Clock;
+}(Event);
+
+var CanvasRender =
+/*#__PURE__*/
+function () {
+  function CanvasRender(options) {
+    _classCallCheck(this, CanvasRender);
+
+    if (!options.context) options.context = options.canvas.getContext('2d');
+    this.context = options.context;
+    this.canvas = options.context.canvas;
+    this.renderArray = [];
+  }
+
+  _createClass(CanvasRender, [{
+    key: "update",
+    value: function update() {
+      for (var i = 0, len = this.renderArray.length; i < len; i++) {
+        this.renderArray[i].emit('update');
+        if (this.renderArray[i].update) this.renderArray[i].update(this);
+        this.renderArray[i].emit('updated');
+      }
+
+      this.renderArray.length = 0;
+    }
+  }, {
+    key: "drawElements",
+    value: function drawElements(texture, Matrix, blendColor) {
+      this.transform(Matrix);
+      return texture.coord ? this.drawClipImage(texture.baseTexture.texture, texture.coord) : this.drawImage(texture.baseTexture.texture);
+    }
+  }, {
+    key: "transform",
+    value: function transform(matrix) {
+      var e = matrix.elements;
+      this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
+      return this;
+    }
+  }, {
+    key: "drawImage",
+    value: function drawImage(image) {
+      this.context.drawImage(image, -1, -1, 2, 2);
+      return this;
+    }
+  }, {
+    key: "drawClipImage",
+    value: function drawClipImage(image, coord) {
+      this.context.drawImage(image, coord[0], coord[1], coord[2], coord[3], -1, -1, 2, 2);
+      return this;
+    }
+  }, {
+    key: "fillText",
+    value: function fillText(value, font, fillStyle) {
+      var ctx = this.context;
+      if (ctx.textAlign != 'left') ctx.textAlign = 'left';
+      if (ctx.textBaseline != 'top') ctx.textBaseline = 'top';
+      if (ctx.font != font) ctx.font = font;
+      if (ctx.fillStyle != fillStyle) ctx.fillStyle = fillStyle;
+      ctx.fillText(value, 0, 0);
+      return this;
+    }
+  }]);
+
+  return CanvasRender;
+}();
+
+function TextureFactory(webgl) {
+  return (
+    /*#__PURE__*/
+    function () {
+      function Texture(baseTexture, x, y, width, height) {
+        _classCallCheck(this, Texture);
+
+        this.baseTexture = baseTexture;
+        this.width = width;
+        this.height = height;
+        this.coord = this.getCoord(x, y, width, height, baseTexture.width, baseTexture.height);
+      }
+
+      _createClass(Texture, [{
+        key: "getCoord",
+        value: function getCoord(x, y, width, height, realWidth, realHeight) {
+          if (x == 0 && y == 0 && width == realWidth && height == realHeight) return false;
+
+          if (webgl) {
+            var left = x / realWidth;
+            var top = y / realHeight;
+            var right = left + width / realWidth;
+            var bottom = top + height / realHeight;
+            return [right, top, left, top, left, bottom, right, bottom];
+          } else {
+            return [x, y, width, height];
+          }
+        }
+      }]);
+
+      return Texture;
+    }()
+  );
 }
-/**
- * 点是否在矩形范围内
- * @param {Number} x 点x坐标
- * @param {Number} y 点y坐标
- * @param {Number} bx 矩形x坐标
- * @param {Number} by 矩形y坐标
- * @param {Number} bw 矩形宽度
- * @param {Number} bh 矩形高度
- */
+function ImageTextureFactory(Texture, buildTexture) {
+  return (
+    /*#__PURE__*/
+    function () {
+      function ImageTexture(image) {
+        _classCallCheck(this, ImageTexture);
 
-function PointInRect(x, y, bx, by, bw, bh) {
-  return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
+        this.width = image.width;
+        this.height = image.height;
+        this.texture = buildTexture ? buildTexture(image) : image;
+      }
+
+      _createClass(ImageTexture, [{
+        key: "getTexture",
+        value: function getTexture(x, y, width, height) {
+          return new Texture(this, x, y, width, height);
+        }
+      }]);
+
+      return ImageTexture;
+    }()
+  );
+}
+function TextureControlFactory(ImageControl, ImageTexture) {
+  return (
+    /*#__PURE__*/
+    function (_ImageControl) {
+      _inherits(TextureControl, _ImageControl);
+
+      function TextureControl() {
+        _classCallCheck(this, TextureControl);
+
+        return _possibleConstructorReturn(this, _getPrototypeOf(TextureControl).apply(this, arguments));
+      }
+
+      _createClass(TextureControl, [{
+        key: "Set",
+        //读取并生成贴图对象
+        value: function Set(url) {
+          return _get(_getPrototypeOf(TextureControl.prototype), "Set", this).call(this, url).then(function (img) {
+            var baseTexture = new ImageTexture(img);
+            return baseTexture.getTexture(0, 0, baseTexture.width, baseTexture.height);
+          });
+        } //生成雪碧图对象
+
+      }, {
+        key: "SetClip",
+        value: function SetClip(key, name, x, y, width, height) {
+          if (!this.resources[key]) return this;
+          var baseTexture = this.resources[key].baseTexture;
+          this.resources[key + '//' + name] = baseTexture.getTexture(x, y, width, height);
+          return this;
+        }
+      }]);
+
+      return TextureControl;
+    }(ImageControl)
+  );
+}
+function FontControlFactory(gl, getCanvas, FontTexture) {
+  return (
+    /*#__PURE__*/
+    function () {
+      function FontControl() {
+        _classCallCheck(this, FontControl);
+
+        this.familys = {};
+
+        for (var i = 0; i < arguments.length; i++) {
+          var family = arguments[i].split(/s+/);
+          this.familys[arguments[i]] = {
+            baseTextures: [],
+            values: {},
+            family: family[1],
+            size: parseFloat(family[0]),
+            weight: family[2] || ''
+          };
+        }
+
+        this["default"] = arguments[0];
+      }
+
+      _createClass(FontControl, [{
+        key: "addBaseTexture",
+        value: function addBaseTexture(font) {
+          return new FontTexture(gl, getCanvas(), font.family, font.weight, font.size);
+        }
+      }, {
+        key: "check",
+        value: function check(font) {
+          var baseTexture = font.baseTextures[0];
+          if (!baseTexture || baseTexture.used >= baseTexture.max) font.baseTextures.unshift(baseTexture = this.addBaseTexture(font));
+          return baseTexture;
+        }
+      }, {
+        key: "get",
+        value: function get(family, value) {
+          var font = this.familys[family] || this.familys[this["default"]];
+          if (font.values[value]) return font.values[value];
+          font.values[value] = this.check(font).getTexture(value);
+          return font.values[value];
+        }
+      }]);
+
+      return FontControl;
+    }()
+  );
 }
 
-export { ContainerFactory as Container, BaseArray as MathArray, Clock as MathClock, color as MathColor, Matrix3 as MathMatrix3, Position as MathPosition, Random as MathRandom, Time as MathTime, Vector as MathVector, Vector2 as MathVector2, RectFactory as Rect, ScrollFactory as Scroll, SpriteFactory as Sprite, TextFactory as Text, canvas2d as UtilCanvas2D, Collision as UtilCollision, Loader as UtilLoader, PointInRect as UtilPointInRect, RecursiveMap as UtilRecursiveMap, Render as UtilRender, Touch as UtilTouch };
+function getActiveAttrib(gl, Program) {
+  var Attributes = {};
+
+  for (var i = 0, len = gl.getProgramParameter(Program, gl.ACTIVE_ATTRIBUTES); i < len; i++) {
+    var attr = gl.getActiveAttrib(Program, i); //size,type,name
+
+    var id = Attributes[attr.name] = gl.getAttribLocation(Program, attr.name);
+    gl.enableVertexAttribArray(id);
+  }
+
+  return Attributes;
+}
+function getActiveUniform(gl, Program) {
+  var Uniforms = {};
+
+  for (var i = 0, len = gl.getProgramParameter(Program, gl.ACTIVE_UNIFORMS); i < len; i++) {
+    var attr = gl.getActiveUniform(Program, i); //size,type,name
+
+    Uniforms[attr.name] = gl.getUniformLocation(Program, attr.name);
+  }
+
+  return Uniforms;
+}
+function createShader(gl, type, text) {
+  var shader = gl.createShader(gl[type]);
+  gl.shaderSource(shader, text);
+  gl.compileShader(shader);
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.log(gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
+  }
+
+  return shader;
+}
+function createProgram(gl, vert, frag) {
+  var program = gl.createProgram();
+  gl.attachShader(program, createShader(gl, 'VERTEX_SHADER', vert));
+  gl.attachShader(program, createShader(gl, 'FRAGMENT_SHADER', frag));
+  gl.linkProgram(program);
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    gl.deleteProgram(program);
+    gl.deleteShader(program);
+    gl.deleteShader(program);
+    throw '链接程序失败';
+  }
+
+  return program;
+}
+function createTexture(gl, img, options) {
+  var texture = gl.createTexture(); // this.pixelStorei(this.UNPACK_FLIP_Y_WEBGL, 1);
+
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img || null);
+  return texture;
+}
+function createBuffer(gl, type, data, draw, buffer) {
+  if (!buffer) buffer = gl.createBuffer();
+  gl.bindBuffer(type, buffer);
+  gl.bufferData(type, data, draw);
+  return buffer;
+}
+function getExtension(gl) {
+  //用WEBGL1就够了
+  // let drawBuffers = gl.getExtension('WEBGL_draw_buffers');
+  // let depthTexture = gl.getExtension('WEBKIT_WEBGL_depth_texture');
+  // let loseContext = gl.getExtension('WEBGL_lose_context');
+  var vertexArrayObject = gl.getExtension('OES_vertex_array_object') || gl.getExtension('MOZ_OES_vertex_array_object') || gl.getExtension('WEBKIT_OES_vertex_array_object'); // let anisotropicFiltering = gl.getExtension('EXT_texture_filter_anisotropic');
+  // let uint32ElementIndex = gl.getExtension('OES_element_index_uint');
+  // // Floats and half-floats
+  // let floatTexture = gl.getExtension('OES_texture_float');
+  // let floatTextureLinear = gl.getExtension('OES_texture_float_linear');
+  // let textureHalfFloat = gl.getExtension('OES_texture_half_float');
+  // let textureHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
+
+  var vertexAttribDivisor = gl.getExtension('ANGLE_instanced_arrays');
+
+  gl.createVertexArray = function () {
+    return vertexArrayObject.createVertexArrayOES();
+  };
+
+  gl.bindVertexArray = function (vao) {
+    return vertexArrayObject.bindVertexArrayOES(vao);
+  };
+
+  gl.deleteVertexArray = function (vao) {
+    return vertexArrayObject.deleteVertexArrayOES(vao);
+  };
+
+  gl.vertexAttribDivisor = function (a, b) {
+    return vertexAttribDivisor.vertexAttribDivisorANGLE(a, b);
+  };
+
+  gl.drawElementsInstanced = function (a, b, c, d, e) {
+    return vertexAttribDivisor.drawElementsInstancedANGLE(a, b, c, d, e);
+  };
+
+  gl.drawArraysInstanced = function (a, b, c, d) {
+    return vertexAttribDivisor.drawArraysInstancedANGLE(a, b, c, d);
+  };
+
+  return gl;
+}
+
+var Shader =
+/*#__PURE__*/
+function () {
+  function Shader(gl) {
+    _classCallCheck(this, Shader);
+
+    this.gl = gl.gl || gl;
+  }
+
+  _createClass(Shader, [{
+    key: "createProgram",
+    value: function createProgram$1() {
+      if (this.program) return this;
+      this.program = createProgram(this.gl, this.vert, this.frag);
+      this.attributes = getActiveAttrib(this.gl, this.program);
+      this.uniforms = getActiveUniform(this.gl, this.program);
+      return this;
+    }
+  }, {
+    key: "useProgram",
+    value: function useProgram() {
+      this.createProgram();
+      this.gl.useProgram(this.program);
+      return this;
+    }
+  }, {
+    key: "createVertexArray",
+    value: function createVertexArray(aPositionArray, aTextureCoordArray, drawElementsArray) {
+      var gl = this.gl;
+      var vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+      var aPosition = createBuffer(gl, gl.ARRAY_BUFFER, aPositionArray || new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ARRAY_BUFFER, aPosition);
+      gl.vertexAttribPointer(this.attributes.aPosition, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.attributes.aPosition);
+      var aTextureCoord = createBuffer(gl, gl.ARRAY_BUFFER, aTextureCoordArray || new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ARRAY_BUFFER, aTextureCoord);
+      gl.vertexAttribPointer(this.attributes.aTextureCoord, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.attributes.aTextureCoord);
+      var drawElements = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray || new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawElements);
+      gl.bindVertexArray(null);
+      return vao;
+    }
+  }, {
+    key: "drawElements",
+    value: function drawElements(texture, Matrix, blendColor) {
+      var gl = this.gl;
+
+      if (blendColor) {
+        gl.uniform4f(this.uniforms.uColor, blendColor.elements[0], blendColor.elements[1], blendColor.elements[2], blendColor.elements[3]);
+      } else {
+        gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
+      }
+
+      gl.uniformMatrix4fv(this.uniforms.uModelMatrix, false, Matrix.elements);
+      if (this.beforeTexture === texture) return gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      this.beforeTexture = texture;
+      if (!texture.vao) texture.vao = this.createVertexArray(null, texture.coord ? new Float32Array(texture.coord) : null, null);
+      gl.bindVertexArray(texture.vao);
+      gl.bindTexture(gl.TEXTURE_2D, texture.baseTexture.texture);
+      gl.uniform1i(this.uniforms.uSampler, 0);
+      gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    }
+  }, {
+    key: "vert",
+    get: function get() {
+      return ['attribute vec4 aPosition;', 'attribute vec2 aTextureCoord;', 'uniform mat4 uModelMatrix;', 'varying vec2 vTextureCoord;', 'void main()', '{', 'gl_Position =  uModelMatrix * aPosition;', // 'gl_PointSize = 100.0;',
+      'vTextureCoord = aTextureCoord;', '}'].join('\n');
+    }
+  }, {
+    key: "frag",
+    get: function get() {
+      return ['precision highp float;', 'uniform sampler2D uSampler;', 'varying vec2 vTextureCoord;', 'uniform vec4 uColor;', 'void main()', '{', 'vec4 color;', 'color = texture2D(uSampler,vTextureCoord);', // gl_FragCoord
+      // gl_PointCoord
+      'gl_FragColor = uColor * color;', // gl_FragData
+      '}'].join('\n');
+    }
+  }]);
+
+  return Shader;
+}();
+
+var WebGLRender =
+/*#__PURE__*/
+function () {
+  function WebGLRender(options) {
+    _classCallCheck(this, WebGLRender);
+
+    if (!options.context) options.context = options.canvas.getContext('webgl');
+    var gl = this.buildWebGL(options.context).gl;
+    this.canvas = gl.canvas;
+    this.useProgram(new Shader(this.gl));
+    this.renderArray = [];
+  }
+
+  _createClass(WebGLRender, [{
+    key: "update",
+    value: function update() {
+      for (var i = 0, len = this.renderArray.length; i < len; i++) {
+        this.renderArray[i].emit('update');
+        if (this.renderArray[i].update) this.renderArray[i].update(this);
+        this.renderArray[i].emit('updated');
+      }
+
+      this.renderArray.length = 0;
+    }
+  }, {
+    key: "buildWebGL",
+    value: function buildWebGL(gl) {
+      this.gl = gl;
+      gl.clearColor(1.0, 1.0, 1.0, 1.0); // gl.enable(gl.DEPTH_TEST);
+
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); //gl.clearDepth(1);
+      //gl.depthFunc(gl.LEQUAL);
+
+      getExtension(gl);
+      return this;
+    }
+  }, {
+    key: "useProgram",
+    value: function useProgram(shader) {
+      if (shader === this.shader) return this;
+      this.shader = shader.useProgram();
+      return this;
+    }
+  }, {
+    key: "createTexture",
+    value: function createTexture$1(image) {
+      return createTexture(this.gl, image);
+    }
+  }, {
+    key: "drawElements",
+    value: function drawElements(texture, Matrix, blendColor) {
+      this.shader.drawElements(texture, Matrix, blendColor);
+      return this;
+    }
+  }]);
+
+  return WebGLRender;
+}();
+
+function CanvasTextureFactory(ImageTexture) {
+  return (
+    /*#__PURE__*/
+    function (_ImageTexture) {
+      _inherits(CanvasTexture, _ImageTexture);
+
+      function CanvasTexture(gl, canvas) {
+        var _this;
+
+        _classCallCheck(this, CanvasTexture);
+
+        _this = _possibleConstructorReturn(this, _getPrototypeOf(CanvasTexture).call(this, canvas));
+        _this.gl = gl;
+        _this.canvas = canvas;
+        _this.context = canvas.getContext('2d');
+        _this.updateTexture = false;
+        return _this;
+      }
+
+      _createClass(CanvasTexture, [{
+        key: "update",
+        value: function update() {
+          this.updateTexture = false;
+          var gl = this.gl;
+          gl.bindTexture(gl.TEXTURE_2D, this.texture);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas);
+        }
+      }]);
+
+      return CanvasTexture;
+    }(ImageTexture)
+  );
+}
+function FontTextureFactory(CanvasTexture, Texture) {
+  return (
+    /*#__PURE__*/
+    function (_CanvasTexture) {
+      _inherits(FontTexture, _CanvasTexture);
+
+      function FontTexture(gl, canvas, family, weight, size) {
+        var _this2;
+
+        _classCallCheck(this, FontTexture);
+
+        _this2 = _possibleConstructorReturn(this, _getPrototypeOf(FontTexture).call(this, gl, canvas));
+        _this2.x = canvas.width / size | 0;
+        _this2.y = canvas.height / size | 0;
+        _this2.size = size;
+        _this2.max = _this2.x * _this2.y;
+        _this2.used = 0;
+        _this2.context.font = weight + ' ' + size + 'px ' + family;
+        _this2.context.textBaseline = 'middle';
+        _this2.context.textAlign = 'center';
+        _this2.context.fillStyle = '#FFFFFF';
+        return _this2;
+      }
+
+      _createClass(FontTexture, [{
+        key: "getTexture",
+        value: function getTexture(value) {
+          if (this.used >= this.max) return;
+          this.updateTexture = true;
+          var x = this.used % this.x * this.size + this.size / 2;
+          var y = (this.used / this.x | 0) * this.size + this.size / 2;
+          this.used++;
+          this.context.fillText(value, x, y);
+          var width = this.context.measureText(value).width;
+          var height = this.size;
+          return new Texture(this, x - width / 2, y - height / 2, width, height);
+        }
+      }, {
+        key: "update",
+        value: function update() {
+          if (!this.updateTexture) return;
+
+          _get(_getPrototypeOf(FontTexture.prototype), "update", this).call(this);
+        }
+      }]);
+
+      return FontTexture;
+    }(CanvasTexture)
+  );
+}
+
+var Container =
+/*#__PURE__*/
+function (_Event) {
+  _inherits(Container, _Event);
+
+  _createClass(Container, [{
+    key: "define",
+    value: function define(key, object, okey, event, set, get) {
+      var setgetkey = key.substr(0, 1).toUpperCase() + key.substr(1).toLowerCase();
+
+      this['set' + setgetkey] = set || function (v) {
+        if (object[okey] == v) return this;
+        object[okey] = v;
+        if (event) this.emit(event, key, v);
+        return this;
+      };
+
+      this['get' + setgetkey] = get || function (v) {
+        return object[okey];
+      };
+
+      Object.defineProperty(this, key, {
+        set: this['set' + setgetkey],
+        get: this['get' + setgetkey]
+      });
+    }
+  }]);
+
+  function Container() {
+    var _this;
+
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, Container);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Container).call(this));
+    _this.id = Container.id ? ++Container.id : Container.id = 1;
+    _this.visible = true;
+    _this.parent = null;
+    _this.children = [];
+    _this.touchChildren = true;
+    if (options.visible === false) _this.visible = false;
+    if (options.children && options.children.length) _this.add(options.children);
+    _this.worldMatrix = new Matrix4(); //矩阵
+
+    _this._updateMatrix = true; //将在下一帧更新矩阵
+
+    _this._updateMatrixInvert = true; //将在下一次需要时更新矩阵
+
+    _this.on('updateMatrix', function () {
+      this._updateMatrix = true;
+
+      for (var i = 0, len = this.children.length; i < len; i++) {
+        this.children[i].emit('updateMatrix');
+      }
+    });
+
+    _this.radian = 0;
+    if (options.angle) _this.angle = options.angle;
+    _this._zIndex = 0;
+
+    _this.define('zIndex', _assertThisInitialized(_this), '_zIndex');
+
+    if (options.zIndex) _this.zIndex = options.zIndex;
+    _this.position = new Vector2();
+    if (options.position) _this.position.setApply(options.position);
+
+    _this.define('x', _this.position, 'x', 'updateMatrix');
+
+    if (options.x) _this.x = options.x;
+
+    _this.define('y', _this.position, 'y', 'updateMatrix');
+
+    if (options.y) _this.y = options.y;
+    _this.scale = new Vector2(1, 1);
+    if (options.scale) _this.scale.same(options.scale);
+
+    _this.define('scaleX', _this.scale, 'x', 'updateMatrix');
+
+    if (options.scaleX) _this.scaleX = options.scaleX;
+
+    _this.define('scaleY', _this.scale, 'y', 'updateMatrix');
+
+    if (options.scaleY) _this.scaleY = options.scaleY;
+    _this.anchor = new Vector2(0, 0);
+
+    _this.define('anchorX', _this.anchor, 'x', 'updateMatrix');
+
+    if (options.anchorX) _this.anchorX = options.anchorX;
+
+    _this.define('anchorY', _this.anchor, 'y', 'updateMatrix');
+
+    if (options.anchorY) _this.anchorY = options.anchorY;
+    _this.size = new Vector2();
+    if (options.size) _this.size.setApply(options.size);
+
+    _this.define('width', _this.size, 'x', 'updateMatrix');
+
+    if (options.width !== undefined) _this.width = options.width;
+
+    _this.define('height', _this.size, 'y', 'updateMatrix');
+
+    if (options.height !== undefined) _this.height = options.height;
+
+    _this.define('angle', _assertThisInitialized(_this), 'radian', 'updateMatrix', function (v) {
+      var a = v * Math.PI / 180;
+      if (a == this.radian) return this;
+      this.radian = a;
+      this.emit('updateMatrix');
+      return this;
+    }, function () {
+      return this.radian * 180 / Math.PI;
+    });
+
+    if (options.angle !== undefined) _this.angle = options.angle;
+    return _this;
+  }
+
+  _createClass(Container, [{
+    key: "setSize",
+    value: function setSize(x, y) {
+      this.width = x;
+      this.height = y;
+      return this;
+    }
+  }, {
+    key: "setPosition",
+    value: function setPosition(x, y) {
+      this.x = x;
+      this.y = y;
+      return this;
+    }
+  }, {
+    key: "setScale",
+    value: function setScale(x, y) {
+      this.scaleX = x;
+      this.scaleY = y;
+      return this;
+    }
+  }, {
+    key: "put",
+    value: function put(object3d) {
+      return object3d.add(this);
+    }
+  }, {
+    key: "add",
+    value: function add(object3d) {
+      if (arguments.length > 1) {
+        for (var i = 0; i < arguments.length; i++) {
+          this.add(arguments[i]);
+        }
+      } else if (object3d instanceof Array) {
+        for (var _i = 0; _i < object3d.length; _i++) {
+          this.add(object3d[_i]);
+        }
+      } else if (object3d) {
+        object3d.emit('create');
+        if (object3d.parent) object3d.remove(this);
+        this.children.push(object3d);
+        object3d.parent = this;
+        object3d.emit('created');
+      }
+
+      return this;
+    }
+  }, {
+    key: "remove",
+    value: function remove(object3d) {
+      if (arguments.length > 1) {
+        for (var i = 0; i < arguments.length; i++) {
+          this.remove(arguments[i]);
+        }
+      } else if (object3d instanceof Array) {
+        for (var _i2 = 0; _i2 < object3d.length; _i2++) {
+          this.remove(object3d[_i2]);
+        }
+      } else if (object3d) {
+        object3d.emit('destroy', this);
+        object3d.clear();
+        var index = this.children.indexOf(object3d);
+        this.children.splice(index, 1);
+        object3d.parent = null;
+        object3d.emit('destroyd', this);
+      }
+
+      return this;
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      //TODO lockChildren
+      return this.remove(this.children);
+    }
+  }, {
+    key: "preUpdate",
+    value: function preUpdate(render) {
+      if (!this.visible) return true;
+      if (this._updateMatrix) this.updateTransform();
+      render.renderArray.push(this);
+
+      for (var i = 0, len = this.children.length; i < len; i++) {
+        this.children[i].preUpdate(render);
+      }
+    }
+  }, {
+    key: "updateTransform",
+    value: function updateTransform(matrix) {
+      this._updateMatrix = false;
+
+      if (matrix) {
+        this.worldMatrix.setApply(matrix);
+      } else {
+        if (this.parent) {
+          if (this.parent._updateMatrix) this.parent.updateTransform();
+          this.worldMatrix.setApply(this.parent.worldMatrix);
+        } else {
+          this.worldMatrix.identity();
+        }
+      }
+
+      this.worldMatrix.translate(this.x, this.y, 0);
+      this.worldMatrix.rotate(this.radian, 0, 0, 1);
+      this.worldMatrix.scale(this.scaleX, this.scaleY, 1);
+      this.worldMatrix.translate(-this.anchorX, -this.anchorY, 0);
+      this._updateMatrixInvert = true;
+      return this;
+    }
+  }, {
+    key: "getWorldVector",
+    value: function getWorldVector(vector) {
+      var clone = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (this._updateMatrix) this.updateTransform();
+
+      if (!vector) {
+        vector = new Vector2();
+      } else if (clone) {
+        vector = vector.clone();
+      }
+
+      return vector.multiplyMatrix4(this.worldMatrix);
+    }
+  }, {
+    key: "getLocalVector",
+    value: function getLocalVector(vector) {
+      if (this._updateMatrixInvert) {
+        if (this._updateMatrix) this.updateTransform();
+        if (!this.worldMatrixInvert) this.worldMatrixInvert = new Matrix4();
+        this.worldMatrixInvert.setApply(this.worldMatrix).invert();
+        this._updateMatrixInvert = false;
+      }
+
+      return vector.multiplyMatrix4(this.worldMatrixInvert);
+    }
+  }, {
+    key: "updateMatrix",
+    get: function get() {
+      return this._updateMatrix;
+    },
+    set: function set(u) {
+      if (u) {
+        this.emit('updateMatrix');
+      } else {
+        this._updateMatrix = u;
+      }
+    }
+  }]);
+
+  return Container;
+}(Event);
+
+var Sprite =
+/*#__PURE__*/
+function (_Container) {
+  _inherits(Sprite, _Container);
+
+  function Sprite(texture) {
+    var _this;
+
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    _classCallCheck(this, Sprite);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options));
+    _this.localMatrix = new Matrix4(); //矩阵
+
+    _this.setTexture(texture);
+
+    _this._color = new Color(1, 1, 1, 1);
+
+    _this.define('color', _assertThisInitialized(_this), '_color', null, function (color) {
+      this._color.setApply(color);
+
+      return this;
+    });
+
+    if (options.color !== undefined) _this.color = options.color;
+
+    _this.define('alpha', _this._color, 'alpha');
+
+    if (options.alpha !== undefined) _this.alpha = options.alpha;
+
+    _this.define('red', _this._color, 'red');
+
+    if (options.red !== undefined) _this.red = options.red;
+
+    _this.define('green', _this._color, 'green');
+
+    if (options.green !== undefined) _this.green = options.green;
+
+    _this.define('blue', _this._color, 'blue');
+
+    if (options.blue !== undefined) _this.blue = options.blue;
+    return _this;
+  }
+
+  _createClass(Sprite, [{
+    key: "checkPoint",
+    value: function checkPoint(vector) {
+      return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
+    }
+  }, {
+    key: "setTexture",
+    value: function setTexture(texture) {
+      if (!texture) {
+        this.texture = null;
+        this.width = 0;
+        this.height = 0;
+      } else {
+        this.texture = texture;
+        this.width = texture.width;
+        this.height = texture.height;
+      }
+
+      return this;
+    }
+  }, {
+    key: "update",
+    value: function update(render) {
+      if (!this.texture) return;
+      render.drawElements(this.texture, this.localMatrix, this.color);
+    }
+  }, {
+    key: "updateTransform",
+    value: function updateTransform(matrix) {
+      _get(_getPrototypeOf(Sprite.prototype), "updateTransform", this).call(this, matrix);
+
+      if (!this.texture) return;
+      this.localMatrix.setApply(this.worldMatrix).scale(this.width / 2, this.height / 2);
+    }
+  }]);
+
+  return Sprite;
+}(Container);
+
+var TextLine =
+/*#__PURE__*/
+function (_Container) {
+  _inherits(TextLine, _Container);
+
+  //最大行宽,默认行高,是否自动行高
+  function TextLine() {
+    var _this;
+
+    _classCallCheck(this, TextLine);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(TextLine).call(this));
+    _this.updateFamily = true; //字体更新
+
+    _this.textures = [];
+    return _this;
+  }
+
+  return TextLine;
+}(Container);
+var TextGroup =
+/*#__PURE__*/
+function (_Container2) {
+  _inherits(TextGroup, _Container2);
+
+  function TextGroup(family, fillStyle) {
+    var _this2;
+
+    _classCallCheck(this, TextGroup);
+
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(TextGroup).call(this));
+    _this2.family = family || '36px 微软雅黑';
+    _this2.fillStyle = fillStyle || '#FFFFFF';
+    _this2.values = '';
+    return _this2;
+  }
+
+  _createClass(TextGroup, [{
+    key: "update",
+    value: function update(render) {
+      render.transform(this.worldMatrix);
+      render.fillText(this.values, this.family, this.fillStyle);
+    }
+  }]);
+
+  return TextGroup;
+}(Container);
+var Text =
+/*#__PURE__*/
+function (_Container3) {
+  _inherits(Text, _Container3);
+
+  _createClass(Text, [{
+    key: "defaultFont",
+    value: function defaultFont(font) {
+      return Object.assign({}, font);
+    }
+  }]);
+
+  function Text() {
+    var _this3;
+
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, Text);
+
+    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, options));
+    _this3.font = _this3.defaultFont(options.font);
+    _this3.value = '';
+    _this3.textures = [];
+    _this3.wrapWidth = -1;
+    _this3.lineHeight = _this3.font.size;
+    _this3.autoLineHeight = true;
+    _this3._color = new Color(1, 1, 1, 1);
+
+    _this3.define('color', _assertThisInitialized(_this3), '_color', null, function (color) {
+      this._color.setApply(color);
+
+      return this;
+    });
+
+    if (options.color !== undefined) _this3.color = options.color;
+
+    _this3.define('alpha', _this3._color, 'alpha');
+
+    if (options.alpha !== undefined) _this3.alpha = options.alpha;
+
+    _this3.define('red', _this3._color, 'red');
+
+    if (options.red !== undefined) _this3.red = options.red;
+
+    _this3.define('green', _this3._color, 'green');
+
+    if (options.green !== undefined) _this3.green = options.green;
+
+    _this3.define('blue', _this3._color, 'blue');
+
+    if (options.blue !== undefined) _this3.blue = options.blue;
+    if (options.value) _this3.setValue(options.value);
+    return _this3;
+  }
+
+  _createClass(Text, [{
+    key: "setValue",
+    value: function setValue(value) {
+      if (value == this.value) return this;
+      this.textures.length = 0;
+      this.value = value === 0 ? '0' : value ? value.toString() : '';
+      if (!this.value) return this;
+      this.updateText(this.value);
+      return this;
+    }
+  }, {
+    key: "updateText",
+    value: function updateText(value) {
+      var tags = {}; //文本内特殊标签
+
+      var family = {
+        size: this.font.size,
+        family: this.font.family,
+        weight: this.font.weight,
+        lineWidth: this.font.lineWidth || 0,
+        strokeStyle: this.font.strokeStyle || '#000000',
+        fillStyle: this.color.string
+      }; //默认属性
+
+      var handle = Object.assign({}, family); //当前临时属性
+
+      var line = null; //当前行精灵
+
+      var string = value.replace(/\<(fillStyle|family|weight|size|i)\=(\S+?)\>/g, function (tag, action, arg, index) {
+        tags[index] = {
+          action: action,
+          arg: arg,
+          length: tag.length - 1
+        };
+        return tag;
+      });
+
+      for (var i = 0, len = string.length; i < len; i++) {
+        var v = string[i];
+
+        if (tags[i]) {
+          if (tags[i].action != 'i') {
+            handle[tags[i].action] = tags[i].arg == '@' ? family[tags[i].action] : tags[i].arg;
+            if (line) line.updateFamily = true;
+          } else {
+            if (!this.getTexture(line, handle, tags[i].arg, true)) {
+              line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
+              this.textures.push(line);
+              this.getTexture(line, handle, tags[i].arg, true);
+            }
+          }
+
+          i += tags[i].length;
+        } else if (v === '\n') {
+          line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
+          this.textures.push(line);
+        } else {
+          //如果当前行精灵不存在或者无法加入当前字，则生成一个新的行精灵推入纹理组
+          if (!this.getTexture(line, handle, v)) {
+            line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
+            this.textures.push(line);
+            this.getTexture(line, handle, v);
+          }
+        }
+      }
+
+      this.updateTextures();
+    }
+  }, {
+    key: "getTexture",
+    value: function getTexture(line, handle, sprite) {
+      throw '请设置getTexture函数';
+    }
+  }, {
+    key: "update",
+    value: function update(render) {
+      if (!this.textures || !this.textures.length) return;
+
+      for (var i = 0; i < this.textures.length; i++) {
+        var line = this.textures[i];
+
+        for (var j = 0; j < line.textures.length; j++) {
+          var sprite = line.textures[j];
+          sprite.update(render);
+        }
+      }
+    }
+  }, {
+    key: "updateTextures",
+    value: function updateTextures() {
+      var widths = this.textures.map(function (l) {
+        return l.width;
+      });
+      this.width = Math.max.apply(null, widths);
+      this.height = this.textures.reduce(function (r, line) {
+        return r + line.height;
+      }, 0);
+
+      for (var i = 0; i < this.textures.length; i++) {
+        var line = this.textures[i];
+        line.x -= this.width / 2; //整体垂直对齐方式
+
+        line.y -= this.height / 2; //整体水平对齐方式
+
+        line.x -= (line.width - this.width) * 0.5; //本行垂直对齐方式
+
+        for (var j = 0; j < line.textures.length; j++) {
+          var sprite = line.textures[j];
+
+          if (sprite.texture && sprite.texture.baseTexture.updateTexture) {
+            sprite.texture.baseTexture.update();
+          }
+
+          sprite.y -= (sprite.height - line.height) * 0.5; //本行水平对齐方式
+          //整行水平对齐方式
+        }
+      }
+
+      this.updateMatrix = true;
+    }
+  }, {
+    key: "updateTransform",
+    value: function updateTransform() {
+      _get(_getPrototypeOf(Text.prototype), "updateTransform", this).call(this);
+
+      if (!this.textures || !this.textures.length) return;
+
+      for (var i = 0; i < this.textures.length; i++) {
+        var line = this.textures[i];
+        line.updateTransform(this.worldMatrix);
+        if (line.textures.length == 3) console.log(line);
+
+        for (var j = 0; j < line.textures.length; j++) {
+          var sprite = line.textures[j];
+          sprite.updateTransform(line.worldMatrix);
+        }
+      }
+    }
+  }]);
+
+  return Text;
+}(Container);
+
+var Director =
+/*#__PURE__*/
+function (_Container) {
+  _inherits(Director, _Container);
+
+  function Director() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, Director);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Director)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "Scenes", {});
+
+    _defineProperty(_assertThisInitialized(_this), "CurrentScene", null);
+
+    return _this;
+  }
+
+  _createClass(Director, [{
+    key: "Go",
+    //当前场景
+    value: function Go(Type) {
+      this.remove(this.CurrentScene);
+
+      for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
+      }
+
+      this.CurrentScene = this.Scenes[Type] ? _construct(this.Scenes[Type], args) : null;
+      this.add(this.CurrentScene, 0);
+      return this;
+    }
+  }, {
+    key: "setScenes",
+    value: function setScenes(scenes) {
+      Object.assign(this.Scenes, scenes);
+      return this;
+    }
+  }, {
+    key: "look",
+    value: function look(Matrix) {
+      this.worldMatrix.setApply(Matrix);
+      this.updateMatrix = false;
+      return this;
+    }
+  }]);
+
+  return Director;
+}(Container);
+
+export { CanvasRender, CanvasTextureFactory, Clock, Collision, Color, Container, Director, Event, FontControlFactory, FontTextureFactory, ImageTextureFactory, Loader, Matrix4, Random, Shader, Sprite, Text, TextGroup, TextLine, TextureControlFactory, TextureFactory, Time, Touch, Vector, Vector2, Vector3, WebGLRender };

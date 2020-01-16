@@ -1,21 +1,14 @@
-import Vector2 from '../../maths/lib/vector2.js';
-import Matrix3 from '../../maths/lib/matrix3.js';
+import Vector3 from '../vector/vector3.js';
 export default class Collision {
-	//触发流程
 	constructor() {
-		this.MatrixHandle = new Matrix3();
-		this.TouchHandle = new Vector2();
+		this.TouchHandle = new Vector3();
 	}
 	InComponent(Component, touch) {
 		if (!Component.visible) return false;
-		this.MatrixHandle.setToArray(Component.matrix).invert();
-		this.TouchHandle.x = this.MatrixHandle.a * touch.x + this.MatrixHandle.c * touch.y + this.MatrixHandle.tx;
-		this.TouchHandle.y = this.MatrixHandle.b * touch.x + this.MatrixHandle.d * touch.y + this.MatrixHandle.ty;
 		if (!Component.checkPoint) return true;
-		this.TouchHandle.addTo(Component.anchorX, Component.anchorY);
-		if (Component.checkPoint(this.TouchHandle)) return true;
+		this.TouchHandle.setApply(touch);
+		if (Component.checkPoint(Component.getLocalVector(this.TouchHandle))) return true;
 	}
-	//TODO 使用event
 	Recursive(Component, touch, Action = 'touchTap') {
 		if (!Component) return false;
 		if (Component instanceof Array) {

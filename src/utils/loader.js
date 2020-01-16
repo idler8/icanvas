@@ -1,4 +1,4 @@
-import Event from 'eventemitter3';
+import Event from './event.js';
 export default class Loader extends Event {
 	constructor() {
 		super();
