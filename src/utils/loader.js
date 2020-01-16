@@ -14,10 +14,15 @@ export default class Loader extends Event {
 			this.resources[key] = res;
 		});
 	}
-	preLoad(map = {}, prefix = '') {
+	preLoad(map = {}, prefix = '', loaded) {
 		let Keys = Object.keys(map);
 		this.emit('preLoad', Keys.length);
-		return Promise.all(Keys.map(key => this.load(prefix + key, map[key])));
+		return Promise.all(
+			Keys.map(key => {
+				let load = this.load(prefix + key, map[key]);
+				return loaded ? load.then(loaded) : load;
+			}),
+		);
 	}
 	loadMap(map = {}, root = '', perfix = '', exts) {
 		let Result = {};

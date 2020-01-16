@@ -1485,10 +1485,13 @@ function (_Event) {
 
       var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      var loaded = arguments.length > 2 ? arguments[2] : undefined;
       var Keys = Object.keys(map);
       this.emit('preLoad', Keys.length);
       return Promise.all(Keys.map(function (key) {
-        return _this3.load(prefix + key, map[key]);
+        var load = _this3.load(prefix + key, map[key]);
+
+        return loaded ? load.then(loaded) : load;
       }));
     }
   }, {
