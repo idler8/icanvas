@@ -2828,9 +2828,9 @@
 
         for (var i = 0; i < this.textures.length; i++) {
           var line = this.textures[i];
-          line.x -= this.width / 2; //整体垂直对齐方式
+          line.x -= this.width * 0.5; //整体垂直对齐方式
 
-          line.y -= this.height / 2; //整体水平对齐方式
+          line.y -= this.height * 0.5; //整体水平对齐方式
 
           line.x -= (line.width - this.width) * 0.5; //本行垂直对齐方式
 
@@ -2842,7 +2842,6 @@
             }
 
             sprite.y -= (sprite.height - line.height) * 0.5; //本行水平对齐方式
-            //整行水平对齐方式
           }
         }
 
@@ -2858,7 +2857,6 @@
         for (var i = 0; i < this.textures.length; i++) {
           var line = this.textures[i];
           line.updateTransform(this.worldMatrix);
-          if (line.textures.length == 3) console.log(line);
 
           for (var j = 0; j < line.textures.length; j++) {
             var sprite = line.textures[j];
