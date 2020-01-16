@@ -1589,17 +1589,11 @@
 
   var Loader =
   /*#__PURE__*/
-  function (_Event) {
-    inherits(Loader, _Event);
-
+  function () {
     function Loader() {
-      var _this;
-
       classCallCheck(this, Loader);
 
-      _this = possibleConstructorReturn(this, getPrototypeOf(Loader).call(this));
-      _this.resources = {};
-      return _this;
+      this.resources = {};
     }
 
     createClass(Loader, [{
@@ -1610,27 +1604,23 @@
     }, {
       key: "load",
       value: function load(key, url) {
-        var _this2 = this;
+        var _this = this;
 
-        this.emit('load', key, url);
         return this.Set(url).then(function (res) {
-          _this2.emit('loaded', key, url, res);
-
-          _this2.resources[key] = res;
+          _this.resources[key] = res;
         });
       }
     }, {
       key: "preLoad",
       value: function preLoad() {
-        var _this3 = this;
+        var _this2 = this;
 
         var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
         var loaded = arguments.length > 2 ? arguments[2] : undefined;
         var Keys = Object.keys(map);
-        this.emit('preLoad', Keys.length);
         return Promise.all(Keys.map(function (key) {
-          var load = _this3.load(prefix + key, map[key]);
+          var load = _this2.load(prefix + key, map[key]);
 
           return loaded ? load.then(loaded) : load;
         }));
@@ -1638,7 +1628,7 @@
     }, {
       key: "loadMap",
       value: function loadMap() {
-        var _this4 = this;
+        var _this3 = this;
 
         var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
@@ -1660,7 +1650,7 @@
 
             Result[_key] = _url;
           } else {
-            Object.assign(Result, _this4.loadMap(map[k], root, perfix + k + '/', exts));
+            Object.assign(Result, _this3.loadMap(map[k], root, perfix + k + '/', exts));
           }
         });
         return Result;
@@ -1668,7 +1658,7 @@
     }]);
 
     return Loader;
-  }(Event);
+  }();
 
   var Clock =
   /*#__PURE__*/

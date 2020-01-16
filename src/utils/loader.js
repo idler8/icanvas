@@ -1,22 +1,17 @@
-import Event from './event.js';
-export default class Loader extends Event {
+export default class Loader {
 	constructor() {
-		super();
 		this.resources = {};
 	}
 	Set(url) {
 		throw Error('请先挂载加载函数(Set)');
 	}
 	load(key, url) {
-		this.emit('load', key, url);
 		return this.Set(url).then(res => {
-			this.emit('loaded', key, url, res);
 			this.resources[key] = res;
 		});
 	}
 	preLoad(map = {}, prefix = '', loaded) {
 		let Keys = Object.keys(map);
-		this.emit('preLoad', Keys.length);
 		return Promise.all(
 			Keys.map(key => {
 				let load = this.load(prefix + key, map[key]);
