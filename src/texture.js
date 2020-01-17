@@ -55,7 +55,7 @@ export function FontControlFactory(gl, getCanvas, FontTexture) {
 		constructor() {
 			this.familys = {};
 			for (let i = 0; i < arguments.length; i++) {
-				let family = arguments[i].split(/s+/);
+				let family = arguments[i].split(/\s+/);
 				this.familys[arguments[i]] = {
 					baseTextures: [],
 					values: {},

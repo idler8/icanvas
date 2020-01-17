@@ -30,9 +30,14 @@ export class Text extends Container {
 		this.value = '';
 		this.textures = [];
 
-		this.wrapWidth = -1;
-		this.lineHeight = this.font.size;
-		this.autoLineHeight = true;
+		this.wrapWidth = options.wrapWidth || -1;
+		if (options.lineHeight > 0) {
+			this.lineHeight = options.lineHeight;
+			this.autoLineHeight = false;
+		} else {
+			this.lineHeight = this.font.size;
+			this.autoLineHeight = true;
+		}
 
 		this._color = new Color(1, 1, 1, 1);
 		this.define('color', this, '_color', null, function(color) {

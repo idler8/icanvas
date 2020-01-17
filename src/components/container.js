@@ -109,6 +109,24 @@ export default class Container extends Event {
 		this.scaleY = y;
 		return this;
 	}
+	center(n = 0, move = 0) {
+		return this.width * n + move;
+	}
+	middle(n = 0, move = 0) {
+		return this.height * n + move;
+	}
+	left(n = 0, move = 0) {
+		return this.center(n - 0.5, move);
+	}
+	right(n = 0, move = 0) {
+		return this.center(n + 0.5, move);
+	}
+	top(n = 0, move = 0) {
+		return this.middle(n - 0.5, move);
+	}
+	bottom(n = 0, move = 0) {
+		return this.middle(n + 0.5, move);
+	}
 	get updateMatrix() {
 		return this._updateMatrix;
 	}

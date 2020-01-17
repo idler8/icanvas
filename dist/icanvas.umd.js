@@ -1888,7 +1888,7 @@
           this.familys = {};
 
           for (var i = 0; i < arguments.length; i++) {
-            var family = arguments[i].split(/s+/);
+            var family = arguments[i].split(/\s+/);
             this.familys[arguments[i]] = {
               baseTextures: [],
               values: {},
@@ -2405,6 +2405,48 @@
         return this;
       }
     }, {
+      key: "center",
+      value: function center() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        return this.width * n + move;
+      }
+    }, {
+      key: "middle",
+      value: function middle() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        return this.height * n + move;
+      }
+    }, {
+      key: "left",
+      value: function left() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        return this.center(n - 0.5, move);
+      }
+    }, {
+      key: "right",
+      value: function right() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        return this.center(n + 0.5, move);
+      }
+    }, {
+      key: "top",
+      value: function top() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        return this.middle(n - 0.5, move);
+      }
+    }, {
+      key: "bottom",
+      value: function bottom() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        return this.middle(n + 0.5, move);
+      }
+    }, {
       key: "put",
       value: function put(object3d) {
         return object3d.add(this);
@@ -2689,9 +2731,16 @@
       _this3.font = _this3.defaultFont(options.font);
       _this3.value = '';
       _this3.textures = [];
-      _this3.wrapWidth = -1;
-      _this3.lineHeight = _this3.font.size;
-      _this3.autoLineHeight = true;
+      _this3.wrapWidth = options.wrapWidth || -1;
+
+      if (options.lineHeight > 0) {
+        _this3.lineHeight = options.lineHeight;
+        _this3.autoLineHeight = false;
+      } else {
+        _this3.lineHeight = _this3.font.size;
+        _this3.autoLineHeight = true;
+      }
+
       _this3._color = new Color(1, 1, 1, 1);
 
       _this3.define('color', assertThisInitialized(_this3), '_color', null, function (color) {
