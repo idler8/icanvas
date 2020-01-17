@@ -2839,6 +2839,18 @@
         this.updateTextures();
       }
     }, {
+      key: "linePush",
+      value: function linePush(line, sprite) {
+        if (this.wrapWidth >= 0 && line.width + sprite.width > this.wrapWidth) return false;
+        sprite.anchorX = -sprite.width / 2;
+        sprite.anchorY = -sprite.height / 2;
+        if (this.autoLineHeight && sprite.height > line.height) line.height = sprite.height;
+        line.textures.push(sprite);
+        line.updateFamily = true;
+        line.width += sprite.width;
+        return true;
+      }
+    }, {
       key: "getTexture",
       value: function getTexture(line, handle, sprite) {
         throw '请设置getTexture函数';
