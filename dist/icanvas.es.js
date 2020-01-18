@@ -1609,11 +1609,9 @@ function () {
       return image;
     }
   }, {
-    key: "drawElements",
-    value: function drawElements(texture, Matrix, blendColor) {
-      var e = Matrix.elements;
-      this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
-      return texture.coord ? this.drawClipImage(texture.baseTexture.texture, texture.coord) : this.drawImage(texture.baseTexture.texture);
+    key: "blend",
+    value: function blend() {
+      return this;
     }
   }, {
     key: "transform",
@@ -1624,15 +1622,10 @@ function () {
     }
   }, {
     key: "drawImage",
-    value: function drawImage(image) {
-      this.context.drawImage(image, -1, -1, 2, 2);
-      return this;
-    }
-  }, {
-    key: "drawClipImage",
-    value: function drawClipImage(image, coord) {
-      this.context.drawImage(image, coord[0], coord[1], coord[2], coord[3], -1, -1, 2, 2);
-      return this;
+    value: function drawImage(texture) {
+      var c = texture.coord;
+      var i = texture.baseTexture.texture;
+      c ? ctx.drawImage(i, c[0], c[1], c[2], c[3], -1, -1, 2, 2) : ctx.drawImage(i, -1, -1, 2, 2);
     }
   }, {
     key: "fillText",
@@ -1917,9 +1910,10 @@ function () {
     key: "createProgram",
     value: function createProgram$1() {
       if (this.program) return this;
-      this.program = createProgram(this.gl, this.vert, this.frag);
-      this.attributes = getActiveAttrib(this.gl, this.program);
-      this.uniforms = getActiveUniform(this.gl, this.program);
+      var gl = this.gl;
+      this.program = createProgram(gl, this.vert, this.frag);
+      this.attributes = getActiveAttrib(gl, this.program);
+      this.uniforms = getActiveUniform(gl, this.program);
       this.options = {
         aPosition: createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
         aTextureCoord: createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
@@ -2045,17 +2039,26 @@ function () {
       return createTexture(this.gl, image);
     }
   }, {
+    key: "blend",
+    value: function blend(color) {
+      this.shader.blend(color);
+      return this;
+    }
+  }, {
     key: "transform",
     value: function transform(matrix) {
       this.shader.transform(matrix);
       return this;
     }
   }, {
-    key: "drawElements",
-    value: function drawElements(texture, Matrix, blendColor) {
-      this.shader.blend(blendColor);
-      this.shader.transform(Matrix);
-      this.shader.drawElements(texture);
+    key: "drawImage",
+    value: function drawImage(texture) {
+      this.shader.drawImage(texture);
+      return this;
+    }
+  }, {
+    key: "fillText",
+    value: function fillText() {
       return this;
     }
   }]);
@@ -2528,7 +2531,9 @@ function (_Container) {
     key: "update",
     value: function update(render) {
       if (!this.texture) return;
-      render.drawElements(this.texture, this.localMatrix, this.color);
+      render.blend(this.color);
+      render.transform(this.localMatrix);
+      render.drawImage(this.texture);
     }
   }, {
     key: "updateTransform",
@@ -2862,53 +2867,4 @@ function (_Container) {
   return Director;
 }(Container);
 
-var Shape =
-/*#__PURE__*/
-function () {
-  function Shape() {
-    var vecties = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-    var x = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var y = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-    _classCallCheck(this, Shape);
-
-    if (!Shape.PI2) Shape.PI2 = Math.PI * 2;
-    this.vecties = vecties;
-    this.x = x;
-    this.y = y;
-  }
-
-  _createClass(Shape, [{
-    key: "moveTo",
-    value: function moveTo(x, y) {
-      this.x = x;
-      this.y = y;
-      return this;
-    }
-  }, {
-    key: "lineTo",
-    value: function lineTo(x, y) {
-      this.vecties.push(x, y);
-      return this;
-    }
-  }, {
-    key: "arcTo",
-    value: function arcTo(x1, y1, r, x2, y2) {
-      var dx1 = x2 - x1;
-      var dy1 = y2 - y1;
-      var dx2 = this.x - x1;
-      var dy2 = this.y - y1;
-      var n = dx2 * dy1 > 0 ? Math.atan(dy1 / dx1) : -Math.atan(dy1 / dx1);
-      var x = x2 + r * Math.sin(n);
-      var y = y2 + r * Math.cos(n);
-      var a = Math.acos((dx1 * dx2 + dy1 * dy2) / (Math.sqrt(dx1 * dx1 + dy1 * dy1) * Math.sqrt(dx2 * dx2 + dy2 * dy2)));
-      var a1 = Math.atan2(y2, x2);
-      var a2 = a1 - a + Math.PI;
-      console.log(x, y, a1 * 180 / Math.PI, a2 * 180 / Math.PI);
-    }
-  }]);
-
-  return Shape;
-}();
-
-export { CanvasRender, CanvasTextureFactory, Clock, Collision, Color, Container, Director, Event, FontControlFactory, FontTextureFactory, ImageTextureFactory, Loader, Matrix4, Random, Shader, Shape, Sprite, Text, TextGroup, TextLine, TextureControlFactory, TextureFactory, Time, Touch, Vector, Vector2, Vector3, WebGLRender };
+export { CanvasRender, CanvasTextureFactory, Clock, Collision, Color, Container, Director, Event, FontControlFactory, FontTextureFactory, ImageTextureFactory, Loader, Matrix4, Random, Shader, Sprite, Text, TextGroup, TextLine, TextureControlFactory, TextureFactory, Time, Touch, Vector, Vector2, Vector3, WebGLRender };

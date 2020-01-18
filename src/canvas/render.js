@@ -17,23 +17,18 @@ export default class CanvasRender {
 	createTexture(image) {
 		return image;
 	}
-	drawElements(texture, Matrix, blendColor) {
-		let e = Matrix.elements;
-		this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
-		return texture.coord ? this.drawClipImage(texture.baseTexture.texture, texture.coord) : this.drawImage(texture.baseTexture.texture);
+	blend() {
+		return this;
 	}
 	transform(matrix) {
 		let e = matrix.elements;
 		this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
 		return this;
 	}
-	drawImage(image) {
-		this.context.drawImage(image, -1, -1, 2, 2);
-		return this;
-	}
-	drawClipImage(image, coord) {
-		this.context.drawImage(image, coord[0], coord[1], coord[2], coord[3], -1, -1, 2, 2);
-		return this;
+	drawImage(texture) {
+		let c = texture.coord;
+		let i = texture.baseTexture.texture;
+		c ? ctx.drawImage(i, c[0], c[1], c[2], c[3], -1, -1, 2, 2) : ctx.drawImage(i, -1, -1, 2, 2);
 	}
 	fillText(value, font, fillStyle) {
 		let ctx = this.context;

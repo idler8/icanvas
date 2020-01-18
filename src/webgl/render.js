@@ -33,14 +33,19 @@ export default class WebGLRender {
 	createTexture(image) {
 		return Webgl.createTexture(this.gl, image);
 	}
+	blend(color) {
+		this.shader.blend(color);
+		return this;
+	}
 	transform(matrix) {
 		this.shader.transform(matrix);
 		return this;
 	}
-	drawElements(texture, Matrix, blendColor) {
-		this.shader.blend(blendColor);
-		this.shader.transform(Matrix);
-		this.shader.drawElements(texture);
+	drawImage(texture) {
+		this.shader.drawImage(texture);
+		return this;
+	}
+	fillText() {
 		return this;
 	}
 }
