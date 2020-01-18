@@ -1962,8 +1962,8 @@ function () {
       }
     }
   }, {
-    key: "drawElements",
-    value: function drawElements(texture) {
+    key: "drawImage",
+    value: function drawImage(texture) {
       var gl = this.gl;
       if (this.beforeTexture === texture) return gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
       this.beforeTexture = texture;
