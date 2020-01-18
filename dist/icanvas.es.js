@@ -1604,9 +1604,15 @@ function () {
       this.renderArray.length = 0;
     }
   }, {
+    key: "createTexture",
+    value: function createTexture(image) {
+      return image;
+    }
+  }, {
     key: "drawElements",
     value: function drawElements(texture, Matrix, blendColor) {
-      this.transform(Matrix);
+      var e = Matrix.elements;
+      this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
       return texture.coord ? this.drawClipImage(texture.baseTexture.texture, texture.coord) : this.drawImage(texture.baseTexture.texture);
     }
   }, {
@@ -1904,6 +1910,7 @@ function () {
     _classCallCheck(this, Shader);
 
     this.gl = gl.gl || gl;
+    this.options = {};
   }
 
   _createClass(Shader, [{
@@ -1913,6 +1920,11 @@ function () {
       this.program = createProgram(this.gl, this.vert, this.frag);
       this.attributes = getActiveAttrib(this.gl, this.program);
       this.uniforms = getActiveUniform(this.gl, this.program);
+      this.options = {
+        aPosition: createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
+        aTextureCoord: createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
+        drawElements: createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray || new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW)
+      };
       return this;
     }
   }, {
@@ -1928,31 +1940,37 @@ function () {
       var gl = this.gl;
       var vao = gl.createVertexArray();
       gl.bindVertexArray(vao);
-      var aPosition = createBuffer(gl, gl.ARRAY_BUFFER, aPositionArray || new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+      var aPosition = aPositionArray ? createBuffer(gl, gl.ARRAY_BUFFER, aPositionArray, gl.STATIC_DRAW) : this.options.aPosition;
       gl.bindBuffer(gl.ARRAY_BUFFER, aPosition);
       gl.vertexAttribPointer(this.attributes.aPosition, 2, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(this.attributes.aPosition);
-      var aTextureCoord = createBuffer(gl, gl.ARRAY_BUFFER, aTextureCoordArray || new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+      var aTextureCoord = aTextureCoordArray ? createBuffer(gl, gl.ARRAY_BUFFER, aTextureCoordArray, gl.STATIC_DRAW) : this.options.aTextureCoord;
       gl.bindBuffer(gl.ARRAY_BUFFER, aTextureCoord);
       gl.vertexAttribPointer(this.attributes.aTextureCoord, 2, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(this.attributes.aTextureCoord);
-      var drawElements = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray || new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW);
+      var drawElements = drawElementsArray ? createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray, gl.STATIC_DRAW) : this.options.drawElements;
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawElements);
       gl.bindVertexArray(null);
       return vao;
     }
   }, {
-    key: "drawElements",
-    value: function drawElements(texture, Matrix, blendColor) {
-      var gl = this.gl;
-
-      if (blendColor) {
-        gl.uniform4f(this.uniforms.uColor, blendColor.elements[0], blendColor.elements[1], blendColor.elements[2], blendColor.elements[3]);
+    key: "transform",
+    value: function transform(matrix) {
+      this.gl.uniformMatrix4fv(this.uniforms.uModelMatrix, false, matrix.elements);
+    }
+  }, {
+    key: "blend",
+    value: function blend(color) {
+      if (color) {
+        this.gl.uniform4f(this.uniforms.uColor, color.elements[0], color.elements[1], color.elements[2], color.elements[3]);
       } else {
-        gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
+        this.gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
       }
-
-      gl.uniformMatrix4fv(this.uniforms.uModelMatrix, false, Matrix.elements);
+    }
+  }, {
+    key: "drawElements",
+    value: function drawElements(texture) {
+      var gl = this.gl;
       if (this.beforeTexture === texture) return gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
       this.beforeTexture = texture;
       if (!texture.vao) texture.vao = this.createVertexArray(null, texture.coord ? new Float32Array(texture.coord) : null, null);
@@ -1994,26 +2012,12 @@ function () {
   }
 
   _createClass(WebGLRender, [{
-    key: "update",
-    value: function update() {
-      for (var i = 0, len = this.renderArray.length; i < len; i++) {
-        this.renderArray[i].emit('update');
-        if (this.renderArray[i].update) this.renderArray[i].update(this);
-        this.renderArray[i].emit('updated');
-      }
-
-      this.renderArray.length = 0;
-    }
-  }, {
     key: "buildWebGL",
     value: function buildWebGL(gl) {
       this.gl = gl;
-      gl.clearColor(1.0, 1.0, 1.0, 1.0); // gl.enable(gl.DEPTH_TEST);
-
+      gl.clearColor(1.0, 1.0, 1.0, 1.0);
       gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); //gl.clearDepth(1);
-      //gl.depthFunc(gl.LEQUAL);
-
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       getExtension(gl);
       return this;
     }
@@ -2025,14 +2029,33 @@ function () {
       return this;
     }
   }, {
+    key: "update",
+    value: function update() {
+      for (var i = 0, len = this.renderArray.length; i < len; i++) {
+        this.renderArray[i].emit('update');
+        if (this.renderArray[i].update) this.renderArray[i].update(this);
+        this.renderArray[i].emit('updated');
+      }
+
+      this.renderArray.length = 0;
+    }
+  }, {
     key: "createTexture",
     value: function createTexture$1(image) {
       return createTexture(this.gl, image);
     }
   }, {
+    key: "transform",
+    value: function transform(matrix) {
+      this.shader.transform(matrix);
+      return this;
+    }
+  }, {
     key: "drawElements",
     value: function drawElements(texture, Matrix, blendColor) {
-      this.shader.drawElements(texture, Matrix, blendColor);
+      this.shader.blend(blendColor);
+      this.shader.transform(Matrix);
+      this.shader.drawElements(texture);
       return this;
     }
   }]);
@@ -2839,4 +2862,53 @@ function (_Container) {
   return Director;
 }(Container);
 
-export { CanvasRender, CanvasTextureFactory, Clock, Collision, Color, Container, Director, Event, FontControlFactory, FontTextureFactory, ImageTextureFactory, Loader, Matrix4, Random, Shader, Sprite, Text, TextGroup, TextLine, TextureControlFactory, TextureFactory, Time, Touch, Vector, Vector2, Vector3, WebGLRender };
+var Shape =
+/*#__PURE__*/
+function () {
+  function Shape() {
+    var vecties = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+    var x = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var y = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+    _classCallCheck(this, Shape);
+
+    if (!Shape.PI2) Shape.PI2 = Math.PI * 2;
+    this.vecties = vecties;
+    this.x = x;
+    this.y = y;
+  }
+
+  _createClass(Shape, [{
+    key: "moveTo",
+    value: function moveTo(x, y) {
+      this.x = x;
+      this.y = y;
+      return this;
+    }
+  }, {
+    key: "lineTo",
+    value: function lineTo(x, y) {
+      this.vecties.push(x, y);
+      return this;
+    }
+  }, {
+    key: "arcTo",
+    value: function arcTo(x1, y1, r, x2, y2) {
+      var dx1 = x2 - x1;
+      var dy1 = y2 - y1;
+      var dx2 = this.x - x1;
+      var dy2 = this.y - y1;
+      var n = dx2 * dy1 > 0 ? Math.atan(dy1 / dx1) : -Math.atan(dy1 / dx1);
+      var x = x2 + r * Math.sin(n);
+      var y = y2 + r * Math.cos(n);
+      var a = Math.acos((dx1 * dx2 + dy1 * dy2) / (Math.sqrt(dx1 * dx1 + dy1 * dy1) * Math.sqrt(dx2 * dx2 + dy2 * dy2)));
+      var a1 = Math.atan2(y2, x2);
+      var a2 = a1 - a + Math.PI;
+      console.log(x, y, a1 * 180 / Math.PI, a2 * 180 / Math.PI);
+    }
+  }]);
+
+  return Shape;
+}();
+
+export { CanvasRender, CanvasTextureFactory, Clock, Collision, Color, Container, Director, Event, FontControlFactory, FontTextureFactory, ImageTextureFactory, Loader, Matrix4, Random, Shader, Shape, Sprite, Text, TextGroup, TextLine, TextureControlFactory, TextureFactory, Time, Touch, Vector, Vector2, Vector3, WebGLRender };

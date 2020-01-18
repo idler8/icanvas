@@ -9,23 +9,11 @@ export default class WebGLRender {
 		this.useProgram(new Shader(this.gl));
 		this.renderArray = [];
 	}
-
-	update() {
-		for (let i = 0, len = this.renderArray.length; i < len; i++) {
-			this.renderArray[i].emit('update');
-			if (this.renderArray[i].update) this.renderArray[i].update(this);
-			this.renderArray[i].emit('updated');
-		}
-		this.renderArray.length = 0;
-	}
 	buildWebGL(gl) {
 		this.gl = gl;
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
-		// gl.enable(gl.DEPTH_TEST);
 		gl.enable(gl.BLEND);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		//gl.clearDepth(1);
-		//gl.depthFunc(gl.LEQUAL);
 		Webgl.getExtension(gl);
 		return this;
 	}
@@ -34,11 +22,25 @@ export default class WebGLRender {
 		this.shader = shader.useProgram();
 		return this;
 	}
+	update() {
+		for (let i = 0, len = this.renderArray.length; i < len; i++) {
+			this.renderArray[i].emit('update');
+			if (this.renderArray[i].update) this.renderArray[i].update(this);
+			this.renderArray[i].emit('updated');
+		}
+		this.renderArray.length = 0;
+	}
 	createTexture(image) {
 		return Webgl.createTexture(this.gl, image);
 	}
+	transform(matrix) {
+		this.shader.transform(matrix);
+		return this;
+	}
 	drawElements(texture, Matrix, blendColor) {
-		this.shader.drawElements(texture, Matrix, blendColor);
+		this.shader.blend(blendColor);
+		this.shader.transform(Matrix);
+		this.shader.drawElements(texture);
 		return this;
 	}
 }

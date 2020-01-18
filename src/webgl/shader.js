@@ -2,12 +2,19 @@ import * as Webgl from './webgl.js';
 export default class Shader {
 	constructor(gl) {
 		this.gl = gl.gl || gl;
+		this.options = {};
 	}
 	createProgram() {
 		if (this.program) return this;
 		this.program = Webgl.createProgram(this.gl, this.vert, this.frag);
 		this.attributes = Webgl.getActiveAttrib(this.gl, this.program);
 		this.uniforms = Webgl.getActiveUniform(this.gl, this.program);
+		this.options = {
+			aPosition: Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
+			aTextureCoord: Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
+			drawElements: Webgl.createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray || new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW),
+		};
+
 		return this;
 	}
 	useProgram() {
@@ -51,37 +58,31 @@ export default class Shader {
 		let gl = this.gl;
 		let vao = gl.createVertexArray();
 		gl.bindVertexArray(vao);
-		let aPosition = Webgl.createBuffer(
-			gl,
-			gl.ARRAY_BUFFER,
-			aPositionArray || new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]),
-			gl.STATIC_DRAW,
-		);
+		let aPosition = aPositionArray ? Webgl.createBuffer(gl, gl.ARRAY_BUFFER, aPositionArray, gl.STATIC_DRAW) : this.options.aPosition;
 		gl.bindBuffer(gl.ARRAY_BUFFER, aPosition);
 		gl.vertexAttribPointer(this.attributes.aPosition, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.attributes.aPosition);
-		let aTextureCoord = Webgl.createBuffer(
-			gl,
-			gl.ARRAY_BUFFER,
-			aTextureCoordArray || new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]),
-			gl.STATIC_DRAW,
-		);
+		let aTextureCoord = aTextureCoordArray ? Webgl.createBuffer(gl, gl.ARRAY_BUFFER, aTextureCoordArray, gl.STATIC_DRAW) : this.options.aTextureCoord;
 		gl.bindBuffer(gl.ARRAY_BUFFER, aTextureCoord);
 		gl.vertexAttribPointer(this.attributes.aTextureCoord, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.attributes.aTextureCoord);
-		let drawElements = Webgl.createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray || new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW);
+		let drawElements = drawElementsArray ? Webgl.createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray, gl.STATIC_DRAW) : this.options.drawElements;
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawElements);
 		gl.bindVertexArray(null);
 		return vao;
 	}
-	drawElements(texture, Matrix, blendColor) {
-		let gl = this.gl;
-		if (blendColor) {
-			gl.uniform4f(this.uniforms.uColor, blendColor.elements[0], blendColor.elements[1], blendColor.elements[2], blendColor.elements[3]);
+	transform(matrix) {
+		this.gl.uniformMatrix4fv(this.uniforms.uModelMatrix, false, matrix.elements);
+	}
+	blend(color) {
+		if (color) {
+			this.gl.uniform4f(this.uniforms.uColor, color.elements[0], color.elements[1], color.elements[2], color.elements[3]);
 		} else {
-			gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
+			this.gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
 		}
-		gl.uniformMatrix4fv(this.uniforms.uModelMatrix, false, Matrix.elements);
+	}
+	drawElements(texture) {
+		let gl = this.gl;
 		if (this.beforeTexture === texture) return gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 		this.beforeTexture = texture;
 		if (!texture.vao) texture.vao = this.createVertexArray(null, texture.coord ? new Float32Array(texture.coord) : null, null);

@@ -14,8 +14,12 @@ export default class CanvasRender {
 		}
 		this.renderArray.length = 0;
 	}
+	createTexture(image) {
+		return image;
+	}
 	drawElements(texture, Matrix, blendColor) {
-		this.transform(Matrix);
+		let e = Matrix.elements;
+		this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
 		return texture.coord ? this.drawClipImage(texture.baseTexture.texture, texture.coord) : this.drawImage(texture.baseTexture.texture);
 	}
 	transform(matrix) {
