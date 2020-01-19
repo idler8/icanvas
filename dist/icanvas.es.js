@@ -2884,6 +2884,11 @@ function (_Container3) {
         line.update(render);
       }
     }
+  }, {
+    key: "allFontSplit",
+    get: function get() {
+      return true;
+    }
   }]);
 
   return Text;

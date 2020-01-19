@@ -140,6 +140,9 @@ export class Text extends Container {
 		}
 		this.updateTextures();
 	}
+	get allFontSplit() {
+		return true;
+	}
 	getElement() {
 		throw '请设置getElement函数';
 	}

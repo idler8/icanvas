@@ -3042,6 +3042,11 @@
           line.update(render);
         }
       }
+    }, {
+      key: "allFontSplit",
+      get: function get() {
+        return true;
+      }
     }]);
 
     return Text;
