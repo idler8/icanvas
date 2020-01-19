@@ -25,8 +25,7 @@ export default class WebGLRender {
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 		return texture;
 	}
-	updateBuffer(array, buffer) {
-		// [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+	updateUvs(array, buffer) {
 		let gl = this.gl;
 		if (buffer) gl.deleteBuffer(buffer);
 		if (!array) return;
@@ -36,16 +35,20 @@ export default class WebGLRender {
 		let height = array[3];
 		let realWidth = array[4];
 		let realHeight = array[5];
-		if (x == 0 && y == 0 && width == realWidth && height == realHeight) {
-			return;
-		} else {
-			let left = x / realWidth;
-			let top = y / realHeight;
-			let right = left + width / realWidth;
-			let bottom = top + height / realHeight;
-			return Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([right, top, left, top, left, bottom, right, bottom]), gl.STATIC_DRAW);
-		}
+		if (x == 0 && y == 0 && width == realWidth && height == realHeight) return;
+		let left = x / realWidth;
+		let top = y / realHeight;
+		let right = left + width / realWidth;
+		let bottom = top + height / realHeight;
+		return Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([right, top, left, top, left, bottom, right, bottom]), gl.STATIC_DRAW);
 	}
+	updateVectices(array, buffer) {
+		let gl = this.gl;
+		if (buffer) gl.deleteBuffer(buffer);
+		if (!array) return;
+		return Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array(array), gl.STATIC_DRAW);
+	}
+
 	bindUvs(a) {
 		return this.shader.bindUvs(a);
 	}
@@ -76,7 +79,7 @@ export default class WebGLRender {
 	}
 	texture(texture) {
 		if (texture.needUpdate) {
-			texture.uv = this.updateBuffer(texture.source, texture.uv);
+			texture.uv = this.updateUvs(texture.source, texture.uv);
 			texture.needUpdate = false;
 		}
 		if (texture.baseTexture.needUpdate) {

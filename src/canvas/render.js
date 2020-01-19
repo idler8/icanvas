@@ -17,7 +17,7 @@ export default class CanvasRender {
 	updateTexture(image) {
 		return image;
 	}
-	updateBuffer(source) {
+	updateUvs(source) {
 		if (!source) return null;
 		let x = source[0];
 		let y = source[1];
@@ -38,7 +38,7 @@ export default class CanvasRender {
 	}
 	texture(texture) {
 		if (texture.needUpdate) {
-			texture.uv = this.updateBuffer(texture.source, texture.uv);
+			texture.uv = this.updateUvs(texture.source, texture.uv);
 			texture.needUpdate = false;
 		}
 		this.beforeUvs = texture.uv;

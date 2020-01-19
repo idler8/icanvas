@@ -1747,8 +1747,8 @@
         return image;
       }
     }, {
-      key: "updateBuffer",
-      value: function updateBuffer(source) {
+      key: "updateUvs",
+      value: function updateUvs(source) {
         if (!source) return null;
         var x = source[0];
         var y = source[1];
@@ -1775,7 +1775,7 @@
       key: "texture",
       value: function texture(_texture) {
         if (_texture.needUpdate) {
-          _texture.uv = this.updateBuffer(_texture.source, _texture.uv);
+          _texture.uv = this.updateUvs(_texture.source, _texture.uv);
           _texture.needUpdate = false;
         }
 
@@ -2231,9 +2231,8 @@
         return texture;
       }
     }, {
-      key: "updateBuffer",
-      value: function updateBuffer(array, buffer) {
-        // [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+      key: "updateUvs",
+      value: function updateUvs(array, buffer) {
         var gl = this.gl;
         if (buffer) gl.deleteBuffer(buffer);
         if (!array) return;
@@ -2243,16 +2242,20 @@
         var height = array[3];
         var realWidth = array[4];
         var realHeight = array[5];
-
-        if (x == 0 && y == 0 && width == realWidth && height == realHeight) {
-          return;
-        } else {
-          var left = x / realWidth;
-          var top = y / realHeight;
-          var right = left + width / realWidth;
-          var bottom = top + height / realHeight;
-          return createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([right, top, left, top, left, bottom, right, bottom]), gl.STATIC_DRAW);
-        }
+        if (x == 0 && y == 0 && width == realWidth && height == realHeight) return;
+        var left = x / realWidth;
+        var top = y / realHeight;
+        var right = left + width / realWidth;
+        var bottom = top + height / realHeight;
+        return createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([right, top, left, top, left, bottom, right, bottom]), gl.STATIC_DRAW);
+      }
+    }, {
+      key: "updateVectices",
+      value: function updateVectices(array, buffer) {
+        var gl = this.gl;
+        if (buffer) gl.deleteBuffer(buffer);
+        if (!array) return;
+        return createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array(array), gl.STATIC_DRAW);
       }
     }, {
       key: "bindUvs",
@@ -2301,7 +2304,7 @@
       key: "texture",
       value: function texture(_texture) {
         if (_texture.needUpdate) {
-          _texture.uv = this.updateBuffer(_texture.source, _texture.uv);
+          _texture.uv = this.updateUvs(_texture.source, _texture.uv);
           _texture.needUpdate = false;
         }
 
