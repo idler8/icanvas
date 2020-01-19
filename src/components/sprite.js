@@ -6,6 +6,8 @@ export default class Sprite extends Container {
 		super(options);
 		this.localMatrix = new Matrix4(); //矩阵
 		this.setTexture(texture);
+		if (options.width) this.width = options.width;
+		if (options.height) this.height = options.height;
 
 		this._color = new Color(1, 1, 1, 1);
 		this.define('color', this, '_color', null, function(color) {
@@ -23,6 +25,7 @@ export default class Sprite extends Container {
 		if (options.blue !== undefined) this.blue = options.blue;
 	}
 	checkPoint(vector) {
+		this.getLocalVector(vector);
 		return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
 	}
 	setTexture(texture) {
@@ -41,7 +44,8 @@ export default class Sprite extends Container {
 		if (!this.texture) return;
 		render.blend(this.color);
 		render.transform(this.localMatrix);
-		render.drawImage(this.texture);
+		render.texture(this.texture);
+		render.draw();
 	}
 	updateTransform(matrix) {
 		super.updateTransform(matrix);

@@ -1,6 +1,6 @@
 import Vector from '../vector/vector.js';
 
-function hex2rgb(hex, out) {
+export function hex2rgb(hex, out) {
 	out = out || [];
 
 	out[0] = ((hex >> 16) & 0xff) / 255;
@@ -9,20 +9,20 @@ function hex2rgb(hex, out) {
 
 	return out;
 }
-function hex2string(hex) {
+export function hex2string(hex) {
 	hex = hex.toString(16);
 	hex = '000000'.substr(0, 6 - hex.length) + hex;
 
 	return `#${hex}`;
 }
-function string2hex(string) {
+export function string2hex(string) {
 	if (typeof string === 'string' && string[0] === '#') {
 		string = string.substr(1);
 	}
 
 	return parseInt(string, 16);
 }
-function rgb2hex(rgb) {
+export function rgb2hex(rgb) {
 	return ((rgb[0] * 255) << 16) + ((rgb[1] * 255) << 8) + ((rgb[2] * 255) | 0);
 }
 export default class Color extends Vector {

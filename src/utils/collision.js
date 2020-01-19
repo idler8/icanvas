@@ -7,7 +7,7 @@ export default class Collision {
 		if (!Component.visible) return false;
 		if (!Component.checkPoint) return true;
 		this.TouchHandle.setApply(touch);
-		if (Component.checkPoint(Component.getLocalVector(this.TouchHandle))) return true;
+		if (Component.checkPoint(this.TouchHandle)) return true;
 	}
 	Recursive(Component, touch, Action = 'touchTap') {
 		if (!Component) return false;

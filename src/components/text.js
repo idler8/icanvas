@@ -1,23 +1,63 @@
-import Color from '../vector/color.js';
 import Container from './container.js';
 export class TextLine extends Container {
 	//最大行宽,默认行高,是否自动行高
 	constructor() {
 		super();
-		this.updateFamily = true; //字体更新
+		this.needSplit = true; //需要打断
 		this.textures = [];
 	}
+	addTexture(sprite) {
+		this.textures.push(sprite);
+		this.width += sprite.width;
+		sprite.anchorX = -sprite.width / 2;
+		sprite.anchorY = -sprite.height / 2;
+	}
+	align(y) {
+		for (let j = 0; j < this.textures.length; j++) {
+			let sprite = this.textures[j];
+			sprite.y -= (sprite.height - this.height) * y; //本行水平对齐方式
+		}
+	}
+	updateTransform(matrix) {
+		super.updateTransform(matrix);
+		for (let j = 0; j < this.textures.length; j++) {
+			this.textures[j].updateTransform(this.worldMatrix);
+		}
+	}
+	update(render) {
+		for (let j = 0; j < this.textures.length; j++) {
+			this.textures[j].update(render);
+		}
+	}
 }
-export class TextGroup extends Container {
-	constructor(family, fillStyle) {
-		super();
-		this.family = family || '36px 微软雅黑';
-		this.fillStyle = fillStyle || '#FFFFFF';
-		this.values = '';
+export class TextElement extends Container {
+	constructor(value, options = {}) {
+		super(options);
+		this.family = options.family || '36px 微软雅黑';
+		this.color = options.color || '#FFFFFF';
+		this.stroke = options.stroke || 0;
+		this.anchorY = -this.height / 2;
+		this.values = value;
+	}
+	addValue(value, width) {
+		this.values += value;
+		this.width += width;
+		this.anchorX = -this.width / 2;
 	}
 	update(render) {
 		render.transform(this.worldMatrix);
-		render.fillText(this.values, this.family, this.fillStyle);
+		let ctx = render.context;
+		if (ctx.font != this.family) ctx.font = this.family;
+		if (ctx.textAlign != 'center') ctx.textAlign = 'center';
+		if (ctx.textBaseline != 'middle') ctx.textBaseline = 'middle';
+		if (this.stroke > 0) {
+			if (ctx.lineWidth != this.stroke) ctx.lineWidth = this.stroke;
+			if (ctx.strokeStyle != this.color) ctx.strokeStyle = this.color;
+			render.context.strokeText(this.values, 0, 0);
+		} else {
+			if (ctx.fillStyle != this.color) ctx.fillStyle = this.color;
+			render.context.fillText(this.values, 0, 0);
+		}
 	}
 }
 export class Text extends Container {
@@ -29,6 +69,7 @@ export class Text extends Container {
 		this.font = this.defaultFont(options.font);
 		this.value = '';
 		this.textures = [];
+		this.icons = Object.assign({}, options.icons);
 
 		this.wrapWidth = options.wrapWidth || -1;
 		if (options.lineHeight > 0) {
@@ -38,21 +79,6 @@ export class Text extends Container {
 			this.lineHeight = this.font.size;
 			this.autoLineHeight = true;
 		}
-
-		this._color = new Color(1, 1, 1, 1);
-		this.define('color', this, '_color', null, function(color) {
-			this._color.setApply(color);
-			return this;
-		});
-		if (options.color !== undefined) this.color = options.color;
-		this.define('alpha', this._color, 'alpha');
-		if (options.alpha !== undefined) this.alpha = options.alpha;
-		this.define('red', this._color, 'red');
-		if (options.red !== undefined) this.red = options.red;
-		this.define('green', this._color, 'green');
-		if (options.green !== undefined) this.green = options.green;
-		this.define('blue', this._color, 'blue');
-		if (options.blue !== undefined) this.blue = options.blue;
 
 		if (options.value) this.setValue(options.value);
 	}
@@ -72,12 +98,17 @@ export class Text extends Container {
 			weight: this.font.weight,
 			lineWidth: this.font.lineWidth || 0,
 			strokeStyle: this.font.strokeStyle || '#000000',
-			fillStyle: this.color.string,
+			fillStyle: this.font.fillStyle || '#FFFFFF',
 		}; //默认属性
 		let handle = Object.assign({}, family); //当前临时属性
 		let line = null; //当前行精灵
+		let icons = this.icons;
 
-		let string = value.replace(/\<(fillStyle|family|weight|size|i)\=(\S+?)\>/g, function(tag, action, arg, index) {
+		let string = value.replace(/\<(fillStyle|strokeStyle|lineWidth|family|weight|size|i)\=(\S+?)\>/g, function(tag, action, arg, index) {
+			if (action == 'i') {
+				if (icons[arg]) tags[index] = { action, arg: icons[arg], length: tag.length - 1 };
+				return tag;
+			}
 			tags[index] = { action, arg, length: tag.length - 1 };
 			return tag;
 		});
@@ -86,12 +117,12 @@ export class Text extends Container {
 			if (tags[i]) {
 				if (tags[i].action != 'i') {
 					handle[tags[i].action] = tags[i].arg == '@' ? family[tags[i].action] : tags[i].arg;
-					if (line) line.updateFamily = true;
+					if (line) line.needSplit = true;
 				} else {
-					if (!this.getTexture(line, handle, tags[i].arg, true)) {
+					if (this.linePushSpecial(line, tags[i].arg)) {
 						line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
 						this.textures.push(line);
-						this.getTexture(line, handle, tags[i].arg, true);
+						this.linePushSpecial(line, tags[i].arg);
 					}
 				}
 				i += tags[i].length;
@@ -100,37 +131,44 @@ export class Text extends Container {
 				this.textures.push(line);
 			} else {
 				//如果当前行精灵不存在或者无法加入当前字，则生成一个新的行精灵推入纹理组
-				if (!this.getTexture(line, handle, v)) {
+				if (this.linePush(line, handle, v)) {
 					line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
 					this.textures.push(line);
-					this.getTexture(line, handle, v);
+					this.linePush(line, handle, v);
 				}
 			}
 		}
 		this.updateTextures();
 	}
-	linePush(line, sprite) {
-		if (this.wrapWidth >= 0 && line.width + sprite.width > this.wrapWidth) return false;
-		sprite.anchorX = -sprite.width / 2;
-		sprite.anchorY = -sprite.height / 2;
-		if (this.autoLineHeight && sprite.height > line.height) line.height = sprite.height;
-		line.textures.push(sprite);
-		line.updateFamily = true;
-		line.width += sprite.width;
-		return true;
+	getElement() {
+		throw '请设置getElement函数';
 	}
-	getTexture(line, handle, sprite) {
-		throw '请设置getTexture函数';
+	linePushSpecial(line, special) {
+		if (this.lineWrapCheck(line, special.width)) return true;
+		if (this.autoLineHeight && special.height > line.height) line.height = special.height;
+		line.addTexture(this.getElement(special, false, { x: line.width }, true));
+		line.needSplit = true;
 	}
-	update(render) {
-		if (!this.textures || !this.textures.length) return;
-		for (let i = 0; i < this.textures.length; i++) {
-			let line = this.textures[i];
-			for (let j = 0; j < line.textures.length; j++) {
-				let sprite = line.textures[j];
-				sprite.update(render);
+	linePush(line, handle, value, isSpecial) {
+		if (!line) return true;
+		if (isSpecial) {
+		} else {
+			let font = this.getElement(line.needSplit, value, handle);
+			let width = font.baseTexture ? (font.width * handle.size) / font.baseTexture.size : font.width;
+			if (this.lineWrapCheck(line, width)) return true;
+			if (line.needSplit) {
+				if (this.autoLineHeight && handle.size > line.height) line.height = handle.size;
+				let option = { family: handle.size + 'px ' + handle.family, color: handle.fillStyle, width, height: handle.size, x: line.width };
+				line.addTexture(this.getElement(font, value, option, true));
+				line.needSplit = this.allFontSplit;
+			} else {
+				line.textures[line.textures.length - 1].addValue(value, width);
+				line.width += width;
 			}
 		}
+	}
+	lineWrapCheck(line, width) {
+		return this.wrapWidth >= 0 && line.width + width > this.wrapWidth;
 	}
 	updateTextures() {
 		let widths = this.textures.map(l => l.width);
@@ -141,13 +179,7 @@ export class Text extends Container {
 			line.x -= this.width * 0.5; //整体垂直对齐方式
 			line.y -= this.height * 0.5; //整体水平对齐方式
 			line.x -= (line.width - this.width) * 0.5; //本行垂直对齐方式
-			for (let j = 0; j < line.textures.length; j++) {
-				let sprite = line.textures[j];
-				if (sprite.texture && sprite.texture.baseTexture.updateTexture) {
-					sprite.texture.baseTexture.update();
-				}
-				sprite.y -= (sprite.height - line.height) * 0.5; //本行水平对齐方式
-			}
+			line.align(0.5);
 		}
 		this.updateMatrix = true;
 	}
@@ -157,10 +189,13 @@ export class Text extends Container {
 		for (let i = 0; i < this.textures.length; i++) {
 			let line = this.textures[i];
 			line.updateTransform(this.worldMatrix);
-			for (let j = 0; j < line.textures.length; j++) {
-				let sprite = line.textures[j];
-				sprite.updateTransform(line.worldMatrix);
-			}
+		}
+	}
+	update(render) {
+		if (!this.textures || !this.textures.length) return;
+		for (let i = 0; i < this.textures.length; i++) {
+			let line = this.textures[i];
+			line.update(render);
 		}
 	}
 }

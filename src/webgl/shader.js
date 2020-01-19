@@ -4,22 +4,17 @@ export default class Shader {
 		this.gl = gl.gl || gl;
 		this.options = {};
 	}
-	createProgram() {
-		if (this.program) return this;
+	use() {
 		let gl = this.gl;
-		this.program = Webgl.createProgram(gl, this.vert, this.frag);
-		this.attributes = Webgl.getActiveAttrib(gl, this.program);
-		this.uniforms = Webgl.getActiveUniform(gl, this.program);
-		this.options = {
-			aPosition: Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
-			aTextureCoord: Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
-			drawElements: Webgl.createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW),
-		};
-		return this;
-	}
-	useProgram() {
-		this.createProgram();
-		this.gl.useProgram(this.program);
+		if (!this.program) {
+			this.program = Webgl.createProgram(gl, this.vert, this.frag);
+			this.attributes = Webgl.getActiveAttrib(gl, this.program);
+			this.uniforms = Webgl.getActiveUniform(gl, this.program);
+			this.vecties = Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+			this.uvs = Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+			this.indices = Webgl.createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW);
+		}
+		gl.useProgram(this.program);
 		return this;
 	}
 	get vert() {
@@ -54,23 +49,42 @@ export default class Shader {
 			'}',
 		].join('\n');
 	}
-	createVertexArray(aPositionArray, aTextureCoordArray, drawElementsArray) {
+	bindTexture(texture) {
+		if (this.beforeTexture === texture) return false;
 		let gl = this.gl;
-		let vao = gl.createVertexArray();
-		gl.bindVertexArray(vao);
-		let aPosition = aPositionArray ? Webgl.createBuffer(gl, gl.ARRAY_BUFFER, aPositionArray, gl.STATIC_DRAW) : this.options.aPosition;
-		gl.bindBuffer(gl.ARRAY_BUFFER, aPosition);
-		gl.vertexAttribPointer(this.attributes.aPosition, 2, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray(this.attributes.aPosition);
-		let aTextureCoord = aTextureCoordArray ? Webgl.createBuffer(gl, gl.ARRAY_BUFFER, aTextureCoordArray, gl.STATIC_DRAW) : this.options.aTextureCoord;
-		gl.bindBuffer(gl.ARRAY_BUFFER, aTextureCoord);
+		this.beforeTexture = texture;
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.uniform1i(this.uniforms.uSampler, 0);
+		return true;
+	}
+	bindUvs(uvs = this.uvs) {
+		if (this.beforeUvs === uvs) return false;
+		this.beforeUvs = uvs;
+		let gl = this.gl;
+		gl.bindBuffer(gl.ARRAY_BUFFER, uvs);
 		gl.vertexAttribPointer(this.attributes.aTextureCoord, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.attributes.aTextureCoord);
-		let drawElements = drawElementsArray ? Webgl.createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray, gl.STATIC_DRAW) : this.options.drawElements;
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawElements);
-		gl.bindVertexArray(null);
-		return vao;
+		return true;
 	}
+	bindVecties(vecties = this.vecties) {
+		if (this.beforeVecties === vecties) return false;
+		this.beforeVecties = vecties;
+		let gl = this.gl;
+		gl.bindBuffer(gl.ARRAY_BUFFER, vecties);
+		gl.vertexAttribPointer(this.attributes.aPosition, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.attributes.aPosition);
+		return true;
+	}
+	bindIndices(indices = this.indices) {
+		let gl = this.gl;
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices);
+		return true;
+	}
+	draw() {
+		let gl = this.gl;
+		gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+	}
+
 	transform(matrix) {
 		this.gl.uniformMatrix4fv(this.uniforms.uModelMatrix, false, matrix.elements);
 	}
@@ -80,17 +94,5 @@ export default class Shader {
 		} else {
 			this.gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
 		}
-	}
-	drawImage(texture) {
-		let gl = this.gl;
-		if (this.beforeTexture === texture) return gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-		this.beforeTexture = texture;
-		if (!texture.vao) texture.vao = this.createVertexArray(null, texture.coord ? new Float32Array(texture.coord) : null, null);
-		gl.bindVertexArray(texture.vao);
-
-		gl.bindTexture(gl.TEXTURE_2D, texture.baseTexture.texture);
-		gl.uniform1i(this.uniforms.uSampler, 0);
-
-		gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 	}
 }

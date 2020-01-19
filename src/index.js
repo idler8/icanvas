@@ -13,13 +13,12 @@ export { default as Clock } from './utils/clock.js';
 export { default as Event } from './utils/event.js';
 
 export { default as CanvasRender } from './canvas/render.js';
-export { TextureFactory, ImageTextureFactory, TextureControlFactory, FontControlFactory } from './texture.js';
+export { Texture, BaseTexture, CanvasTexture, FontTexture, TextureControlFactory, FontControlFactory } from './texture.js';
 
 export { default as WebGLRender } from './webgl/render.js';
 export { default as Shader } from './webgl/shader.js';
-export { CanvasTextureFactory, FontTextureFactory } from './webgl/texture.js';
 
 export { default as Container } from './components/container.js';
 export { default as Sprite } from './components/sprite.js';
-export { Text, TextGroup, TextLine } from './components/text.js';
+export { Text, TextLine, TextElement } from './components/text.js';
 export { default as Director } from './components/director.js';

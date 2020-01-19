@@ -949,13 +949,11 @@
     out[2] = (hex & 0xff) / 255;
     return out;
   }
-
   function hex2string(hex) {
     hex = hex.toString(16);
     hex = '000000'.substr(0, 6 - hex.length) + hex;
     return "#".concat(hex);
   }
-
   function string2hex(string) {
     if (typeof string === 'string' && string[0] === '#') {
       string = string.substr(1);
@@ -963,7 +961,6 @@
 
     return parseInt(string, 16);
   }
-
   function rgb2hex(rgb) {
     return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + (rgb[2] * 255 | 0);
   }
@@ -1324,7 +1321,7 @@
         if (!Component.visible) return false;
         if (!Component.checkPoint) return true;
         this.TouchHandle.setApply(touch);
-        if (Component.checkPoint(Component.getLocalVector(this.TouchHandle))) return true;
+        if (Component.checkPoint(this.TouchHandle)) return true;
       }
     }, {
       key: "Recursive",
@@ -1745,9 +1742,22 @@
         this.renderArray.length = 0;
       }
     }, {
-      key: "createTexture",
-      value: function createTexture(image) {
+      key: "updateTexture",
+      value: function updateTexture(image) {
         return image;
+      }
+    }, {
+      key: "updateBuffer",
+      value: function updateBuffer(source) {
+        if (!source) return null;
+        var x = source[0];
+        var y = source[1];
+        var width = source[2];
+        var height = source[3];
+        var realWidth = source[4];
+        var realHeight = source[5];
+        if (x == 0 && y == 0 && width == realWidth && height == realHeight) return null;
+        return source;
       }
     }, {
       key: "blend",
@@ -1762,86 +1772,144 @@
         return this;
       }
     }, {
-      key: "drawImage",
-      value: function drawImage(texture) {
-        var c = texture.coord;
-        var i = texture.baseTexture.texture;
+      key: "texture",
+      value: function texture(_texture) {
+        if (_texture.needUpdate) {
+          _texture.uv = this.updateBuffer(_texture.source, _texture.uv);
+          _texture.needUpdate = false;
+        }
+
+        this.beforeUvs = _texture.uv;
+        this.beforeTexture = _texture.baseTexture.source;
+      }
+    }, {
+      key: "draw",
+      value: function draw() {
+        var ctx = this.context;
+        var c = this.beforeUvs;
+        var i = this.beforeTexture;
         c ? ctx.drawImage(i, c[0], c[1], c[2], c[3], -1, -1, 2, 2) : ctx.drawImage(i, -1, -1, 2, 2);
       }
     }, {
-      key: "fillText",
-      value: function fillText(value, font, fillStyle) {
-        var ctx = this.context;
-        if (ctx.textAlign != 'left') ctx.textAlign = 'left';
-        if (ctx.textBaseline != 'top') ctx.textBaseline = 'top';
-        if (ctx.font != font) ctx.font = font;
-        if (ctx.fillStyle != fillStyle) ctx.fillStyle = fillStyle;
-        ctx.fillText(value, 0, 0);
-        return this;
+      key: "text",
+      value: function text() {//TODO
+        // let ctx = render.context;
+        // if (ctx.font != this.family) ctx.font = this.family;
+        // if (ctx.textAlign != 'left') ctx.fillStyle = 'left';
+        // if (ctx.textBaseline != 'top') ctx.textBaseline = 'top';
+        // if (this.stroke > 0) {
+        // 	if (ctx.lineWidth != this.stroke) ctx.lineWidth = this.stroke;
+        // 	if (ctx.strokeStyle != this.color) ctx.strokeStyle = this.color;
+        // 	render.context.strokeText(this.values, 0, 0);
+        // } else {
+        // 	if (ctx.fillStyle != this.color) ctx.fillStyle = this.color;
+        // 	render.context.fillText(this.values, 0, 0);
+        // }
       }
     }]);
 
     return CanvasRender;
   }();
 
-  function TextureFactory(webgl) {
-    return (
-      /*#__PURE__*/
-      function () {
-        function Texture(baseTexture, x, y, width, height) {
-          classCallCheck(this, Texture);
+  var Texture = function Texture(baseTexture, x, y, width, height) {
+    classCallCheck(this, Texture);
 
-          this.baseTexture = baseTexture;
-          this.width = width;
-          this.height = height;
-          this.coord = this.getCoord(x, y, width, height, baseTexture.width, baseTexture.height);
-        }
+    this.baseTexture = baseTexture;
+    this.width = width;
+    this.height = height;
+    this.source = [x, y, width, height, baseTexture.width, baseTexture.height];
+    this.needUpdate = true;
+    this.uv = null;
+  };
+  var BaseTexture =
+  /*#__PURE__*/
+  function () {
+    function BaseTexture(source) {
+      classCallCheck(this, BaseTexture);
 
-        createClass(Texture, [{
-          key: "getCoord",
-          value: function getCoord(x, y, width, height, realWidth, realHeight) {
-            if (x == 0 && y == 0 && width == realWidth && height == realHeight) return false;
+      this.width = source.width;
+      this.height = source.height;
+      this.source = source;
+      this.needUpdate = true;
+      this.texture = null;
+    }
 
-            if (webgl) {
-              var left = x / realWidth;
-              var top = y / realHeight;
-              var right = left + width / realWidth;
-              var bottom = top + height / realHeight;
-              return [right, top, left, top, left, bottom, right, bottom];
-            } else {
-              return [x, y, width, height];
-            }
-          }
-        }]);
+    createClass(BaseTexture, [{
+      key: "getTexture",
+      value: function getTexture(x, y, width, height) {
+        return new Texture(this, x, y, width, height);
+      }
+    }]);
 
-        return Texture;
-      }()
-    );
-  }
-  function ImageTextureFactory(Texture, buildTexture) {
-    return (
-      /*#__PURE__*/
-      function () {
-        function ImageTexture(image) {
-          classCallCheck(this, ImageTexture);
+    return BaseTexture;
+  }();
+  var CanvasTexture =
+  /*#__PURE__*/
+  function (_BaseTexture) {
+    inherits(CanvasTexture, _BaseTexture);
 
-          this.width = image.width;
-          this.height = image.height;
-          this.texture = buildTexture ? buildTexture(image) : image;
-        }
+    function CanvasTexture(canvas) {
+      var _this;
 
-        createClass(ImageTexture, [{
-          key: "getTexture",
-          value: function getTexture(x, y, width, height) {
-            return new Texture(this, x, y, width, height);
-          }
-        }]);
+      classCallCheck(this, CanvasTexture);
 
-        return ImageTexture;
-      }()
-    );
-  }
-  function TextureControlFactory(ImageControl, ImageTexture) {
+      var context = null;
+
+      if (canvas.getContext) {
+        context = canvas.getContext('2d');
+      } else {
+        context = canvas;
+        canvas = context.canvas;
+      }
+
+      _this = possibleConstructorReturn(this, getPrototypeOf(CanvasTexture).call(this, canvas));
+      _this.context = canvas.getContext('2d');
+      return _this;
+    }
+
+    return CanvasTexture;
+  }(BaseTexture);
+  var FontTexture =
+  /*#__PURE__*/
+  function (_CanvasTexture) {
+    inherits(FontTexture, _CanvasTexture);
+
+    function FontTexture(canvas, family, weight, size) {
+      var _this2;
+
+      classCallCheck(this, FontTexture);
+
+      _this2 = possibleConstructorReturn(this, getPrototypeOf(FontTexture).call(this, canvas));
+      _this2.x = _this2.source.width / size | 0;
+      _this2.y = _this2.source.height / size | 0;
+      _this2.size = size;
+      _this2.max = _this2.x * _this2.y;
+      _this2.used = 0;
+      _this2.context.font = weight + ' ' + size + 'px ' + family;
+      _this2.context.textBaseline = 'middle';
+      _this2.context.textAlign = 'center';
+      _this2.context.fillStyle = '#FFFFFF';
+      return _this2;
+    }
+
+    createClass(FontTexture, [{
+      key: "getTexture",
+      value: function getTexture(value) {
+        if (this.used >= this.max) return;
+        this.needUpdate = true;
+        var x = this.used % this.x * this.size + this.size / 2;
+        var y = (this.used / this.x | 0) * this.size + this.size / 2;
+        this.used++;
+        this.context.fillText(value, x, y);
+        var width = this.context.measureText(value).width;
+        var height = this.size;
+        return new Texture(this, x - width / 2, y - height / 2, width, height);
+      }
+    }]);
+
+    return FontTexture;
+  }(CanvasTexture);
+  function TextureControlFactory(ImageControl, BaseTexture) {
     return (
       /*#__PURE__*/
       function (_ImageControl) {
@@ -1858,7 +1926,7 @@
           //读取并生成贴图对象
           value: function Set(url) {
             return get(getPrototypeOf(TextureControl.prototype), "Set", this).call(this, url).then(function (img) {
-              var baseTexture = new ImageTexture(img);
+              var baseTexture = new BaseTexture(img);
               return baseTexture.getTexture(0, 0, baseTexture.width, baseTexture.height);
             });
           } //生成雪碧图对象
@@ -1877,7 +1945,7 @@
       }(ImageControl)
     );
   }
-  function FontControlFactory(gl, getCanvas, FontTexture) {
+  function FontControlFactory(getCanvas, FontTexture) {
     return (
       /*#__PURE__*/
       function () {
@@ -1898,12 +1966,13 @@
           }
 
           this["default"] = arguments[0];
+          this.used = null;
         }
 
         createClass(FontControl, [{
           key: "addBaseTexture",
           value: function addBaseTexture(font) {
-            return new FontTexture(gl, getCanvas(), font.family, font.weight, font.size);
+            return new FontTexture(getCanvas(), font.family, font.weight, font.size);
           }
         }, {
           key: "check",
@@ -1913,9 +1982,14 @@
             return baseTexture;
           }
         }, {
+          key: "update",
+          value: function update(family) {
+            this.used = this.familys[family] || this.familys[this["default"]];
+          }
+        }, {
           key: "get",
-          value: function get(family, value) {
-            var font = this.familys[family] || this.familys[this["default"]];
+          value: function get(value) {
+            var font = this.used;
             if (font.values[value]) return font.values[value];
             font.values[value] = this.check(font).getTexture(value);
             return font.values[value];
@@ -1926,6 +2000,23 @@
       }()
     );
   }
+
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
+  var defineProperty = _defineProperty;
 
   function getActiveAttrib(gl, Program) {
     var Attributes = {};
@@ -1995,47 +2086,6 @@
     gl.bufferData(type, data, draw);
     return buffer;
   }
-  function getExtension(gl) {
-    //用WEBGL1就够了
-    // let drawBuffers = gl.getExtension('WEBGL_draw_buffers');
-    // let depthTexture = gl.getExtension('WEBKIT_WEBGL_depth_texture');
-    // let loseContext = gl.getExtension('WEBGL_lose_context');
-    var vertexArrayObject = gl.getExtension('OES_vertex_array_object') || gl.getExtension('MOZ_OES_vertex_array_object') || gl.getExtension('WEBKIT_OES_vertex_array_object'); // let anisotropicFiltering = gl.getExtension('EXT_texture_filter_anisotropic');
-    // let uint32ElementIndex = gl.getExtension('OES_element_index_uint');
-    // // Floats and half-floats
-    // let floatTexture = gl.getExtension('OES_texture_float');
-    // let floatTextureLinear = gl.getExtension('OES_texture_float_linear');
-    // let textureHalfFloat = gl.getExtension('OES_texture_half_float');
-    // let textureHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
-
-    var vertexAttribDivisor = gl.getExtension('ANGLE_instanced_arrays');
-
-    gl.createVertexArray = function () {
-      return vertexArrayObject.createVertexArrayOES();
-    };
-
-    gl.bindVertexArray = function (vao) {
-      return vertexArrayObject.bindVertexArrayOES(vao);
-    };
-
-    gl.deleteVertexArray = function (vao) {
-      return vertexArrayObject.deleteVertexArrayOES(vao);
-    };
-
-    gl.vertexAttribDivisor = function (a, b) {
-      return vertexAttribDivisor.vertexAttribDivisorANGLE(a, b);
-    };
-
-    gl.drawElementsInstanced = function (a, b, c, d, e) {
-      return vertexAttribDivisor.drawElementsInstancedANGLE(a, b, c, d, e);
-    };
-
-    gl.drawArraysInstanced = function (a, b, c, d) {
-      return vertexAttribDivisor.drawArraysInstancedANGLE(a, b, c, d);
-    };
-
-    return gl;
-  }
 
   var Shader =
   /*#__PURE__*/
@@ -2048,45 +2098,69 @@
     }
 
     createClass(Shader, [{
-      key: "createProgram",
-      value: function createProgram$1() {
-        if (this.program) return this;
+      key: "use",
+      value: function use() {
         var gl = this.gl;
-        this.program = createProgram(gl, this.vert, this.frag);
-        this.attributes = getActiveAttrib(gl, this.program);
-        this.uniforms = getActiveUniform(gl, this.program);
-        this.options = {
-          aPosition: createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
-          aTextureCoord: createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW),
-          drawElements: createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW)
-        };
+
+        if (!this.program) {
+          this.program = createProgram(gl, this.vert, this.frag);
+          this.attributes = getActiveAttrib(gl, this.program);
+          this.uniforms = getActiveUniform(gl, this.program);
+          this.vecties = createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+          this.uvs = createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+          this.indices = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW);
+        }
+
+        gl.useProgram(this.program);
         return this;
       }
     }, {
-      key: "useProgram",
-      value: function useProgram() {
-        this.createProgram();
-        this.gl.useProgram(this.program);
-        return this;
+      key: "bindTexture",
+      value: function bindTexture(texture) {
+        if (this.beforeTexture === texture) return false;
+        var gl = this.gl;
+        this.beforeTexture = texture;
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.uniform1i(this.uniforms.uSampler, 0);
+        return true;
       }
     }, {
-      key: "createVertexArray",
-      value: function createVertexArray(aPositionArray, aTextureCoordArray, drawElementsArray) {
+      key: "bindUvs",
+      value: function bindUvs() {
+        var uvs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.uvs;
+        if (this.beforeUvs === uvs) return false;
+        this.beforeUvs = uvs;
         var gl = this.gl;
-        var vao = gl.createVertexArray();
-        gl.bindVertexArray(vao);
-        var aPosition = aPositionArray ? createBuffer(gl, gl.ARRAY_BUFFER, aPositionArray, gl.STATIC_DRAW) : this.options.aPosition;
-        gl.bindBuffer(gl.ARRAY_BUFFER, aPosition);
-        gl.vertexAttribPointer(this.attributes.aPosition, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(this.attributes.aPosition);
-        var aTextureCoord = aTextureCoordArray ? createBuffer(gl, gl.ARRAY_BUFFER, aTextureCoordArray, gl.STATIC_DRAW) : this.options.aTextureCoord;
-        gl.bindBuffer(gl.ARRAY_BUFFER, aTextureCoord);
+        gl.bindBuffer(gl.ARRAY_BUFFER, uvs);
         gl.vertexAttribPointer(this.attributes.aTextureCoord, 2, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(this.attributes.aTextureCoord);
-        var drawElements = drawElementsArray ? createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, drawElementsArray, gl.STATIC_DRAW) : this.options.drawElements;
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawElements);
-        gl.bindVertexArray(null);
-        return vao;
+        return true;
+      }
+    }, {
+      key: "bindVecties",
+      value: function bindVecties() {
+        var vecties = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.vecties;
+        if (this.beforeVecties === vecties) return false;
+        this.beforeVecties = vecties;
+        var gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, vecties);
+        gl.vertexAttribPointer(this.attributes.aPosition, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.attributes.aPosition);
+        return true;
+      }
+    }, {
+      key: "bindIndices",
+      value: function bindIndices() {
+        var indices = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.indices;
+        var gl = this.gl;
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices);
+        return true;
+      }
+    }, {
+      key: "draw",
+      value: function draw() {
+        var gl = this.gl;
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
       }
     }, {
       key: "transform",
@@ -2101,18 +2175,6 @@
         } else {
           this.gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
         }
-      }
-    }, {
-      key: "drawImage",
-      value: function drawImage(texture) {
-        var gl = this.gl;
-        if (this.beforeTexture === texture) return gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-        this.beforeTexture = texture;
-        if (!texture.vao) texture.vao = this.createVertexArray(null, texture.coord ? new Float32Array(texture.coord) : null, null);
-        gl.bindVertexArray(texture.vao);
-        gl.bindTexture(gl.TEXTURE_2D, texture.baseTexture.texture);
-        gl.uniform1i(this.uniforms.uSampler, 0);
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
       }
     }, {
       key: "vert",
@@ -2139,29 +2201,78 @@
     function WebGLRender(options) {
       classCallCheck(this, WebGLRender);
 
+      defineProperty(this, "text", this.draw);
+
       if (!options.context) options.context = options.canvas.getContext('webgl');
-      var gl = this.buildWebGL(options.context).gl;
+      var gl = this.gl = options.context;
+      gl.clearColor(1.0, 1.0, 1.0, 1.0);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); // Webgl.getExtension(gl);
+
       this.canvas = gl.canvas;
       this.useProgram(new Shader(this.gl));
       this.renderArray = [];
     }
 
     createClass(WebGLRender, [{
-      key: "buildWebGL",
-      value: function buildWebGL(gl) {
-        this.gl = gl;
-        gl.clearColor(1.0, 1.0, 1.0, 1.0);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        getExtension(gl);
-        return this;
-      }
-    }, {
       key: "useProgram",
       value: function useProgram(shader) {
         if (shader === this.shader) return this;
-        this.shader = shader.useProgram();
+        this.shader = shader.use();
         return this;
+      }
+    }, {
+      key: "updateTexture",
+      value: function updateTexture(image, texture) {
+        var gl = this.gl;
+        if (!texture) return createTexture(gl, image);
+        gl.bindTexture(texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        return texture;
+      }
+    }, {
+      key: "updateBuffer",
+      value: function updateBuffer(array, buffer) {
+        // [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+        var gl = this.gl;
+        if (buffer) gl.deleteBuffer(buffer);
+        if (!array) return;
+        var x = array[0];
+        var y = array[1];
+        var width = array[2];
+        var height = array[3];
+        var realWidth = array[4];
+        var realHeight = array[5];
+
+        if (x == 0 && y == 0 && width == realWidth && height == realHeight) {
+          return;
+        } else {
+          var left = x / realWidth;
+          var top = y / realHeight;
+          var right = left + width / realWidth;
+          var bottom = top + height / realHeight;
+          return createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([right, top, left, top, left, bottom, right, bottom]), gl.STATIC_DRAW);
+        }
+      }
+    }, {
+      key: "bindUvs",
+      value: function bindUvs(a) {
+        return this.shader.bindUvs(a);
+      }
+    }, {
+      key: "bindVecties",
+      value: function bindVecties(a) {
+        return this.shader.bindVecties(a);
+      }
+    }, {
+      key: "bindIndices",
+      value: function bindIndices(a) {
+        return this.shader.bindIndices(a);
+      }
+    }, {
+      key: "bindTexture",
+      value: function bindTexture(a) {
+        return this.shader.bindTexture(a);
       }
     }, {
       key: "update",
@@ -2173,11 +2284,6 @@
         }
 
         this.renderArray.length = 0;
-      }
-    }, {
-      key: "createTexture",
-      value: function createTexture$1(image) {
-        return createTexture(this.gl, image);
       }
     }, {
       key: "blend",
@@ -2192,104 +2298,34 @@
         return this;
       }
     }, {
-      key: "drawImage",
-      value: function drawImage(texture) {
-        this.shader.drawImage(texture);
+      key: "texture",
+      value: function texture(_texture) {
+        if (_texture.needUpdate) {
+          _texture.uv = this.updateBuffer(_texture.source, _texture.uv);
+          _texture.needUpdate = false;
+        }
+
+        if (_texture.baseTexture.needUpdate) {
+          _texture.baseTexture.texture = this.updateTexture(_texture.baseTexture.source, _texture.baseTexture.texture);
+          _texture.baseTexture.needUpdate = false;
+        }
+
+        this.bindUvs(_texture.uv);
+        this.bindTexture(_texture.baseTexture.texture);
         return this;
       }
     }, {
-      key: "fillText",
-      value: function fillText() {
+      key: "draw",
+      value: function draw() {
+        this.shader.bindVecties();
+        this.shader.bindIndices();
+        this.shader.draw();
         return this;
       }
     }]);
 
     return WebGLRender;
   }();
-
-  function CanvasTextureFactory(ImageTexture) {
-    return (
-      /*#__PURE__*/
-      function (_ImageTexture) {
-        inherits(CanvasTexture, _ImageTexture);
-
-        function CanvasTexture(gl, canvas) {
-          var _this;
-
-          classCallCheck(this, CanvasTexture);
-
-          _this = possibleConstructorReturn(this, getPrototypeOf(CanvasTexture).call(this, canvas));
-          _this.gl = gl;
-          _this.canvas = canvas;
-          _this.context = canvas.getContext('2d');
-          _this.updateTexture = false;
-          return _this;
-        }
-
-        createClass(CanvasTexture, [{
-          key: "update",
-          value: function update() {
-            this.updateTexture = false;
-            var gl = this.gl;
-            gl.bindTexture(gl.TEXTURE_2D, this.texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas);
-          }
-        }]);
-
-        return CanvasTexture;
-      }(ImageTexture)
-    );
-  }
-  function FontTextureFactory(CanvasTexture, Texture) {
-    return (
-      /*#__PURE__*/
-      function (_CanvasTexture) {
-        inherits(FontTexture, _CanvasTexture);
-
-        function FontTexture(gl, canvas, family, weight, size) {
-          var _this2;
-
-          classCallCheck(this, FontTexture);
-
-          _this2 = possibleConstructorReturn(this, getPrototypeOf(FontTexture).call(this, gl, canvas));
-          _this2.x = canvas.width / size | 0;
-          _this2.y = canvas.height / size | 0;
-          _this2.size = size;
-          _this2.max = _this2.x * _this2.y;
-          _this2.used = 0;
-          _this2.context.font = weight + ' ' + size + 'px ' + family;
-          _this2.context.textBaseline = 'middle';
-          _this2.context.textAlign = 'center';
-          _this2.context.fillStyle = '#FFFFFF';
-          return _this2;
-        }
-
-        createClass(FontTexture, [{
-          key: "getTexture",
-          value: function getTexture(value) {
-            if (this.used >= this.max) return;
-            this.updateTexture = true;
-            var x = this.used % this.x * this.size + this.size / 2;
-            var y = (this.used / this.x | 0) * this.size + this.size / 2;
-            this.used++;
-            this.context.fillText(value, x, y);
-            var width = this.context.measureText(value).width;
-            var height = this.size;
-            return new Texture(this, x - width / 2, y - height / 2, width, height);
-          }
-        }, {
-          key: "update",
-          value: function update() {
-            if (!this.updateTexture) return;
-
-            get(getPrototypeOf(FontTexture.prototype), "update", this).call(this);
-          }
-        }]);
-
-        return FontTexture;
-      }(CanvasTexture)
-    );
-  }
 
   var Container =
   /*#__PURE__*/
@@ -2620,6 +2656,8 @@
 
       _this.setTexture(texture);
 
+      if (options.width) _this.width = options.width;
+      if (options.height) _this.height = options.height;
       _this._color = new Color(1, 1, 1, 1);
 
       _this.define('color', assertThisInitialized(_this), '_color', null, function (color) {
@@ -2651,6 +2689,7 @@
     createClass(Sprite, [{
       key: "checkPoint",
       value: function checkPoint(vector) {
+        this.getLocalVector(vector);
         return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
       }
     }, {
@@ -2674,7 +2713,8 @@
         if (!this.texture) return;
         render.blend(this.color);
         render.transform(this.localMatrix);
-        render.drawImage(this.texture);
+        render.texture(this.texture);
+        render.draw();
       }
     }, {
       key: "updateTransform",
@@ -2701,40 +2741,97 @@
       classCallCheck(this, TextLine);
 
       _this = possibleConstructorReturn(this, getPrototypeOf(TextLine).call(this));
-      _this.updateFamily = true; //字体更新
+      _this.needSplit = true; //需要打断
 
       _this.textures = [];
       return _this;
     }
 
-    return TextLine;
-  }(Container);
-  var TextGroup =
-  /*#__PURE__*/
-  function (_Container2) {
-    inherits(TextGroup, _Container2);
+    createClass(TextLine, [{
+      key: "addTexture",
+      value: function addTexture(sprite) {
+        this.textures.push(sprite);
+        this.width += sprite.width;
+        sprite.anchorX = -sprite.width / 2;
+        sprite.anchorY = -sprite.height / 2;
+      }
+    }, {
+      key: "align",
+      value: function align(y) {
+        for (var j = 0; j < this.textures.length; j++) {
+          var sprite = this.textures[j];
+          sprite.y -= (sprite.height - this.height) * y; //本行水平对齐方式
+        }
+      }
+    }, {
+      key: "updateTransform",
+      value: function updateTransform(matrix) {
+        get(getPrototypeOf(TextLine.prototype), "updateTransform", this).call(this, matrix);
 
-    function TextGroup(family, fillStyle) {
-      var _this2;
-
-      classCallCheck(this, TextGroup);
-
-      _this2 = possibleConstructorReturn(this, getPrototypeOf(TextGroup).call(this));
-      _this2.family = family || '36px 微软雅黑';
-      _this2.fillStyle = fillStyle || '#FFFFFF';
-      _this2.values = '';
-      return _this2;
-    }
-
-    createClass(TextGroup, [{
+        for (var j = 0; j < this.textures.length; j++) {
+          this.textures[j].updateTransform(this.worldMatrix);
+        }
+      }
+    }, {
       key: "update",
       value: function update(render) {
-        render.transform(this.worldMatrix);
-        render.fillText(this.values, this.family, this.fillStyle);
+        for (var j = 0; j < this.textures.length; j++) {
+          this.textures[j].update(render);
+        }
       }
     }]);
 
-    return TextGroup;
+    return TextLine;
+  }(Container);
+  var TextElement =
+  /*#__PURE__*/
+  function (_Container2) {
+    inherits(TextElement, _Container2);
+
+    function TextElement(value) {
+      var _this2;
+
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      classCallCheck(this, TextElement);
+
+      _this2 = possibleConstructorReturn(this, getPrototypeOf(TextElement).call(this, options));
+      _this2.family = options.family || '36px 微软雅黑';
+      _this2.color = options.color || '#FFFFFF';
+      _this2.stroke = options.stroke || 0;
+      _this2.anchorY = -_this2.height / 2;
+      _this2.values = value;
+      return _this2;
+    }
+
+    createClass(TextElement, [{
+      key: "addValue",
+      value: function addValue(value, width) {
+        this.values += value;
+        this.width += width;
+        this.anchorX = -this.width / 2;
+      }
+    }, {
+      key: "update",
+      value: function update(render) {
+        render.transform(this.worldMatrix);
+        var ctx = render.context;
+        if (ctx.font != this.family) ctx.font = this.family;
+        if (ctx.textAlign != 'center') ctx.textAlign = 'center';
+        if (ctx.textBaseline != 'middle') ctx.textBaseline = 'middle';
+
+        if (this.stroke > 0) {
+          if (ctx.lineWidth != this.stroke) ctx.lineWidth = this.stroke;
+          if (ctx.strokeStyle != this.color) ctx.strokeStyle = this.color;
+          render.context.strokeText(this.values, 0, 0);
+        } else {
+          if (ctx.fillStyle != this.color) ctx.fillStyle = this.color;
+          render.context.fillText(this.values, 0, 0);
+        }
+      }
+    }]);
+
+    return TextElement;
   }(Container);
   var Text =
   /*#__PURE__*/
@@ -2759,6 +2856,7 @@
       _this3.font = _this3.defaultFont(options.font);
       _this3.value = '';
       _this3.textures = [];
+      _this3.icons = Object.assign({}, options.icons);
       _this3.wrapWidth = options.wrapWidth || -1;
 
       if (options.lineHeight > 0) {
@@ -2769,31 +2867,6 @@
         _this3.autoLineHeight = true;
       }
 
-      _this3._color = new Color(1, 1, 1, 1);
-
-      _this3.define('color', assertThisInitialized(_this3), '_color', null, function (color) {
-        this._color.setApply(color);
-
-        return this;
-      });
-
-      if (options.color !== undefined) _this3.color = options.color;
-
-      _this3.define('alpha', _this3._color, 'alpha');
-
-      if (options.alpha !== undefined) _this3.alpha = options.alpha;
-
-      _this3.define('red', _this3._color, 'red');
-
-      if (options.red !== undefined) _this3.red = options.red;
-
-      _this3.define('green', _this3._color, 'green');
-
-      if (options.green !== undefined) _this3.green = options.green;
-
-      _this3.define('blue', _this3._color, 'blue');
-
-      if (options.blue !== undefined) _this3.blue = options.blue;
       if (options.value) _this3.setValue(options.value);
       return _this3;
     }
@@ -2819,14 +2892,24 @@
           weight: this.font.weight,
           lineWidth: this.font.lineWidth || 0,
           strokeStyle: this.font.strokeStyle || '#000000',
-          fillStyle: this.color.string
+          fillStyle: this.font.fillStyle || '#FFFFFF'
         }; //默认属性
 
         var handle = Object.assign({}, family); //当前临时属性
 
         var line = null; //当前行精灵
 
-        var string = value.replace(/\<(fillStyle|family|weight|size|i)\=(\S+?)\>/g, function (tag, action, arg, index) {
+        var icons = this.icons;
+        var string = value.replace(/\<(fillStyle|strokeStyle|lineWidth|family|weight|size|i)\=(\S+?)\>/g, function (tag, action, arg, index) {
+          if (action == 'i') {
+            if (icons[arg]) tags[index] = {
+              action: action,
+              arg: icons[arg],
+              length: tag.length - 1
+            };
+            return tag;
+          }
+
           tags[index] = {
             action: action,
             arg: arg,
@@ -2841,12 +2924,12 @@
           if (tags[i]) {
             if (tags[i].action != 'i') {
               handle[tags[i].action] = tags[i].arg == '@' ? family[tags[i].action] : tags[i].arg;
-              if (line) line.updateFamily = true;
+              if (line) line.needSplit = true;
             } else {
-              if (!this.getTexture(line, handle, tags[i].arg, true)) {
+              if (this.linePushSpecial(line, tags[i].arg)) {
                 line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
                 this.textures.push(line);
-                this.getTexture(line, handle, tags[i].arg, true);
+                this.linePushSpecial(line, tags[i].arg);
               }
             }
 
@@ -2856,10 +2939,10 @@
             this.textures.push(line);
           } else {
             //如果当前行精灵不存在或者无法加入当前字，则生成一个新的行精灵推入纹理组
-            if (!this.getTexture(line, handle, v)) {
+            if (this.linePush(line, handle, v)) {
               line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
               this.textures.push(line);
-              this.getTexture(line, handle, v);
+              this.linePush(line, handle, v);
             }
           }
         }
@@ -2867,35 +2950,51 @@
         this.updateTextures();
       }
     }, {
+      key: "getElement",
+      value: function getElement() {
+        throw '请设置getElement函数';
+      }
+    }, {
+      key: "linePushSpecial",
+      value: function linePushSpecial(line, special) {
+        if (this.lineWrapCheck(line, special.width)) return true;
+        if (this.autoLineHeight && special.height > line.height) line.height = special.height;
+        line.addTexture(this.getElement(special, false, {
+          x: line.width
+        }, true));
+        line.needSplit = true;
+      }
+    }, {
       key: "linePush",
-      value: function linePush(line, sprite) {
-        if (this.wrapWidth >= 0 && line.width + sprite.width > this.wrapWidth) return false;
-        sprite.anchorX = -sprite.width / 2;
-        sprite.anchorY = -sprite.height / 2;
-        if (this.autoLineHeight && sprite.height > line.height) line.height = sprite.height;
-        line.textures.push(sprite);
-        line.updateFamily = true;
-        line.width += sprite.width;
-        return true;
-      }
-    }, {
-      key: "getTexture",
-      value: function getTexture(line, handle, sprite) {
-        throw '请设置getTexture函数';
-      }
-    }, {
-      key: "update",
-      value: function update(render) {
-        if (!this.textures || !this.textures.length) return;
+      value: function linePush(line, handle, value, isSpecial) {
+        if (!line) return true;
 
-        for (var i = 0; i < this.textures.length; i++) {
-          var line = this.textures[i];
+        if (isSpecial) ; else {
+          var font = this.getElement(line.needSplit, value, handle);
+          var width = font.baseTexture ? font.width * handle.size / font.baseTexture.size : font.width;
+          if (this.lineWrapCheck(line, width)) return true;
 
-          for (var j = 0; j < line.textures.length; j++) {
-            var sprite = line.textures[j];
-            sprite.update(render);
+          if (line.needSplit) {
+            if (this.autoLineHeight && handle.size > line.height) line.height = handle.size;
+            var option = {
+              family: handle.size + 'px ' + handle.family,
+              color: handle.fillStyle,
+              width: width,
+              height: handle.size,
+              x: line.width
+            };
+            line.addTexture(this.getElement(font, value, option, true));
+            line.needSplit = this.allFontSplit;
+          } else {
+            line.textures[line.textures.length - 1].addValue(value, width);
+            line.width += width;
           }
         }
+      }
+    }, {
+      key: "lineWrapCheck",
+      value: function lineWrapCheck(line, width) {
+        return this.wrapWidth >= 0 && line.width + width > this.wrapWidth;
       }
     }, {
       key: "updateTextures",
@@ -2916,15 +3015,7 @@
 
           line.x -= (line.width - this.width) * 0.5; //本行垂直对齐方式
 
-          for (var j = 0; j < line.textures.length; j++) {
-            var sprite = line.textures[j];
-
-            if (sprite.texture && sprite.texture.baseTexture.updateTexture) {
-              sprite.texture.baseTexture.update();
-            }
-
-            sprite.y -= (sprite.height - line.height) * 0.5; //本行水平对齐方式
-          }
+          line.align(0.5);
         }
 
         this.updateMatrix = true;
@@ -2939,11 +3030,16 @@
         for (var i = 0; i < this.textures.length; i++) {
           var line = this.textures[i];
           line.updateTransform(this.worldMatrix);
+        }
+      }
+    }, {
+      key: "update",
+      value: function update(render) {
+        if (!this.textures || !this.textures.length) return;
 
-          for (var j = 0; j < line.textures.length; j++) {
-            var sprite = line.textures[j];
-            sprite.updateTransform(line.worldMatrix);
-          }
+        for (var i = 0; i < this.textures.length; i++) {
+          var line = this.textures[i];
+          line.update(render);
         }
       }
     }]);
@@ -2984,23 +3080,6 @@
 
   module.exports = _construct;
   });
-
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-
-    return obj;
-  }
-
-  var defineProperty = _defineProperty;
 
   var Director =
   /*#__PURE__*/
@@ -3059,8 +3138,9 @@
     return Director;
   }(Container);
 
+  exports.BaseTexture = BaseTexture;
   exports.CanvasRender = CanvasRender;
-  exports.CanvasTextureFactory = CanvasTextureFactory;
+  exports.CanvasTexture = CanvasTexture;
   exports.Clock = Clock;
   exports.Collision = Collision;
   exports.Color = Color;
@@ -3068,18 +3148,17 @@
   exports.Director = Director;
   exports.Event = Event;
   exports.FontControlFactory = FontControlFactory;
-  exports.FontTextureFactory = FontTextureFactory;
-  exports.ImageTextureFactory = ImageTextureFactory;
+  exports.FontTexture = FontTexture;
   exports.Loader = Loader;
   exports.Matrix4 = Matrix4;
   exports.Random = Random;
   exports.Shader = Shader;
   exports.Sprite = Sprite;
   exports.Text = Text;
-  exports.TextGroup = TextGroup;
+  exports.TextElement = TextElement;
   exports.TextLine = TextLine;
+  exports.Texture = Texture;
   exports.TextureControlFactory = TextureControlFactory;
-  exports.TextureFactory = TextureFactory;
   exports.Time = Time;
   exports.Touch = Touch;
   exports.Vector = Vector;
