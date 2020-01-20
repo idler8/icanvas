@@ -45,7 +45,7 @@ export class TextElement extends Container {
 		this.anchorX = -this.width / 2;
 	}
 	update(render) {
-		render.transform(this.worldMatrix);
+		render.setTransform(this.worldMatrix);
 		let ctx = render.context;
 		if (ctx.font != this.family) ctx.font = this.family;
 		if (ctx.textAlign != 'center') ctx.textAlign = 'center';

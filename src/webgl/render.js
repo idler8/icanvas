@@ -1,8 +1,12 @@
 import * as Webgl from './webgl.js';
 import Shader from './shader.js';
+import Matrix4 from '../vector/matrix4.js';
 
 export default class WebGLRender {
 	constructor(options) {
+		this.renderArray = [];
+		this.matrix = new Matrix4();
+
 		if (!options.context) options.context = options.canvas.getContext('webgl');
 		let gl = (this.gl = options.context);
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
@@ -11,8 +15,33 @@ export default class WebGLRender {
 		// Webgl.getExtension(gl);
 		this.canvas = gl.canvas;
 		this.useProgram(new Shader(this.gl));
-		this.renderArray = [];
 	}
+	update() {
+		for (let i = 0, len = this.renderArray.length; i < len; i++) {
+			this.renderArray[i].emit('update');
+			if (this.renderArray[i].update) this.renderArray[i].update(this);
+			this.renderArray[i].emit('updated');
+		}
+		this.renderArray.length = 0;
+	}
+	setTransform(matrix) {
+		this.matrix.setApply(matrix);
+		return this;
+	}
+	transform(matrix) {
+		this.matrix.multiply(matrix);
+		return this;
+	}
+	drawImage(texture, x, y, width, height) {
+		let sx = (width || texture.width) / 2;
+		let sy = (height || texture.height) / 2;
+		this.matrix.translate(x, y).scale(sx, sy);
+		this.bindTexture(texture);
+		this.draw();
+		this.matrix.scale(1 / sx, 1 / sy).translate(-x, -y);
+		return this;
+	}
+
 	useProgram(shader) {
 		if (shader === this.shader) return this;
 		this.shader = shader.use();
@@ -49,35 +78,11 @@ export default class WebGLRender {
 		return Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array(array), gl.STATIC_DRAW);
 	}
 
-	bindUvs(a) {
-		return this.shader.bindUvs(a);
+	setBlend(color) {
+		return this.shader.blend(color);
 	}
-	bindVecties(a) {
-		return this.shader.bindVecties(a);
-	}
-	bindIndices(a) {
-		return this.shader.bindIndices(a);
-	}
-	bindTexture(a) {
-		return this.shader.bindTexture(a);
-	}
-	update() {
-		for (let i = 0, len = this.renderArray.length; i < len; i++) {
-			this.renderArray[i].emit('update');
-			if (this.renderArray[i].update) this.renderArray[i].update(this);
-			this.renderArray[i].emit('updated');
-		}
-		this.renderArray.length = 0;
-	}
-	blend(color) {
-		this.shader.blend(color);
-		return this;
-	}
-	transform(matrix) {
-		this.shader.transform(matrix);
-		return this;
-	}
-	texture(texture) {
+	bindTexture(texture) {
+		if (!texture || !texture.baseTexture) return false;
 		if (texture.needUpdate) {
 			texture.uv = this.updateUvs(texture.source, texture.uv);
 			texture.needUpdate = false;
@@ -86,15 +91,14 @@ export default class WebGLRender {
 			texture.baseTexture.texture = this.updateTexture(texture.baseTexture.source, texture.baseTexture.texture);
 			texture.baseTexture.needUpdate = false;
 		}
-		this.bindUvs(texture.uv);
-		this.bindTexture(texture.baseTexture.texture);
-		return this;
+		this.shader.bindUvs(texture.uv);
+		return this.shader.bindTexture(texture.baseTexture.texture);
 	}
 	draw() {
+		this.shader.transform(this.matrix);
 		this.shader.bindVecties();
 		this.shader.bindIndices();
 		this.shader.draw();
 		return this;
 	}
-	text = this.draw;
 }

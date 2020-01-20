@@ -5,9 +5,9 @@ import _getPrototypeOf from '@babel/runtime/helpers/getPrototypeOf';
 import _inherits from '@babel/runtime/helpers/inherits';
 import _get from '@babel/runtime/helpers/get';
 import _typeof from '@babel/runtime/helpers/typeof';
-import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import _assertThisInitialized from '@babel/runtime/helpers/assertThisInitialized';
 import _construct from '@babel/runtime/helpers/construct';
+import _defineProperty from '@babel/runtime/helpers/defineProperty';
 
 /**
  * @class 扩展数组类
@@ -1583,10 +1583,11 @@ function () {
   function CanvasRender(options) {
     _classCallCheck(this, CanvasRender);
 
+    this.renderArray = [];
+    this.matrix = new Matrix4();
     if (!options.context) options.context = options.canvas.getContext('2d');
     this.context = options.context;
     this.canvas = options.context.canvas;
-    this.renderArray = [];
   }
 
   _createClass(CanvasRender, [{
@@ -1601,9 +1602,27 @@ function () {
       this.renderArray.length = 0;
     }
   }, {
-    key: "updateTexture",
-    value: function updateTexture(image) {
-      return image;
+    key: "setTransform",
+    value: function setTransform(matrix) {
+      this.matrix.setApply(matrix);
+      return this;
+    }
+  }, {
+    key: "transform",
+    value: function transform(matrix) {
+      this.matrix.multiply(matrix);
+      return this;
+    }
+  }, {
+    key: "drawImage",
+    value: function drawImage(texture, x, y, width, height) {
+      var sx = (width || texture.width) / 2;
+      var sy = (height || texture.height) / 2;
+      this.matrix.translate(x, y).scale(sx, sy);
+      this.bindTexture(texture);
+      this.draw();
+      this.matrix.scale(1 / sx, 1 / sy).translate(-x, -y);
+      return this;
     }
   }, {
     key: "updateUvs",
@@ -1619,51 +1638,38 @@ function () {
       return source;
     }
   }, {
-    key: "blend",
-    value: function blend() {
+    key: "setBlend",
+    value: function setBlend(color) {
+      //TODO 融合纹理，生成新内容
       return this;
     }
   }, {
-    key: "transform",
-    value: function transform(matrix) {
-      var e = matrix.elements;
-      this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
-      return this;
-    }
-  }, {
-    key: "texture",
-    value: function texture(_texture) {
-      if (_texture.needUpdate) {
-        _texture.uv = this.updateUvs(_texture.source, _texture.uv);
-        _texture.needUpdate = false;
+    key: "bindTexture",
+    value: function bindTexture(texture) {
+      if (!texture || !texture.baseTexture) return false;
+
+      if (texture.needUpdate) {
+        texture.uv = this.updateUvs(texture.source, texture.uv);
+        texture.needUpdate = false;
       }
 
-      this.beforeUvs = _texture.uv;
-      this.beforeTexture = _texture.baseTexture.source;
+      if (texture.baseTexture.needUpdate) {
+        texture.baseTexture.texture = texture.baseTexture.source;
+        texture.baseTexture.needUpdate = false;
+      }
+
+      this.beforeUvs = texture.uv;
+      this.beforeTexture = texture.baseTexture.texture;
     }
   }, {
     key: "draw",
     value: function draw() {
+      var e = this.matrix.elements;
       var ctx = this.context;
       var c = this.beforeUvs;
       var i = this.beforeTexture;
+      this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
       c ? ctx.drawImage(i, c[0], c[1], c[2], c[3], -1, -1, 2, 2) : ctx.drawImage(i, -1, -1, 2, 2);
-    }
-  }, {
-    key: "text",
-    value: function text() {//TODO
-      // let ctx = render.context;
-      // if (ctx.font != this.family) ctx.font = this.family;
-      // if (ctx.textAlign != 'left') ctx.fillStyle = 'left';
-      // if (ctx.textBaseline != 'top') ctx.textBaseline = 'top';
-      // if (this.stroke > 0) {
-      // 	if (ctx.lineWidth != this.stroke) ctx.lineWidth = this.stroke;
-      // 	if (ctx.strokeStyle != this.color) ctx.strokeStyle = this.color;
-      // 	render.context.strokeText(this.values, 0, 0);
-      // } else {
-      // 	if (ctx.fillStyle != this.color) ctx.fillStyle = this.color;
-      // 	render.context.fillText(this.values, 0, 0);
-      // }
     }
   }]);
 
@@ -2043,8 +2049,8 @@ function () {
   function WebGLRender(options) {
     _classCallCheck(this, WebGLRender);
 
-    _defineProperty(this, "text", this.draw);
-
+    this.renderArray = [];
+    this.matrix = new Matrix4();
     if (!options.context) options.context = options.canvas.getContext('webgl');
     var gl = this.gl = options.context;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
@@ -2053,10 +2059,43 @@ function () {
 
     this.canvas = gl.canvas;
     this.useProgram(new Shader(this.gl));
-    this.renderArray = [];
   }
 
   _createClass(WebGLRender, [{
+    key: "update",
+    value: function update() {
+      for (var i = 0, len = this.renderArray.length; i < len; i++) {
+        this.renderArray[i].emit('update');
+        if (this.renderArray[i].update) this.renderArray[i].update(this);
+        this.renderArray[i].emit('updated');
+      }
+
+      this.renderArray.length = 0;
+    }
+  }, {
+    key: "setTransform",
+    value: function setTransform(matrix) {
+      this.matrix.setApply(matrix);
+      return this;
+    }
+  }, {
+    key: "transform",
+    value: function transform(matrix) {
+      this.matrix.multiply(matrix);
+      return this;
+    }
+  }, {
+    key: "drawImage",
+    value: function drawImage(texture, x, y, width, height) {
+      var sx = (width || texture.width) / 2;
+      var sy = (height || texture.height) / 2;
+      this.matrix.translate(x, y).scale(sx, sy);
+      this.bindTexture(texture);
+      this.draw();
+      this.matrix.scale(1 / sx, 1 / sy).translate(-x, -y);
+      return this;
+    }
+  }, {
     key: "useProgram",
     value: function useProgram(shader) {
       if (shader === this.shader) return this;
@@ -2100,68 +2139,32 @@ function () {
       return createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array(array), gl.STATIC_DRAW);
     }
   }, {
-    key: "bindUvs",
-    value: function bindUvs(a) {
-      return this.shader.bindUvs(a);
-    }
-  }, {
-    key: "bindVecties",
-    value: function bindVecties(a) {
-      return this.shader.bindVecties(a);
-    }
-  }, {
-    key: "bindIndices",
-    value: function bindIndices(a) {
-      return this.shader.bindIndices(a);
+    key: "setBlend",
+    value: function setBlend(color) {
+      return this.shader.blend(color);
     }
   }, {
     key: "bindTexture",
-    value: function bindTexture(a) {
-      return this.shader.bindTexture(a);
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      for (var i = 0, len = this.renderArray.length; i < len; i++) {
-        this.renderArray[i].emit('update');
-        if (this.renderArray[i].update) this.renderArray[i].update(this);
-        this.renderArray[i].emit('updated');
+    value: function bindTexture(texture) {
+      if (!texture || !texture.baseTexture) return false;
+
+      if (texture.needUpdate) {
+        texture.uv = this.updateUvs(texture.source, texture.uv);
+        texture.needUpdate = false;
       }
 
-      this.renderArray.length = 0;
-    }
-  }, {
-    key: "blend",
-    value: function blend(color) {
-      this.shader.blend(color);
-      return this;
-    }
-  }, {
-    key: "transform",
-    value: function transform(matrix) {
-      this.shader.transform(matrix);
-      return this;
-    }
-  }, {
-    key: "texture",
-    value: function texture(_texture) {
-      if (_texture.needUpdate) {
-        _texture.uv = this.updateUvs(_texture.source, _texture.uv);
-        _texture.needUpdate = false;
+      if (texture.baseTexture.needUpdate) {
+        texture.baseTexture.texture = this.updateTexture(texture.baseTexture.source, texture.baseTexture.texture);
+        texture.baseTexture.needUpdate = false;
       }
 
-      if (_texture.baseTexture.needUpdate) {
-        _texture.baseTexture.texture = this.updateTexture(_texture.baseTexture.source, _texture.baseTexture.texture);
-        _texture.baseTexture.needUpdate = false;
-      }
-
-      this.bindUvs(_texture.uv);
-      this.bindTexture(_texture.baseTexture.texture);
-      return this;
+      this.shader.bindUvs(texture.uv);
+      return this.shader.bindTexture(texture.baseTexture.texture);
     }
   }, {
     key: "draw",
     value: function draw() {
+      this.shader.transform(this.matrix);
       this.shader.bindVecties();
       this.shader.bindIndices();
       this.shader.draw();
@@ -2556,9 +2559,9 @@ function (_Container) {
     key: "update",
     value: function update(render) {
       if (!this.texture) return;
-      render.blend(this.color);
-      render.transform(this.localMatrix);
-      render.texture(this.texture);
+      render.setBlend(this.color);
+      render.setTransform(this.localMatrix);
+      render.bindTexture(this.texture);
       render.draw();
     }
   }, {
@@ -2659,7 +2662,7 @@ function (_Container2) {
   }, {
     key: "update",
     value: function update(render) {
-      render.transform(this.worldMatrix);
+      render.setTransform(this.worldMatrix);
       var ctx = render.context;
       if (ctx.font != this.family) ctx.font = this.family;
       if (ctx.textAlign != 'center') ctx.textAlign = 'center';

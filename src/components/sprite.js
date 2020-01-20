@@ -42,9 +42,9 @@ export default class Sprite extends Container {
 	}
 	update(render) {
 		if (!this.texture) return;
-		render.blend(this.color);
-		render.transform(this.localMatrix);
-		render.texture(this.texture);
+		render.setBlend(this.color);
+		render.setTransform(this.localMatrix);
+		render.bindTexture(this.texture);
 		render.draw();
 	}
 	updateTransform(matrix) {
