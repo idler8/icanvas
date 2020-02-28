@@ -1,55 +1,85 @@
 import Container from './container.js';
-import Color from '../vector/color.js';
 import Matrix4 from '../vector/matrix4.js';
-export default class Sprite extends Container {
-	constructor(texture, options = {}) {
-		super(options);
-		this.localMatrix = new Matrix4(); //矩阵
-		this.setTexture(texture);
-		if (options.width) this.width = options.width;
-		if (options.height) this.height = options.height;
+import { Shape } from '../prototype.js';
 
-		this._color = new Color(1, 1, 1, 1);
-		this.define('color', this, '_color', null, function(color) {
-			this._color.setApply(color);
-			return this;
-		});
-		if (options.color !== undefined) this.color = options.color;
-		this.define('alpha', this._color, 'alpha');
-		if (options.alpha !== undefined) this.alpha = options.alpha;
-		this.define('red', this._color, 'red');
-		if (options.red !== undefined) this.red = options.red;
-		this.define('green', this._color, 'green');
-		if (options.green !== undefined) this.green = options.green;
-		this.define('blue', this._color, 'blue');
-		if (options.blue !== undefined) this.blue = options.blue;
+export default class Sprite extends Container {
+	constructor(options = {}) {
+		super(options);
+
+		this.invertId = 0;
+		this.invertMatrix = new Matrix4();
+
+		this.shape = options.shape || new Shape(options);
+		this.texture = options.texture;
 	}
-	checkPoint(vector) {
-		this.getLocalVector(vector);
-		return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
+	get texture() {
+		return this._texture;
 	}
-	setTexture(texture) {
-		if (!texture) {
-			this.texture = null;
-			this.width = 0;
-			this.height = 0;
-		} else {
-			this.texture = texture;
-			this.width = texture.width;
-			this.height = texture.height;
-		}
+	set texture(a) {
+		if (!a) return (this._texture = null);
+		this._texture = a.baseTexture || a;
+		this.shape.updateTexture(a);
+	}
+	set width(a) {
+		this.shape.width = a;
+	}
+	get width() {
+		return this.shape.width;
+	}
+	set height(a) {
+		this.shape.height = a;
+	}
+	get height() {
+		return this.shape.height;
+	}
+	setSize(x, y) {
+		this.shape.width = x;
+		this.shape.height = y;
 		return this;
 	}
-	update(render) {
-		if (!this.texture) return;
-		render.setBlend(this.color);
-		render.setTransform(this.localMatrix);
-		render.bindTexture(this.texture);
-		render.draw();
+	set anchorX(a) {
+		this.shape.anchorX = a;
 	}
-	updateTransform(matrix) {
-		super.updateTransform(matrix);
+	get anchorX() {
+		return this.shape.anchorX;
+	}
+	set anchorY(a) {
+		this.shape.anchorY = a;
+	}
+	get anchorY() {
+		return this.shape.anchorY;
+	}
+	setAnchor(x, y) {
+		this.shape.anchorX = x;
+		this.shape.anchorY = y;
+		return this;
+	}
+
+	setAnchorSize(x = 0, y = 0) {
+		this.shape.anchorX = this.shape.width * x;
+		this.shape.anchorY = this.shape.height * y;
+		return this;
+	}
+
+	draw(app, now) {
 		if (!this.texture) return;
-		this.localMatrix.setApply(this.worldMatrix).scale(this.width / 2, this.height / 2);
+		app.render.blend(this.blend);
+		this.emit('updateTransform', now);
+		app.render.transform(this.transform.matrix);
+
+		this.texture.update(app.render);
+		app.render.texture(this.texture.texture);
+
+		this.shape.update(app.render);
+		app.render.draw(this.shape.buffer);
+	}
+	checkPoint(vector) {
+		this.emit('updateTransform', 0);
+		if (this.invertId != this.transform.worldId) {
+			this.invertMatrix.invert(this.transform.matrix);
+			this.invertId = this.transform.worldId;
+		}
+		vector.multiplyMatrix4(this.invertMatrix);
+		return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
 	}
 }

@@ -12,13 +12,14 @@ export { default as Loader } from './utils/loader.js';
 export { default as Clock } from './utils/clock.js';
 export { default as Event } from './utils/event.js';
 
-export { default as CanvasRender } from './canvas/render.js';
-export { Texture, BaseTexture, CanvasTexture, FontTexture, TextureControlFactory, FontControlFactory } from './texture.js';
-
-export { default as WebGLRender } from './webgl/render.js';
-export { default as Shader } from './webgl/shader.js';
-
 export { default as Container } from './components/container.js';
 export { default as Sprite } from './components/sprite.js';
-export { Text, TextLine, TextElement } from './components/text.js';
-export { default as Director } from './components/director.js';
+export { default as Application } from './application.js';
+
+export * from './prototype.js';
+export * from './texture.js';
+export { Image, Audio } from './resource.js';
+
+export { default as CanvasRender } from './canvas/render.js';
+export { default as WebGLRender } from './webgl/render.js';
+export { default as Shader } from './webgl/shader.js';

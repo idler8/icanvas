@@ -1,45 +1,26 @@
 import * as Webgl from './webgl.js';
 import Shader from './shader.js';
-import Matrix4 from '../vector/matrix4.js';
-
 export default class WebGLRender {
-	constructor(options) {
+	constructor(options = {}) {
 		this.renderArray = [];
-		this.matrix = new Matrix4();
 
-		if (!options.context) options.context = options.canvas.getContext('webgl');
-		let gl = (this.gl = options.context);
+		this.context = options.context || options.canvas.getContext('webgl');
+		this.canvas = this.context.canvas;
+
+		let gl = this.context;
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
 		gl.enable(gl.BLEND);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		// Webgl.getExtension(gl);
-		this.canvas = gl.canvas;
-		this.useProgram(new Shader(this.gl));
+		this.useProgram(new Shader(gl));
 	}
-	update() {
-		for (let i = 0, len = this.renderArray.length; i < len; i++) {
-			this.renderArray[i].emit('update');
-			if (this.renderArray[i].update) this.renderArray[i].update(this);
-			this.renderArray[i].emit('updated');
-		}
-		this.renderArray.length = 0;
-	}
-	setTransform(matrix) {
-		this.matrix.setApply(matrix);
+	look(matrix, x, y) {
+		matrix.setOrtho(-x / 2, x / 2, y / 2, -y / 2, 0, 1);
+		this.context.viewport(0, 0, x, y);
 		return this;
 	}
-	transform(matrix) {
-		this.matrix.multiply(matrix);
-		return this;
-	}
-	drawImage(texture, x, y, width, height) {
-		let sx = (width || texture.width) / 2;
-		let sy = (height || texture.height) / 2;
-		this.matrix.translate(x, y).scale(sx, sy);
-		this.bindTexture(texture);
-		this.draw();
-		this.matrix.scale(1 / sx, 1 / sy).translate(-x, -y);
-		return this;
+	get gl() {
+		return this.context;
 	}
 
 	useProgram(shader) {
@@ -48,57 +29,78 @@ export default class WebGLRender {
 		return this;
 	}
 	updateTexture(image, texture) {
-		let gl = this.gl;
+		let gl = this.context;
 		if (!texture) return Webgl.createTexture(gl, image);
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 		return texture;
 	}
-	updateUvs(array, buffer) {
-		let gl = this.gl;
-		if (buffer) gl.deleteBuffer(buffer);
-		if (!array) return;
-		let x = array[0];
-		let y = array[1];
-		let width = array[2];
-		let height = array[3];
-		let realWidth = array[4];
-		let realHeight = array[5];
-		if (x == 0 && y == 0 && width == realWidth && height == realHeight) return;
-		let left = x / realWidth;
-		let top = y / realHeight;
-		let right = left + width / realWidth;
-		let bottom = top + height / realHeight;
-		return Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([right, top, left, top, left, bottom, right, bottom]), gl.STATIC_DRAW);
-	}
-	updateVectices(array, buffer) {
-		let gl = this.gl;
+	updateBuffer(array, buffer) {
+		let gl = this.context;
 		if (buffer) gl.deleteBuffer(buffer);
 		if (!array) return;
 		return Webgl.createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array(array), gl.STATIC_DRAW);
 	}
+	updateIndices(array, buffer) {
+		let gl = this.context;
+		if (buffer) gl.deleteBuffer(buffer);
+		if (!array) return;
+		return Webgl.createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(array), gl.STATIC_DRAW);
+	}
+	shapeToBuffer(shape) {
+		if (!shape.buffer) shape.buffer = {};
+		if (shape.morph == 'Rectangle') {
+			let left = shape.left;
+			let top = shape.top;
+			let right = shape.right;
+			let bottom = shape.bottom;
+			let cLeft = shape.clipPosition.x;
+			let cTop = shape.clipPosition.y;
+			let cRight = shape.clipPosition.x + shape.clipSize.x;
+			let cBottom = shape.clipPosition.y + shape.clipSize.y;
+			shape.buffer.array = [left, top, cLeft, cTop, right, top, cRight, cTop, left, bottom, cLeft, cBottom, right, bottom, cRight, cBottom];
+			shape.buffer.buffers = this.updateBuffer(shape.buffer.array, shape.buffer.buffers);
+			shape.buffer.length = 4;
+			shape.buffer.type = this.gl.TRIANGLE_STRIP;
+		} else if (shape.morph == 'Circle') {
+			let length = ((shape.size.x + shape.size.y) / 20) | 0;
+			let radian = (2 * Math.PI) / length;
+			let cx = -shape.anchor.x;
+			let cy = -shape.anchor.y;
+			let rx = shape.size.x * 0.5;
+			let ry = shape.size.y * 0.5;
 
-	setBlend(color) {
-		return this.shader.blend(color);
-	}
-	bindTexture(texture) {
-		if (!texture || !texture.baseTexture) return false;
-		if (texture.needUpdate) {
-			texture.uv = this.updateUvs(texture.source, texture.uv);
-			texture.needUpdate = false;
+			let rx1 = shape.clipSize.x * 0.5;
+			let ry1 = shape.clipSize.y * 0.5;
+			let cx1 = shape.clipPosition.x + rx1;
+			let cy1 = shape.clipPosition.y + ry1;
+
+			shape.buffer.array = [cx, cy, cx1, cy1];
+			for (let i = 0; i <= length; i++) {
+				let r = i * radian;
+				let cos = Math.cos(r);
+				let sin = Math.sin(r);
+				shape.buffer.array.push(rx * cos + cx, ry * sin + cy, rx1 * cos + cx1, ry1 * sin + cy1);
+			}
+			shape.buffer.buffers = this.updateBuffer(shape.buffer.array, shape.buffer.buffers);
+			shape.buffer.length = shape.buffer.array.length / 4;
+			shape.buffer.type = this.gl.TRIANGLE_FAN;
+		} else if (typeof shape.morph == 'object') {
+			//TODO 多边形
 		}
-		if (texture.baseTexture.needUpdate) {
-			texture.baseTexture.texture = this.updateTexture(texture.baseTexture.source, texture.baseTexture.texture);
-			texture.baseTexture.needUpdate = false;
-		}
-		this.shader.bindUvs(texture.uv);
-		return this.shader.bindTexture(texture.baseTexture.texture);
 	}
-	draw() {
-		this.shader.transform(this.matrix);
-		this.shader.bindVecties();
-		this.shader.bindIndices();
-		this.shader.draw();
-		return this;
+	blend() {
+		this.shader.blend();
+	}
+	transform(matrix) {
+		this.shader.transform(matrix);
+	}
+	texture(texture) {
+		this.shader.bindTexture(texture);
+	}
+	draw(buffer) {
+		if (!buffer) return;
+		this.shader.bindBuffer(buffer.buffers, 2, 2, 0, 4);
+		this.gl.drawArrays(buffer.type, 0, buffer.length);
 	}
 }
