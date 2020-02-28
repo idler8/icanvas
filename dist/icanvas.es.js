@@ -6,7 +6,6 @@ import _inherits from '@babel/runtime/helpers/inherits';
 import _get from '@babel/runtime/helpers/get';
 import _typeof from '@babel/runtime/helpers/typeof';
 import _assertThisInitialized from '@babel/runtime/helpers/assertThisInitialized';
-import _construct from '@babel/runtime/helpers/construct';
 import _defineProperty from '@babel/runtime/helpers/defineProperty';
 
 /**
@@ -1565,7 +1564,7 @@ function (_Event) {
         requestAnimationFrame(HandleUpdate);
         if (!render.step()) return;
         render.emit('start');
-        render.emit('tick');
+        render.emit('tick', render.time);
         render.emit('end');
       };
 
@@ -1577,137 +1576,845 @@ function (_Event) {
   return Clock;
 }(Event);
 
-var CanvasRender =
+var Transform =
 /*#__PURE__*/
 function () {
-  function CanvasRender(options) {
-    _classCallCheck(this, CanvasRender);
+  function Transform() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    this.renderArray = [];
+    _classCallCheck(this, Transform);
+
     this.matrix = new Matrix4();
-    if (!options.context) options.context = options.canvas.getContext('2d');
-    this.context = options.context;
-    this.canvas = options.context.canvas;
+    this.position = new Vector2(options.x || 0, options.y || 0);
+    this.scale = new Vector2(options.scaleX || 1, options.scaleY || 1);
+    this._radian = options.radian || 0;
+    if (options.angle) this.angle = options.angle;
+    this.id = Transform.id ? ++Transform.id : Transform.id = 1;
+    this.loopId = 0;
+    this.parentId = 0;
+    this.worldId = 1;
+    this.needUpdate = true;
   }
 
-  _createClass(CanvasRender, [{
+  _createClass(Transform, [{
+    key: "isStop",
+    value: function isStop(now) {
+      if (this.loopId === now) return true;
+      this.loopId = now;
+    }
+  }, {
+    key: "isFollow",
+    value: function isFollow(transform) {
+      if (transform.worldId == this.parentId) return;
+      this.parentId = transform.worldId;
+      this.needUpdate = true;
+    }
+  }, {
     key: "update",
-    value: function update() {
-      for (var i = 0, len = this.renderArray.length; i < len; i++) {
-        this.renderArray[i].emit('update');
-        if (this.renderArray[i].update) this.renderArray[i].update(this);
-        this.renderArray[i].emit('updated');
-      }
-
-      this.renderArray.length = 0;
+    value: function update(matrix) {
+      if (!this.needUpdate) return;
+      matrix ? this.matrix.setApply(matrix) : this.matrix.identity();
+      this.matrix.translate(this.position.x, this.position.y, 0);
+      this.matrix.rotate(this.radian, 0, 0, 1);
+      this.matrix.scale(this.scale.x, this.scale.y, 1);
+      this.needUpdate = false;
+      this.worldId++;
     }
   }, {
-    key: "setTransform",
-    value: function setTransform(matrix) {
-      this.matrix.setApply(matrix);
-      return this;
+    key: "x",
+    get: function get() {
+      return this.position.x;
+    },
+    set: function set(x) {
+      if (this.position.x == x) return;
+      this.position.x = x;
+      this.needUpdate = true;
     }
   }, {
-    key: "transform",
-    value: function transform(matrix) {
-      this.matrix.multiply(matrix);
-      return this;
+    key: "y",
+    get: function get() {
+      return this.position.y;
+    },
+    set: function set(y) {
+      if (this.position.y == y) return;
+      this.position.y = y;
+      this.needUpdate = true;
     }
   }, {
-    key: "drawImage",
-    value: function drawImage(texture, x, y, width, height) {
-      var sx = (width || texture.width) / 2;
-      var sy = (height || texture.height) / 2;
-      this.matrix.translate(x, y).scale(sx, sy);
-      this.bindTexture(texture);
-      this.draw();
-      this.matrix.scale(1 / sx, 1 / sy).translate(-x, -y);
-      return this;
+    key: "scaleX",
+    get: function get() {
+      return this.scale.x;
+    },
+    set: function set(x) {
+      if (this.scale.x == x) return;
+      this.scale.x = x;
+      this.needUpdate = true;
     }
   }, {
-    key: "updateUvs",
-    value: function updateUvs(source) {
-      if (!source) return null;
-      var x = source[0];
-      var y = source[1];
-      var width = source[2];
-      var height = source[3];
-      var realWidth = source[4];
-      var realHeight = source[5];
-      if (x == 0 && y == 0 && width == realWidth && height == realHeight) return null;
-      return source;
+    key: "scaleY",
+    get: function get() {
+      return this.scale.y;
+    },
+    set: function set(y) {
+      if (this.scale.y == y) return;
+      this.scale.y = y;
+      this.needUpdate = true;
     }
   }, {
-    key: "setBlend",
-    value: function setBlend(color) {
-      //TODO 融合纹理，生成新内容
-      return this;
+    key: "radian",
+    get: function get() {
+      return this._radian;
+    },
+    set: function set(r) {
+      if (r == this._radian) return;
+      this._radian = r;
+      this.needUpdate = true;
     }
   }, {
-    key: "bindTexture",
-    value: function bindTexture(texture) {
-      if (!texture || !texture.baseTexture) return false;
-
-      if (texture.needUpdate) {
-        texture.uv = this.updateUvs(texture.source, texture.uv);
-        texture.needUpdate = false;
-      }
-
-      if (texture.baseTexture.needUpdate) {
-        texture.baseTexture.texture = texture.baseTexture.source;
-        texture.baseTexture.needUpdate = false;
-      }
-
-      this.beforeUvs = texture.uv;
-      this.beforeTexture = texture.baseTexture.texture;
-    }
-  }, {
-    key: "draw",
-    value: function draw() {
-      var e = this.matrix.elements;
-      var ctx = this.context;
-      var c = this.beforeUvs;
-      var i = this.beforeTexture;
-      this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
-      c ? ctx.drawImage(i, c[0], c[1], c[2], c[3], -1, -1, 2, 2) : ctx.drawImage(i, -1, -1, 2, 2);
+    key: "angle",
+    get: function get() {
+      return this.radian * 180 / Math.PI;
+    },
+    set: function set(v) {
+      var a = v * Math.PI / 180;
+      if (a == this._radian) return;
+      this._radian = a;
+      this.needUpdate = true;
     }
   }]);
 
-  return CanvasRender;
+  return Transform;
+}();
+var Shape =
+/*#__PURE__*/
+function () {
+  function Shape() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, Shape);
+
+    this.anchor = new Vector2(options.anchorX || 0, options.anchorY || 0);
+    this.size = new Vector2(options.width || 0, options.height || 0);
+    this.staticWidth = options.width ? true : false;
+    this.staticHeight = options.height ? true : false;
+    this.clipPosition = new Vector2();
+    this.clipSize = new Vector2();
+    this.morph = options.morph || 'Rectangle';
+    this.needUpdate = true;
+    this.buffer = null;
+  }
+
+  _createClass(Shape, [{
+    key: "updateTexture",
+    value: function updateTexture(texture) {
+      if (!texture) return this.needUpdate = false;
+      if (!this.staticWidth) this.size.x = texture.width;
+      if (!this.staticHeight) this.size.y = texture.height;
+      var real = texture.baseTexture || texture;
+      this.clipPosition.set(texture.x ? texture.x / real.width : 0, texture.y ? texture.y / real.height : 0);
+      this.clipSize.set(texture.width ? texture.width / real.width : 0, texture.height ? texture.height / real.height : 0);
+      this.needUpdate = true;
+    }
+  }, {
+    key: "update",
+    value: function update(render) {
+      if (!this.needUpdate) return;
+      render.shapeToBuffer(this);
+      this.needUpdate = false;
+    }
+  }, {
+    key: "width",
+    set: function set(a) {
+      this.size.x = a;
+      this.staticWidth = true;
+      this.needUpdate = true;
+    },
+    get: function get() {
+      return this.size.x;
+    }
+  }, {
+    key: "height",
+    set: function set(a) {
+      this.size.y = a;
+      this.staticHeight = true;
+      this.needUpdate = true;
+    },
+    get: function get() {
+      return this.size.y;
+    }
+  }, {
+    key: "anchorX",
+    set: function set(x) {
+      this.anchor.x = x;
+      this.needUpdate = true;
+    },
+    get: function get() {
+      return this.anchor.x;
+    }
+  }, {
+    key: "anchorY",
+    set: function set(y) {
+      this.anchor.y = y;
+      this.needUpdate = true;
+    },
+    get: function get() {
+      return this.anchor.y;
+    }
+  }, {
+    key: "left",
+    get: function get() {
+      return -this.size.x / 2 - this.anchor.x;
+    }
+  }, {
+    key: "right",
+    get: function get() {
+      return this.size.x / 2 - this.anchor.x;
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return -this.size.y / 2 - this.anchor.y;
+    }
+  }, {
+    key: "bottom",
+    get: function get() {
+      return this.size.y / 2 - this.anchor.y;
+    }
+  }]);
+
+  return Shape;
+}();
+var RichText =
+/*#__PURE__*/
+function () {
+  function RichText(context) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    _classCallCheck(this, RichText);
+
+    this.fillStyle = options.fillStyle || '#FFFFFF';
+    this.strokeStyle = options.strokeStyle || '#000000';
+    this.lineWidth = options.lineWidth || 0;
+    this.family = options.family || 'icanvas';
+    this.size = options.size || 36;
+    this.weight = options.weight || false;
+    this.align = options.align || 'center';
+    this.baseline = options.baseline || 'middle';
+    this.wrapWidth = options.wrapWidth || -1;
+
+    if (options.lineHeight > 0) {
+      this.lineHeight = options.lineHeight;
+      this.autoLineHeight = false;
+    } else {
+      this.lineHeight = this.size;
+      this.autoLineHeight = true;
+    }
+
+    this.context = context;
+    this.icons = options.icons;
+  }
+
+  _createClass(RichText, [{
+    key: "mergeStyle",
+    value: function mergeStyle(handle) {
+      handle.fillStyle = this.fillStyle;
+      handle.strokeStyle = this.strokeStyle;
+      handle.lineWidth = this.lineWidth;
+      handle.family = this.family;
+      handle.size = this.size;
+      handle.weight = this.weight;
+    }
+  }, {
+    key: "mergeContext",
+    value: function mergeContext(handle) {
+      var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var context = this.context;
+      context.fillStyle = handle.fillStyle;
+      context.strokeStyle = handle.strokeStyle;
+      context.lineWidth = handle.lineWidth;
+      if (!init) return;
+      context.textAlign = 'left';
+      context.textBaseline = 'top';
+    }
+  }, {
+    key: "mergeFamily",
+    value: function mergeFamily(handle) {
+      this.context.font = handle.size + 'px ' + handle.family + (handle.weight ? ' bold' : '');
+    }
+  }, {
+    key: "checkSize",
+    value: function checkSize(structure, width, height) {
+      var lines = structure.contents;
+      if (this.wrapWidth >= 0 && lines[0].width + width > this.wrapWidth) this.addLine();
+      if (this.autoLineHeight && height > lines[0].height) lines[0].height = height;
+      lines[0].width += width;
+    }
+  }, {
+    key: "addLine",
+    value: function addLine(structure) {
+      var lines = structure.contents;
+      structure.height += lines[0].height;
+      if (lines[0].width > structure.width) structure.width = lines[0].width;
+      structure.contents.unshift({
+        width: 0,
+        height: this.lineHeight,
+        contents: []
+      });
+    }
+  }, {
+    key: "updateValue",
+    value: function updateValue(values, icons) {
+      if (!values) return; //this.Empty;
+
+      var context = this.context;
+      var handle = {};
+      this.mergeStyle(handle);
+      this.mergeFamily(handle);
+      var tags = {}; //文本内特殊标签
+
+      values.replace(/\<(fillStyle|strokeStyle|lineWidth|family|weight|size|i)\=(\S+?)\>/g, function (tag, action, arg, index) {
+        if (action == 'i') {
+          if (!icons[arg]) return tag;
+          tags[index] = {
+            action: action,
+            arg: icons[arg],
+            length: tag.length - 1
+          };
+        } else {
+          tags[index] = {
+            action: action,
+            arg: arg == '@' ? family[action] : arg,
+            length: tag.length - 1
+          };
+        }
+
+        return tag;
+      });
+      var structure = {
+        width: this.wrapWidth,
+        height: 0,
+        contents: [{
+          width: 0,
+          height: this.lineHeight,
+          contents: []
+        }]
+      };
+
+      for (var i = 0, len = values.length; i < len; i++) {
+        var v = values[i];
+
+        if (tags[i]) {
+          var tag = tags[i];
+          i += tag.length;
+
+          if (tag.action != 'i') {
+            handle[tag.action] = tag.arg;
+            this.mergeFamily(handle);
+          } else {
+            this.checkSize(structure, tag.arg.width, tag.arg.height);
+          }
+
+          structure.contents[0].contents.push(tag);
+        } else if (v === '\n') {
+          this.addLine(structure);
+        } else {
+          var width = context.measureText(v).width;
+          this.checkSize(structure, width, handle.size);
+          structure.contents[0].contents.push({
+            value: v,
+            width: width,
+            height: handle.size
+          });
+        }
+      }
+
+      structure.height += structure.contents[0].height;
+      if (structure.contents[0].width > structure.width) structure.width = structure.contents[0].width;
+      this.mergeStyle(handle);
+      var totalWidth = context.canvas.width = structure.width;
+      context.canvas.height = structure.height;
+      this.mergeFamily(handle);
+      this.mergeContext(handle, true);
+      var offsetTop = 0;
+
+      for (var _i = structure.contents.length - 1; _i >= 0; _i--) {
+        var _structure$contents$_ = structure.contents[_i],
+            _width = _structure$contents$_.width,
+            height = _structure$contents$_.height,
+            contents = _structure$contents$_.contents;
+        var offsetLeft = (totalWidth - _width) * 0.5; //handle.align
+
+        for (var j = 0; j < contents.length; j++) {
+          var element = contents[j];
+
+          if (element.value) {
+            context.fillText(element.value, offsetLeft, offsetTop + (height - element.height) * 0.5); //handle.baseline
+
+            offsetLeft += element.width;
+          } else if (element.action == 'i') {
+            var texture = element.arg;
+            var dy = offsetTop + (height - element.arg.height) * 0.5;
+
+            if (texture.baseTexture) {
+              var image = texture.baseTexture.source;
+              context.drawImage(image, texture.x, texture.y, texture.width, texture.height, offsetLeft, dy, texture.width, texture.height);
+            } else {
+              var _image = texture.source;
+              context.drawImage(_image, offsetLeft, dy, texture.width, texture.height);
+            }
+
+            offsetLeft += element.arg.width;
+          } else {
+            handle[element.action] = element.arg;
+            this.mergeFamily(handle);
+            this.mergeContext(handle);
+          }
+        }
+
+        offsetTop += height;
+      }
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this._value;
+    },
+    set: function set(v) {
+      v = '' + v;
+      if (v == this._value) return;
+      this._value = v;
+      this.updateValue(v, this.icons);
+      if (this.update) this.update();
+    }
+  }]);
+
+  return RichText;
 }();
 
-var Texture = function Texture(baseTexture, x, y, width, height) {
-  _classCallCheck(this, Texture);
+var Container =
+/*#__PURE__*/
+function (_Event) {
+  _inherits(Container, _Event);
 
-  this.baseTexture = baseTexture;
-  this.width = width;
-  this.height = height;
-  this.source = [x, y, width, height, baseTexture.width, baseTexture.height];
-  this.needUpdate = true;
-  this.uv = null;
-};
+  function Container() {
+    var _this;
+
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, Container);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Container).call(this));
+    _this.id = Container.id ? ++Container.id : Container.id = 1;
+    _this.parent = null;
+    _this.children = [];
+    _this.touchChildren = true;
+    _this.visible = !(options.visible === false);
+    _this.zIndex = options.zIndex || 0;
+
+    _this.on('destroy', function () {
+      for (var i = 0; i < this.children.length; i++) {
+        this.children[i].emit('destroy');
+      }
+    });
+
+    _this.transform = options.transform || new Transform(options);
+
+    _this.on('updateTransform', function (now) {
+      if (now && this.transform.isStop(now)) return;
+
+      if (this.parent) {
+        this.parent.emit('updateTransform', now);
+        this.transform.isFollow(this.parent.transform);
+        this.transform.update(this.parent.transform.matrix);
+      } else {
+        this.transform.update();
+      }
+    });
+
+    return _this;
+  }
+
+  _createClass(Container, [{
+    key: "setPosition",
+    value: function setPosition(x, y) {
+      this.transform.x = x;
+      this.transform.y = y;
+      return this;
+    }
+  }, {
+    key: "setScale",
+    value: function setScale(x, y) {
+      this.transform.scaleX = x;
+      this.transform.scaleY = y;
+      return this;
+    }
+  }, {
+    key: "setRadian",
+    value: function setRadian(a) {
+      this.transform.radian = a;
+      return this;
+    }
+  }, {
+    key: "setAngle",
+    value: function setAngle(a) {
+      this.transform.angle = a;
+      return this;
+    }
+  }, {
+    key: "getWorldVector",
+    value: function getWorldVector(vector) {
+      var clone = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      vector = clone ? vector.clone() : vector;
+      this.emit('updateTransform');
+      return vector.multiplyMatrix4(this.transform.matrix);
+    }
+  }, {
+    key: "put",
+    value: function put(object3d) {
+      if (this.parent) this.parent.remove(this);
+      if (!object3d) return this;
+      this.emit('create');
+      object3d.children.push(this);
+      this.parent = object3d;
+      this.transform.parentId = 0;
+      this.emit('created');
+      return this;
+    }
+  }, {
+    key: "add",
+    value: function add(object3d) {
+      if (arguments.length > 1) {
+        for (var i = 0; i < arguments.length; i++) {
+          this.add(arguments[i]);
+        }
+      } else if (object3d instanceof Array) {
+        for (var _i = 0; _i < object3d.length; _i++) {
+          this.add(object3d[_i]);
+        }
+      } else if (object3d) {
+        object3d.put(this);
+      }
+
+      return this;
+    }
+  }, {
+    key: "remove",
+    value: function remove(object3d) {
+      if (arguments.length > 1) {
+        for (var i = 0; i < arguments.length; i++) {
+          this.remove(arguments[i]);
+        }
+      } else if (object3d instanceof Array) {
+        for (var _i2 = 0; _i2 < object3d.length; _i2++) {
+          this.remove(object3d[_i2]);
+        }
+      } else if (object3d) {
+        object3d.emit('destroy', this);
+        var index = this.children.indexOf(object3d);
+        this.children.splice(index, 1);
+        object3d.parent = null;
+        object3d.emit('destroyed', this);
+      }
+
+      return this;
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      for (var i = 0; i < this.children.length; i++) {
+        this.children[i].emit('destroy', this);
+        this.children[i].parent = null;
+        this.children[i].emit('destroyed', this);
+      }
+
+      this.children.length = 0;
+      return this;
+    }
+  }, {
+    key: "x",
+    set: function set(a) {
+      this.transform.x = a;
+    },
+    get: function get() {
+      return this.transform.x;
+    }
+  }, {
+    key: "y",
+    set: function set(a) {
+      this.transform.y = a;
+    },
+    get: function get() {
+      return this.transform.y;
+    }
+  }, {
+    key: "scaleX",
+    set: function set(a) {
+      this.transform.scaleX = a;
+    },
+    get: function get() {
+      return this.transform.scaleX;
+    }
+  }, {
+    key: "scaleY",
+    set: function set(a) {
+      this.transform.scaleY = a;
+    },
+    get: function get() {
+      return this.transform.scaleY;
+    }
+  }, {
+    key: "radian",
+    set: function set(a) {
+      this.transform.radian = a;
+    },
+    get: function get() {
+      return this.transform.radian;
+    }
+  }, {
+    key: "angle",
+    set: function set(a) {
+      this.transform.angle = a;
+    },
+    get: function get() {
+      return this.transform.angle;
+    }
+  }]);
+
+  return Container;
+}(Event);
+
+var Sprite =
+/*#__PURE__*/
+function (_Container) {
+  _inherits(Sprite, _Container);
+
+  function Sprite() {
+    var _this;
+
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, Sprite);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options));
+    _this.invertId = 0;
+    _this.invertMatrix = new Matrix4();
+    _this.shape = options.shape || new Shape(options);
+    _this.texture = options.texture;
+    return _this;
+  }
+
+  _createClass(Sprite, [{
+    key: "setSize",
+    value: function setSize(x, y) {
+      this.shape.width = x;
+      this.shape.height = y;
+      return this;
+    }
+  }, {
+    key: "setAnchor",
+    value: function setAnchor(x, y) {
+      this.shape.anchorX = x;
+      this.shape.anchorY = y;
+      return this;
+    }
+  }, {
+    key: "setAnchorSize",
+    value: function setAnchorSize() {
+      var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      this.shape.anchorX = this.shape.width * x;
+      this.shape.anchorY = this.shape.height * y;
+      return this;
+    }
+  }, {
+    key: "draw",
+    value: function draw(app, now) {
+      if (!this.texture) return;
+      app.render.blend(this.blend);
+      this.emit('updateTransform', now);
+      app.render.transform(this.transform.matrix);
+      this.texture.update(app.render);
+      app.render.texture(this.texture.texture);
+      this.shape.update(app.render);
+      app.render.draw(this.shape.buffer);
+    }
+  }, {
+    key: "checkPoint",
+    value: function checkPoint(vector) {
+      this.emit('updateTransform', 0);
+
+      if (this.invertId != this.transform.worldId) {
+        this.invertMatrix.invert(this.transform.matrix);
+        this.invertId = this.transform.worldId;
+      }
+
+      vector.multiplyMatrix4(this.invertMatrix);
+      return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
+    }
+  }, {
+    key: "texture",
+    get: function get() {
+      return this._texture;
+    },
+    set: function set(a) {
+      if (!a) return this._texture = null;
+      this._texture = a.baseTexture || a;
+      this.shape.updateTexture(a);
+    }
+  }, {
+    key: "width",
+    set: function set(a) {
+      this.shape.width = a;
+    },
+    get: function get() {
+      return this.shape.width;
+    }
+  }, {
+    key: "height",
+    set: function set(a) {
+      this.shape.height = a;
+    },
+    get: function get() {
+      return this.shape.height;
+    }
+  }, {
+    key: "anchorX",
+    set: function set(a) {
+      this.shape.anchorX = a;
+    },
+    get: function get() {
+      return this.shape.anchorX;
+    }
+  }, {
+    key: "anchorY",
+    set: function set(a) {
+      this.shape.anchorY = a;
+    },
+    get: function get() {
+      return this.shape.anchorY;
+    }
+  }]);
+
+  return Sprite;
+}(Container);
+
+var Application =
+/*#__PURE__*/
+function () {
+  function Application() {
+    var _this = this;
+
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, Application);
+
+    this.collision = options.collision || new Collision();
+    this.stage = options.stage || new Container();
+    this.touch = options.touch || new Touch();
+    this.clock = options.clock || new Clock();
+    this.clock.on('tick', function (now) {
+      return _this.tick(now);
+    });
+    this.time = options.time || new Time();
+    this.renderArray = [];
+    Object.keys(options).forEach(function (key) {
+      if (!_this[key]) _this[key] = options[key];
+    });
+  }
+
+  _createClass(Application, [{
+    key: "go",
+    value: function go(scene) {
+      this.stage.clear().add(scene);
+      return this;
+    }
+  }, {
+    key: "check",
+    value: function check(stage) {
+      if (!stage.visible) return;
+      stage.emit('check', this);
+      if (stage.visible && stage.draw) this.renderArray.push(stage);
+
+      for (var i = 0, len = stage.children.length; i < len; i++) {
+        this.check(stage.children[i]);
+      }
+    }
+  }, {
+    key: "tick",
+    value: function tick(now) {
+      this.check(this.stage); //TODO 排序
+
+      for (var i = 0, len = this.renderArray.length; i < len; i++) {
+        this.renderArray[i].emit('draw');
+        this.renderArray[i].draw(this, now);
+        this.renderArray[i].emit('drawn');
+      }
+
+      this.renderArray.length = 0;
+      return this;
+    }
+  }, {
+    key: "look",
+    value: function look(x, y) {
+      this.stage.transform.update();
+      this.render.look(this.stage.transform.matrix, x, y);
+      return this;
+    }
+  }]);
+
+  return Application;
+}();
+
+/**
+ * baseTexture基本纹理类型
+ */
+//全图纹理
+
 var BaseTexture =
 /*#__PURE__*/
 function () {
   function BaseTexture(source) {
     _classCallCheck(this, BaseTexture);
 
-    this.width = source.width;
-    this.height = source.height;
     this.source = source;
-    this.needUpdate = true;
+    this.size = new Vector2(source.width, source.height);
     this.texture = null;
+    this.needUpdate = true;
   }
 
   _createClass(BaseTexture, [{
+    key: "update",
+    value: function update(render) {
+      if (!this.needUpdate) return;
+      this.texture = render.updateTexture(this.source, this.texture);
+      this.needUpdate = false;
+    }
+  }, {
     key: "getTexture",
     value: function getTexture(x, y, width, height) {
-      return new Texture(this, x, y, width, height);
+      return {
+        baseTexture: this,
+        x: x || 0,
+        y: y || 0,
+        width: width || this.width,
+        height: height || this.height
+      };
+    }
+  }, {
+    key: "width",
+    get: function get() {
+      return this.size.x;
+    }
+  }, {
+    key: "height",
+    get: function get() {
+      return this.size.y;
     }
   }]);
 
   return BaseTexture;
-}();
+}(); //Canvas全图纹理
+
 var CanvasTexture =
 /*#__PURE__*/
 function (_BaseTexture) {
@@ -1728,12 +2435,22 @@ function (_BaseTexture) {
     }
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CanvasTexture).call(this, canvas));
-    _this.context = canvas.getContext('2d');
+    _this.context = context;
+    _this.canvas = canvas;
     return _this;
   }
 
+  _createClass(CanvasTexture, [{
+    key: "refresh",
+    value: function refresh() {
+      this.size.set(this.canvas.width, this.canvas.height);
+      return this;
+    }
+  }]);
+
   return CanvasTexture;
-}(BaseTexture);
+}(BaseTexture); //字体Canvas全图纹理
+
 var FontTexture =
 /*#__PURE__*/
 function (_CanvasTexture) {
@@ -1774,97 +2491,202 @@ function (_CanvasTexture) {
 
   return FontTexture;
 }(CanvasTexture);
-function TextureControlFactory(ImageControl, BaseTexture) {
-  return (
-    /*#__PURE__*/
-    function (_ImageControl) {
-      _inherits(TextureControl, _ImageControl);
 
-      function TextureControl() {
-        _classCallCheck(this, TextureControl);
+var Loader$1 =
+/*#__PURE__*/
+function () {
+  function Loader(loader) {
+    _classCallCheck(this, Loader);
 
-        return _possibleConstructorReturn(this, _getPrototypeOf(TextureControl).apply(this, arguments));
-      }
+    this.resources = {};
+    this.loader = loader;
+  }
 
-      _createClass(TextureControl, [{
-        key: "Set",
-        //读取并生成贴图对象
-        value: function Set(url) {
-          return _get(_getPrototypeOf(TextureControl.prototype), "Set", this).call(this, url).then(function (img) {
-            var baseTexture = new BaseTexture(img);
-            return baseTexture.getTexture(0, 0, baseTexture.width, baseTexture.height);
-          });
-        } //生成雪碧图对象
+  _createClass(Loader, [{
+    key: "loads",
+    value: function loads() {
+      var _this = this;
 
-      }, {
-        key: "SetClip",
-        value: function SetClip(key, name, x, y, width, height) {
-          if (!this.resources[key]) return this;
-          var baseTexture = this.resources[key].baseTexture;
-          this.resources[key + '//' + name] = baseTexture.getTexture(x, y, width, height);
-          return this;
-        }
-      }]);
+      var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      var loaded = arguments.length > 2 ? arguments[2] : undefined;
+      var Keys = Object.keys(map);
+      return Promise.all(Keys.map(function (key) {
+        var load = _this.load(prefix + key, map[key]);
 
-      return TextureControl;
-    }(ImageControl)
-  );
-}
-function FontControlFactory(getCanvas, FontTexture) {
-  return (
-    /*#__PURE__*/
-    function () {
-      function FontControl() {
-        _classCallCheck(this, FontControl);
+        return loaded ? load.then(loaded) : load;
+      }));
+    }
+  }, {
+    key: "get",
+    value: function get(key) {
+      return this.resources[key];
+    }
+  }]);
 
-        this.familys = {};
+  return Loader;
+}();
+var Image =
+/*#__PURE__*/
+function (_Loader) {
+  _inherits(Image, _Loader);
 
-        for (var i = 0; i < arguments.length; i++) {
-          var family = arguments[i].split(/\s+/);
-          this.familys[arguments[i]] = {
-            baseTextures: [],
-            values: {},
-            family: family[1],
-            size: parseFloat(family[0]),
-            weight: family[2] || ''
-          };
-        }
+  function Image() {
+    _classCallCheck(this, Image);
 
-        this["default"] = arguments[0];
-        this.used = null;
-      }
+    return _possibleConstructorReturn(this, _getPrototypeOf(Image).apply(this, arguments));
+  }
 
-      _createClass(FontControl, [{
-        key: "addBaseTexture",
-        value: function addBaseTexture(font) {
-          return new FontTexture(getCanvas(), font.family, font.weight, font.size);
-        }
-      }, {
-        key: "check",
-        value: function check(font) {
-          var baseTexture = font.baseTextures[0];
-          if (!baseTexture || baseTexture.used >= baseTexture.max) font.baseTextures.unshift(baseTexture = this.addBaseTexture(font));
-          return baseTexture;
-        }
-      }, {
-        key: "update",
-        value: function update(family) {
-          this.used = this.familys[family] || this.familys[this["default"]];
-        }
-      }, {
-        key: "get",
-        value: function get(value) {
-          var font = this.used;
-          if (font.values[value]) return font.values[value];
-          font.values[value] = this.check(font).getTexture(value);
-          return font.values[value];
-        }
-      }]);
+  _createClass(Image, [{
+    key: "load",
+    //读取并生成贴图对象
+    value: function load(key, url) {
+      var _this2 = this;
 
-      return FontControl;
-    }()
-  );
-}
+      return this.loader.load(url).then(function (image) {
+        _this2.resources[key] = new BaseTexture(image);
+      });
+    } //生成雪碧图对象
+
+  }, {
+    key: "sprite",
+    value: function sprite(key, name, x, y, width, height) {
+      if (!this.resources[key]) return this;
+      var texture = this.resources[key];
+      var baseTexture = texture.baseTexture || texture;
+      this.resources[key + '//' + name] = baseTexture.getTexture(x, y, width, height);
+      return this;
+    }
+  }]);
+
+  return Image;
+}(Loader$1);
+var Audio =
+/*#__PURE__*/
+function (_Loader2) {
+  _inherits(Audio, _Loader2);
+
+  function Audio() {
+    var _getPrototypeOf2;
+
+    var _this3;
+
+    _classCallCheck(this, Audio);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this3 = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Audio)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this3), "_mute", false);
+
+    return _this3;
+  }
+
+  _createClass(Audio, [{
+    key: "load",
+    value: function load(key, url) {
+      var _this4 = this;
+
+      return this.loader.load(url).then(function (audio) {
+        return _this4.resources[key] = audio;
+      });
+    } //静音
+
+  }, {
+    key: "mute",
+    get: function get() {
+      return this._mute;
+    },
+    set: function set(mute) {
+      this._mute = mute;
+      this.loader.mute(mute);
+    } //设置音量
+
+  }, {
+    key: "volume",
+    set: function set() {
+      var v = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      this.loader.volume(v);
+    },
+    get: function get() {
+      return this.loader.volume();
+    }
+  }]);
+
+  return Audio;
+}(Loader$1);
+
+var CanvasRender =
+/*#__PURE__*/
+function () {
+  function CanvasRender() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, CanvasRender);
+
+    this.renderArray = [];
+    this.context = options.context || options.canvas.getContext('2d');
+    this.canvas = this.context.canvas;
+  }
+
+  _createClass(CanvasRender, [{
+    key: "look",
+    value: function look(matrix, x, y) {
+      matrix.translate(-x / 2, -y / 2);
+      return this;
+    }
+  }, {
+    key: "updateTexture",
+    value: function updateTexture(image, texture) {
+      return image;
+    }
+  }, {
+    key: "updateBuffer",
+    value: function updateBuffer(array, buffer) {
+      return array;
+    }
+  }, {
+    key: "updateIndices",
+    value: function updateIndices(array, buffer) {
+      return array;
+    }
+  }, {
+    key: "transform",
+    value: function transform(_transform) {
+      if (this.beforeTransform === _transform && this.beforeTransformId == _transform.cid) return this;
+      this.beforeTransform = _transform;
+      this.beforeTransformId = _transform.cid;
+      var e = _transform.matrix.elements;
+      this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
+      return this;
+    }
+  }, {
+    key: "vetices",
+    value: function vetices(_vetices) {}
+  }, {
+    key: "uvs",
+    value: function uvs(_uvs) {}
+  }, {
+    key: "indices",
+    value: function indices(_indices) {}
+  }, {
+    key: "blend",
+    value: function blend(color) {}
+  }, {
+    key: "texture",
+    value: function texture(_texture) {}
+  }, {
+    key: "draw",
+    value: function draw(length) {}
+  }, {
+    key: "text",
+    value: function text(length) {}
+  }]);
+
+  return CanvasRender;
+}();
 
 function getActiveAttrib(gl, Program) {
   var Attributes = {};
@@ -1954,9 +2776,6 @@ function () {
         this.program = createProgram(gl, this.vert, this.frag);
         this.attributes = getActiveAttrib(gl, this.program);
         this.uniforms = getActiveUniform(gl, this.program);
-        this.vecties = createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
-        this.uvs = createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), gl.STATIC_DRAW);
-        this.indices = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([3, 2, 1, 3, 1, 0]), gl.STATIC_DRAW);
       }
 
       gl.useProgram(this.program);
@@ -1973,42 +2792,20 @@ function () {
       return true;
     }
   }, {
-    key: "bindUvs",
-    value: function bindUvs() {
-      var uvs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.uvs;
-      if (this.beforeUvs === uvs) return false;
-      this.beforeUvs = uvs;
+    key: "bindBuffer",
+    value: function bindBuffer(buffer) {
+      var vetices = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
+      var uvs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 2;
+      var offset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+      var bpe = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 4;
+      if (this.beforeBuffer === buffer) return false;
+      this.beforeBuffer = buffer;
       var gl = this.gl;
-      gl.bindBuffer(gl.ARRAY_BUFFER, uvs);
-      gl.vertexAttribPointer(this.attributes.aTextureCoord, 2, gl.FLOAT, false, 0, 0);
-      gl.enableVertexAttribArray(this.attributes.aTextureCoord);
-      return true;
-    }
-  }, {
-    key: "bindVecties",
-    value: function bindVecties() {
-      var vecties = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.vecties;
-      if (this.beforeVecties === vecties) return false;
-      this.beforeVecties = vecties;
-      var gl = this.gl;
-      gl.bindBuffer(gl.ARRAY_BUFFER, vecties);
-      gl.vertexAttribPointer(this.attributes.aPosition, 2, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.vertexAttribPointer(this.attributes.aPosition, vetices, gl.FLOAT, false, (vetices + uvs) * bpe, offset * bpe);
       gl.enableVertexAttribArray(this.attributes.aPosition);
-      return true;
-    }
-  }, {
-    key: "bindIndices",
-    value: function bindIndices() {
-      var indices = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.indices;
-      var gl = this.gl;
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices);
-      return true;
-    }
-  }, {
-    key: "draw",
-    value: function draw() {
-      var gl = this.gl;
-      gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+      gl.vertexAttribPointer(this.attributes.aTextureCoord, uvs, gl.FLOAT, false, (vetices + uvs) * bpe, (offset + vetices) * bpe);
+      gl.enableVertexAttribArray(this.attributes.aTextureCoord);
     }
   }, {
     key: "transform",
@@ -2027,7 +2824,7 @@ function () {
   }, {
     key: "vert",
     get: function get() {
-      return ['attribute vec4 aPosition;', 'attribute vec2 aTextureCoord;', 'uniform mat4 uModelMatrix;', 'varying vec2 vTextureCoord;', 'void main()', '{', 'gl_Position =  uModelMatrix * aPosition;', // 'gl_PointSize = 100.0;',
+      return ['attribute vec4 aPosition;', 'attribute vec2 aTextureCoord;', 'uniform mat4 uModelMatrix;', 'varying vec2 vTextureCoord;', 'void main()', '{', 'gl_Position = uModelMatrix * aPosition;', // 'gl_PointSize = 100.0;',
       'vTextureCoord = aTextureCoord;', '}'].join('\n');
     }
   }, {
@@ -2046,53 +2843,27 @@ function () {
 var WebGLRender =
 /*#__PURE__*/
 function () {
-  function WebGLRender(options) {
+  function WebGLRender() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
     _classCallCheck(this, WebGLRender);
 
     this.renderArray = [];
-    this.matrix = new Matrix4();
-    if (!options.context) options.context = options.canvas.getContext('webgl');
-    var gl = this.gl = options.context;
+    this.context = options.context || options.canvas.getContext('webgl');
+    this.canvas = this.context.canvas;
+    var gl = this.context;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); // Webgl.getExtension(gl);
 
-    this.canvas = gl.canvas;
-    this.useProgram(new Shader(this.gl));
+    this.useProgram(new Shader(gl));
   }
 
   _createClass(WebGLRender, [{
-    key: "update",
-    value: function update() {
-      for (var i = 0, len = this.renderArray.length; i < len; i++) {
-        this.renderArray[i].emit('update');
-        if (this.renderArray[i].update) this.renderArray[i].update(this);
-        this.renderArray[i].emit('updated');
-      }
-
-      this.renderArray.length = 0;
-    }
-  }, {
-    key: "setTransform",
-    value: function setTransform(matrix) {
-      this.matrix.setApply(matrix);
-      return this;
-    }
-  }, {
-    key: "transform",
-    value: function transform(matrix) {
-      this.matrix.multiply(matrix);
-      return this;
-    }
-  }, {
-    key: "drawImage",
-    value: function drawImage(texture, x, y, width, height) {
-      var sx = (width || texture.width) / 2;
-      var sy = (height || texture.height) / 2;
-      this.matrix.translate(x, y).scale(sx, sy);
-      this.bindTexture(texture);
-      this.draw();
-      this.matrix.scale(1 / sx, 1 / sy).translate(-x, -y);
+    key: "look",
+    value: function look(matrix, x, y) {
+      matrix.setOrtho(-x / 2, x / 2, y / 2, -y / 2, 0, 1);
+      this.context.viewport(0, 0, x, y);
       return this;
     }
   }, {
@@ -2105,856 +2876,101 @@ function () {
   }, {
     key: "updateTexture",
     value: function updateTexture(image, texture) {
-      var gl = this.gl;
+      var gl = this.context;
       if (!texture) return createTexture(gl, image);
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
       return texture;
     }
   }, {
-    key: "updateUvs",
-    value: function updateUvs(array, buffer) {
-      var gl = this.gl;
-      if (buffer) gl.deleteBuffer(buffer);
-      if (!array) return;
-      var x = array[0];
-      var y = array[1];
-      var width = array[2];
-      var height = array[3];
-      var realWidth = array[4];
-      var realHeight = array[5];
-      if (x == 0 && y == 0 && width == realWidth && height == realHeight) return;
-      var left = x / realWidth;
-      var top = y / realHeight;
-      var right = left + width / realWidth;
-      var bottom = top + height / realHeight;
-      return createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array([right, top, left, top, left, bottom, right, bottom]), gl.STATIC_DRAW);
-    }
-  }, {
-    key: "updateVectices",
-    value: function updateVectices(array, buffer) {
-      var gl = this.gl;
+    key: "updateBuffer",
+    value: function updateBuffer(array, buffer) {
+      var gl = this.context;
       if (buffer) gl.deleteBuffer(buffer);
       if (!array) return;
       return createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array(array), gl.STATIC_DRAW);
     }
   }, {
-    key: "setBlend",
-    value: function setBlend(color) {
-      return this.shader.blend(color);
+    key: "updateIndices",
+    value: function updateIndices(array, buffer) {
+      var gl = this.context;
+      if (buffer) gl.deleteBuffer(buffer);
+      if (!array) return;
+      return createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(array), gl.STATIC_DRAW);
     }
   }, {
-    key: "bindTexture",
-    value: function bindTexture(texture) {
-      if (!texture || !texture.baseTexture) return false;
+    key: "shapeToBuffer",
+    value: function shapeToBuffer(shape) {
+      if (!shape.buffer) shape.buffer = {};
 
-      if (texture.needUpdate) {
-        texture.uv = this.updateUvs(texture.source, texture.uv);
-        texture.needUpdate = false;
-      }
+      if (shape.morph == 'Rectangle') {
+        var left = shape.left;
+        var top = shape.top;
+        var right = shape.right;
+        var bottom = shape.bottom;
+        var cLeft = shape.clipPosition.x;
+        var cTop = shape.clipPosition.y;
+        var cRight = shape.clipPosition.x + shape.clipSize.x;
+        var cBottom = shape.clipPosition.y + shape.clipSize.y;
+        shape.buffer.array = [left, top, cLeft, cTop, right, top, cRight, cTop, left, bottom, cLeft, cBottom, right, bottom, cRight, cBottom];
+        shape.buffer.buffers = this.updateBuffer(shape.buffer.array, shape.buffer.buffers);
+        shape.buffer.length = 4;
+        shape.buffer.type = this.gl.TRIANGLE_STRIP;
+      } else if (shape.morph == 'Circle') {
+        var length = (shape.size.x + shape.size.y) / 20 | 0;
+        var radian = 2 * Math.PI / length;
+        var cx = -shape.anchor.x;
+        var cy = -shape.anchor.y;
+        var rx = shape.size.x * 0.5;
+        var ry = shape.size.y * 0.5;
+        var rx1 = shape.clipSize.x * 0.5;
+        var ry1 = shape.clipSize.y * 0.5;
+        var cx1 = shape.clipPosition.x + rx1;
+        var cy1 = shape.clipPosition.y + ry1;
+        shape.buffer.array = [cx, cy, cx1, cy1];
 
-      if (texture.baseTexture.needUpdate) {
-        texture.baseTexture.texture = this.updateTexture(texture.baseTexture.source, texture.baseTexture.texture);
-        texture.baseTexture.needUpdate = false;
-      }
+        for (var i = 0; i <= length; i++) {
+          var r = i * radian;
+          var cos = Math.cos(r);
+          var sin = Math.sin(r);
+          shape.buffer.array.push(rx * cos + cx, ry * sin + cy, rx1 * cos + cx1, ry1 * sin + cy1);
+        }
 
-      this.shader.bindUvs(texture.uv);
-      return this.shader.bindTexture(texture.baseTexture.texture);
+        shape.buffer.buffers = this.updateBuffer(shape.buffer.array, shape.buffer.buffers);
+        shape.buffer.length = shape.buffer.array.length / 4;
+        shape.buffer.type = this.gl.TRIANGLE_FAN;
+      } else if (_typeof(shape.morph) == 'object') ;
+    }
+  }, {
+    key: "blend",
+    value: function blend() {
+      this.shader.blend();
+    }
+  }, {
+    key: "transform",
+    value: function transform(matrix) {
+      this.shader.transform(matrix);
+    }
+  }, {
+    key: "texture",
+    value: function texture(_texture) {
+      this.shader.bindTexture(_texture);
     }
   }, {
     key: "draw",
-    value: function draw() {
-      this.shader.transform(this.matrix);
-      this.shader.bindVecties();
-      this.shader.bindIndices();
-      this.shader.draw();
-      return this;
+    value: function draw(buffer) {
+      if (!buffer) return;
+      this.shader.bindBuffer(buffer.buffers, 2, 2, 0, 4);
+      this.gl.drawArrays(buffer.type, 0, buffer.length);
+    }
+  }, {
+    key: "gl",
+    get: function get() {
+      return this.context;
     }
   }]);
 
   return WebGLRender;
 }();
 
-var Container =
-/*#__PURE__*/
-function (_Event) {
-  _inherits(Container, _Event);
-
-  _createClass(Container, [{
-    key: "define",
-    value: function define(key, object, okey, event, set, get) {
-      var setgetkey = key.substr(0, 1).toUpperCase() + key.substr(1).toLowerCase();
-
-      this['set' + setgetkey] = set || function (v) {
-        if (object[okey] == v) return this;
-        object[okey] = v;
-        if (event) this.emit(event, key, v);
-        return this;
-      };
-
-      this['get' + setgetkey] = get || function (v) {
-        return object[okey];
-      };
-
-      Object.defineProperty(this, key, {
-        set: this['set' + setgetkey],
-        get: this['get' + setgetkey]
-      });
-    }
-  }]);
-
-  function Container() {
-    var _this;
-
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-    _classCallCheck(this, Container);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Container).call(this));
-    _this.id = Container.id ? ++Container.id : Container.id = 1;
-    _this.visible = true;
-    _this.parent = null;
-    _this.children = [];
-    _this.touchChildren = true;
-    if (options.visible === false) _this.visible = false;
-    if (options.children && options.children.length) _this.add(options.children);
-    _this.worldMatrix = new Matrix4(); //矩阵
-
-    _this._updateMatrix = true; //将在下一帧更新矩阵
-
-    _this._updateMatrixInvert = true; //将在下一次需要时更新矩阵
-
-    _this.on('updateMatrix', function () {
-      this._updateMatrix = true;
-
-      for (var i = 0, len = this.children.length; i < len; i++) {
-        this.children[i].emit('updateMatrix');
-      }
-    });
-
-    _this.radian = 0;
-    if (options.angle) _this.angle = options.angle;
-    _this._zIndex = 0;
-
-    _this.define('zIndex', _assertThisInitialized(_this), '_zIndex');
-
-    if (options.zIndex) _this.zIndex = options.zIndex;
-    _this.position = new Vector2();
-    if (options.position) _this.position.setApply(options.position);
-
-    _this.define('x', _this.position, 'x', 'updateMatrix');
-
-    if (options.x) _this.x = options.x;
-
-    _this.define('y', _this.position, 'y', 'updateMatrix');
-
-    if (options.y) _this.y = options.y;
-    _this.scale = new Vector2(1, 1);
-    if (options.scale) _this.scale.same(options.scale);
-
-    _this.define('scaleX', _this.scale, 'x', 'updateMatrix');
-
-    if (options.scaleX) _this.scaleX = options.scaleX;
-
-    _this.define('scaleY', _this.scale, 'y', 'updateMatrix');
-
-    if (options.scaleY) _this.scaleY = options.scaleY;
-    _this.anchor = new Vector2(0, 0);
-
-    _this.define('anchorX', _this.anchor, 'x', 'updateMatrix');
-
-    if (options.anchorX) _this.anchorX = options.anchorX;
-
-    _this.define('anchorY', _this.anchor, 'y', 'updateMatrix');
-
-    if (options.anchorY) _this.anchorY = options.anchorY;
-    _this.size = new Vector2();
-    if (options.size) _this.size.setApply(options.size);
-
-    _this.define('width', _this.size, 'x', 'updateMatrix');
-
-    if (options.width !== undefined) _this.width = options.width;
-
-    _this.define('height', _this.size, 'y', 'updateMatrix');
-
-    if (options.height !== undefined) _this.height = options.height;
-
-    _this.define('angle', _assertThisInitialized(_this), 'radian', 'updateMatrix', function (v) {
-      var a = v * Math.PI / 180;
-      if (a == this.radian) return this;
-      this.radian = a;
-      this.emit('updateMatrix');
-      return this;
-    }, function () {
-      return this.radian * 180 / Math.PI;
-    });
-
-    if (options.angle !== undefined) _this.angle = options.angle;
-    return _this;
-  }
-
-  _createClass(Container, [{
-    key: "setSize",
-    value: function setSize(x, y) {
-      this.width = x;
-      this.height = y;
-      return this;
-    }
-  }, {
-    key: "setPosition",
-    value: function setPosition(x, y) {
-      this.x = x;
-      this.y = y;
-      return this;
-    }
-  }, {
-    key: "setScale",
-    value: function setScale(x, y) {
-      this.scaleX = x;
-      this.scaleY = y;
-      return this;
-    }
-  }, {
-    key: "center",
-    value: function center() {
-      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      return this.width * n + move;
-    }
-  }, {
-    key: "middle",
-    value: function middle() {
-      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      return this.height * n + move;
-    }
-  }, {
-    key: "left",
-    value: function left() {
-      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      return this.center(n - 0.5, move);
-    }
-  }, {
-    key: "right",
-    value: function right() {
-      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      return this.center(n + 0.5, move);
-    }
-  }, {
-    key: "top",
-    value: function top() {
-      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      return this.middle(n - 0.5, move);
-    }
-  }, {
-    key: "bottom",
-    value: function bottom() {
-      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var move = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      return this.middle(n + 0.5, move);
-    }
-  }, {
-    key: "put",
-    value: function put(object3d) {
-      return object3d.add(this);
-    }
-  }, {
-    key: "add",
-    value: function add(object3d) {
-      if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-          this.add(arguments[i]);
-        }
-      } else if (object3d instanceof Array) {
-        for (var _i = 0; _i < object3d.length; _i++) {
-          this.add(object3d[_i]);
-        }
-      } else if (object3d) {
-        object3d.emit('create');
-        if (object3d.parent) object3d.remove(this);
-        this.children.push(object3d);
-        object3d.parent = this;
-        object3d.emit('created');
-      }
-
-      return this;
-    }
-  }, {
-    key: "remove",
-    value: function remove(object3d) {
-      if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-          this.remove(arguments[i]);
-        }
-      } else if (object3d instanceof Array) {
-        for (var _i2 = 0; _i2 < object3d.length; _i2++) {
-          this.remove(object3d[_i2]);
-        }
-      } else if (object3d) {
-        object3d.emit('destroy', this);
-        object3d.clear();
-        var index = this.children.indexOf(object3d);
-        this.children.splice(index, 1);
-        object3d.parent = null;
-        object3d.emit('destroyd', this);
-      }
-
-      return this;
-    }
-  }, {
-    key: "clear",
-    value: function clear() {
-      //TODO lockChildren
-      return this.remove(this.children);
-    }
-  }, {
-    key: "preUpdate",
-    value: function preUpdate(render) {
-      if (!this.visible) return true;
-      if (this._updateMatrix) this.updateTransform();
-      render.renderArray.push(this);
-
-      for (var i = 0, len = this.children.length; i < len; i++) {
-        this.children[i].preUpdate(render);
-      }
-    }
-  }, {
-    key: "updateTransform",
-    value: function updateTransform(matrix) {
-      this._updateMatrix = false;
-
-      if (matrix) {
-        this.worldMatrix.setApply(matrix);
-      } else {
-        if (this.parent) {
-          if (this.parent._updateMatrix) this.parent.updateTransform();
-          this.worldMatrix.setApply(this.parent.worldMatrix);
-        } else {
-          this.worldMatrix.identity();
-        }
-      }
-
-      this.worldMatrix.translate(this.x, this.y, 0);
-      this.worldMatrix.rotate(this.radian, 0, 0, 1);
-      this.worldMatrix.scale(this.scaleX, this.scaleY, 1);
-      this.worldMatrix.translate(-this.anchorX, -this.anchorY, 0);
-      this._updateMatrixInvert = true;
-      return this;
-    }
-  }, {
-    key: "getWorldVector",
-    value: function getWorldVector(vector) {
-      var clone = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (this._updateMatrix) this.updateTransform();
-
-      if (!vector) {
-        vector = new Vector2();
-      } else if (clone) {
-        vector = vector.clone();
-      }
-
-      return vector.multiplyMatrix4(this.worldMatrix);
-    }
-  }, {
-    key: "getLocalVector",
-    value: function getLocalVector(vector) {
-      if (this._updateMatrixInvert) {
-        if (this._updateMatrix) this.updateTransform();
-        if (!this.worldMatrixInvert) this.worldMatrixInvert = new Matrix4();
-        this.worldMatrixInvert.setApply(this.worldMatrix).invert();
-        this._updateMatrixInvert = false;
-      }
-
-      return vector.multiplyMatrix4(this.worldMatrixInvert);
-    }
-  }, {
-    key: "updateMatrix",
-    get: function get() {
-      return this._updateMatrix;
-    },
-    set: function set(u) {
-      if (u) {
-        this.emit('updateMatrix');
-      } else {
-        this._updateMatrix = u;
-      }
-    }
-  }]);
-
-  return Container;
-}(Event);
-
-var Sprite =
-/*#__PURE__*/
-function (_Container) {
-  _inherits(Sprite, _Container);
-
-  function Sprite(texture) {
-    var _this;
-
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    _classCallCheck(this, Sprite);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, options));
-    _this.localMatrix = new Matrix4(); //矩阵
-
-    _this.setTexture(texture);
-
-    if (options.width) _this.width = options.width;
-    if (options.height) _this.height = options.height;
-    _this._color = new Color(1, 1, 1, 1);
-
-    _this.define('color', _assertThisInitialized(_this), '_color', null, function (color) {
-      this._color.setApply(color);
-
-      return this;
-    });
-
-    if (options.color !== undefined) _this.color = options.color;
-
-    _this.define('alpha', _this._color, 'alpha');
-
-    if (options.alpha !== undefined) _this.alpha = options.alpha;
-
-    _this.define('red', _this._color, 'red');
-
-    if (options.red !== undefined) _this.red = options.red;
-
-    _this.define('green', _this._color, 'green');
-
-    if (options.green !== undefined) _this.green = options.green;
-
-    _this.define('blue', _this._color, 'blue');
-
-    if (options.blue !== undefined) _this.blue = options.blue;
-    return _this;
-  }
-
-  _createClass(Sprite, [{
-    key: "checkPoint",
-    value: function checkPoint(vector) {
-      this.getLocalVector(vector);
-      return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
-    }
-  }, {
-    key: "setTexture",
-    value: function setTexture(texture) {
-      if (!texture) {
-        this.texture = null;
-        this.width = 0;
-        this.height = 0;
-      } else {
-        this.texture = texture;
-        this.width = texture.width;
-        this.height = texture.height;
-      }
-
-      return this;
-    }
-  }, {
-    key: "update",
-    value: function update(render) {
-      if (!this.texture) return;
-      render.setBlend(this.color);
-      render.setTransform(this.localMatrix);
-      render.bindTexture(this.texture);
-      render.draw();
-    }
-  }, {
-    key: "updateTransform",
-    value: function updateTransform(matrix) {
-      _get(_getPrototypeOf(Sprite.prototype), "updateTransform", this).call(this, matrix);
-
-      if (!this.texture) return;
-      this.localMatrix.setApply(this.worldMatrix).scale(this.width / 2, this.height / 2);
-    }
-  }]);
-
-  return Sprite;
-}(Container);
-
-var TextLine =
-/*#__PURE__*/
-function (_Container) {
-  _inherits(TextLine, _Container);
-
-  //最大行宽,默认行高,是否自动行高
-  function TextLine() {
-    var _this;
-
-    _classCallCheck(this, TextLine);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(TextLine).call(this));
-    _this.needSplit = true; //需要打断
-
-    _this.textures = [];
-    return _this;
-  }
-
-  _createClass(TextLine, [{
-    key: "addTexture",
-    value: function addTexture(sprite) {
-      this.textures.push(sprite);
-      this.width += sprite.width;
-      sprite.anchorX = -sprite.width / 2;
-      sprite.anchorY = -sprite.height / 2;
-    }
-  }, {
-    key: "align",
-    value: function align(y) {
-      for (var j = 0; j < this.textures.length; j++) {
-        var sprite = this.textures[j];
-        sprite.y -= (sprite.height - this.height) * y; //本行水平对齐方式
-      }
-    }
-  }, {
-    key: "updateTransform",
-    value: function updateTransform(matrix) {
-      _get(_getPrototypeOf(TextLine.prototype), "updateTransform", this).call(this, matrix);
-
-      for (var j = 0; j < this.textures.length; j++) {
-        this.textures[j].updateTransform(this.worldMatrix);
-      }
-    }
-  }, {
-    key: "update",
-    value: function update(render) {
-      for (var j = 0; j < this.textures.length; j++) {
-        this.textures[j].update(render);
-      }
-    }
-  }]);
-
-  return TextLine;
-}(Container);
-var TextElement =
-/*#__PURE__*/
-function (_Container2) {
-  _inherits(TextElement, _Container2);
-
-  function TextElement(value) {
-    var _this2;
-
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    _classCallCheck(this, TextElement);
-
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(TextElement).call(this, options));
-    _this2.family = options.family || '36px 微软雅黑';
-    _this2.color = options.color || '#FFFFFF';
-    _this2.stroke = options.stroke || 0;
-    _this2.anchorY = -_this2.height / 2;
-    _this2.values = value;
-    return _this2;
-  }
-
-  _createClass(TextElement, [{
-    key: "addValue",
-    value: function addValue(value, width) {
-      this.values += value;
-      this.width += width;
-      this.anchorX = -this.width / 2;
-    }
-  }, {
-    key: "update",
-    value: function update(render) {
-      render.setTransform(this.worldMatrix);
-      var ctx = render.context;
-      if (ctx.font != this.family) ctx.font = this.family;
-      if (ctx.textAlign != 'center') ctx.textAlign = 'center';
-      if (ctx.textBaseline != 'middle') ctx.textBaseline = 'middle';
-
-      if (this.stroke > 0) {
-        if (ctx.lineWidth != this.stroke) ctx.lineWidth = this.stroke;
-        if (ctx.strokeStyle != this.color) ctx.strokeStyle = this.color;
-        render.context.strokeText(this.values, 0, 0);
-      } else {
-        if (ctx.fillStyle != this.color) ctx.fillStyle = this.color;
-        render.context.fillText(this.values, 0, 0);
-      }
-    }
-  }]);
-
-  return TextElement;
-}(Container);
-var Text =
-/*#__PURE__*/
-function (_Container3) {
-  _inherits(Text, _Container3);
-
-  _createClass(Text, [{
-    key: "defaultFont",
-    value: function defaultFont(font) {
-      return Object.assign({}, font);
-    }
-  }]);
-
-  function Text() {
-    var _this3;
-
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-    _classCallCheck(this, Text);
-
-    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, options));
-    _this3.font = _this3.defaultFont(options.font);
-    _this3.value = '';
-    _this3.textures = [];
-    _this3.icons = Object.assign({}, options.icons);
-    _this3.wrapWidth = options.wrapWidth || -1;
-
-    if (options.lineHeight > 0) {
-      _this3.lineHeight = options.lineHeight;
-      _this3.autoLineHeight = false;
-    } else {
-      _this3.lineHeight = _this3.font.size;
-      _this3.autoLineHeight = true;
-    }
-
-    if (options.value) _this3.setValue(options.value);
-    return _this3;
-  }
-
-  _createClass(Text, [{
-    key: "setValue",
-    value: function setValue(value) {
-      if (value == this.value) return this;
-      this.textures.length = 0;
-      this.value = value === 0 ? '0' : value ? value.toString() : '';
-      if (!this.value) return this;
-      this.updateText(this.value);
-      return this;
-    }
-  }, {
-    key: "updateText",
-    value: function updateText(value) {
-      var tags = {}; //文本内特殊标签
-
-      var family = {
-        size: this.font.size,
-        family: this.font.family,
-        weight: this.font.weight,
-        lineWidth: this.font.lineWidth || 0,
-        strokeStyle: this.font.strokeStyle || '#000000',
-        fillStyle: this.font.fillStyle || '#FFFFFF'
-      }; //默认属性
-
-      var handle = Object.assign({}, family); //当前临时属性
-
-      var line = null; //当前行精灵
-
-      var icons = this.icons;
-      var string = value.replace(/\<(fillStyle|strokeStyle|lineWidth|family|weight|size|i)\=(\S+?)\>/g, function (tag, action, arg, index) {
-        if (action == 'i') {
-          if (icons[arg]) tags[index] = {
-            action: action,
-            arg: icons[arg],
-            length: tag.length - 1
-          };
-          return tag;
-        }
-
-        tags[index] = {
-          action: action,
-          arg: arg,
-          length: tag.length - 1
-        };
-        return tag;
-      });
-
-      for (var i = 0, len = string.length; i < len; i++) {
-        var v = string[i];
-
-        if (tags[i]) {
-          if (tags[i].action != 'i') {
-            handle[tags[i].action] = tags[i].arg == '@' ? family[tags[i].action] : tags[i].arg;
-            if (line) line.needSplit = true;
-          } else {
-            if (this.linePushSpecial(line, tags[i].arg)) {
-              line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
-              this.textures.push(line);
-              this.linePushSpecial(line, tags[i].arg);
-            }
-          }
-
-          i += tags[i].length;
-        } else if (v === '\n') {
-          line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
-          this.textures.push(line);
-        } else {
-          //如果当前行精灵不存在或者无法加入当前字，则生成一个新的行精灵推入纹理组
-          if (this.linePush(line, handle, v)) {
-            line = new TextLine().setSize(0, this.lineHeight).setPosition(0, line ? line.y + line.height : 0);
-            this.textures.push(line);
-            this.linePush(line, handle, v);
-          }
-        }
-      }
-
-      this.updateTextures();
-    }
-  }, {
-    key: "getElement",
-    value: function getElement() {
-      throw '请设置getElement函数';
-    }
-  }, {
-    key: "linePushSpecial",
-    value: function linePushSpecial(line, special) {
-      if (this.lineWrapCheck(line, special.width)) return true;
-      if (this.autoLineHeight && special.height > line.height) line.height = special.height;
-      line.addTexture(this.getElement(special, false, {
-        x: line.width
-      }, true));
-      line.needSplit = true;
-    }
-  }, {
-    key: "linePush",
-    value: function linePush(line, handle, value, isSpecial) {
-      if (!line) return true;
-
-      if (isSpecial) ; else {
-        var font = this.getElement(line.needSplit, value, handle);
-        var width = font.baseTexture ? font.width * handle.size / font.baseTexture.size : font.width;
-        if (this.lineWrapCheck(line, width)) return true;
-
-        if (line.needSplit) {
-          if (this.autoLineHeight && handle.size > line.height) line.height = handle.size;
-          var option = {
-            family: handle.size + 'px ' + handle.family,
-            color: handle.fillStyle,
-            width: width,
-            height: handle.size,
-            x: line.width
-          };
-          line.addTexture(this.getElement(font, value, option, true));
-          line.needSplit = this.allFontSplit;
-        } else {
-          line.textures[line.textures.length - 1].addValue(value, width);
-          line.width += width;
-        }
-      }
-    }
-  }, {
-    key: "lineWrapCheck",
-    value: function lineWrapCheck(line, width) {
-      return this.wrapWidth >= 0 && line.width + width > this.wrapWidth;
-    }
-  }, {
-    key: "updateTextures",
-    value: function updateTextures() {
-      var widths = this.textures.map(function (l) {
-        return l.width;
-      });
-      this.width = Math.max.apply(null, widths);
-      this.height = this.textures.reduce(function (r, line) {
-        return r + line.height;
-      }, 0);
-
-      for (var i = 0; i < this.textures.length; i++) {
-        var line = this.textures[i];
-        line.x -= this.width * 0.5; //整体垂直对齐方式
-
-        line.y -= this.height * 0.5; //整体水平对齐方式
-
-        line.x -= (line.width - this.width) * 0.5; //本行垂直对齐方式
-
-        line.align(0.5);
-      }
-
-      this.updateMatrix = true;
-    }
-  }, {
-    key: "updateTransform",
-    value: function updateTransform() {
-      _get(_getPrototypeOf(Text.prototype), "updateTransform", this).call(this);
-
-      if (!this.textures || !this.textures.length) return;
-
-      for (var i = 0; i < this.textures.length; i++) {
-        var line = this.textures[i];
-        line.updateTransform(this.worldMatrix);
-      }
-    }
-  }, {
-    key: "update",
-    value: function update(render) {
-      if (!this.textures || !this.textures.length) return;
-
-      for (var i = 0; i < this.textures.length; i++) {
-        var line = this.textures[i];
-        line.update(render);
-      }
-    }
-  }, {
-    key: "allFontSplit",
-    get: function get() {
-      return true;
-    }
-  }]);
-
-  return Text;
-}(Container);
-
-var Director =
-/*#__PURE__*/
-function (_Container) {
-  _inherits(Director, _Container);
-
-  function Director() {
-    var _getPrototypeOf2;
-
-    var _this;
-
-    _classCallCheck(this, Director);
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Director)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-    _defineProperty(_assertThisInitialized(_this), "Scenes", {});
-
-    _defineProperty(_assertThisInitialized(_this), "CurrentScene", null);
-
-    return _this;
-  }
-
-  _createClass(Director, [{
-    key: "Go",
-    //当前场景
-    value: function Go(Type) {
-      this.remove(this.CurrentScene);
-
-      for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-        args[_key2 - 1] = arguments[_key2];
-      }
-
-      this.CurrentScene = this.Scenes[Type] ? _construct(this.Scenes[Type], args) : null;
-      this.add(this.CurrentScene, 0);
-      return this;
-    }
-  }, {
-    key: "setScenes",
-    value: function setScenes(scenes) {
-      Object.assign(this.Scenes, scenes);
-      return this;
-    }
-  }, {
-    key: "look",
-    value: function look(Matrix) {
-      this.worldMatrix.setApply(Matrix);
-      this.updateMatrix = false;
-      return this;
-    }
-  }]);
-
-  return Director;
-}(Container);
-
-export { BaseTexture, CanvasRender, CanvasTexture, Clock, Collision, Color, Container, Director, Event, FontControlFactory, FontTexture, Loader, Matrix4, Random, Shader, Sprite, Text, TextElement, TextLine, Texture, TextureControlFactory, Time, Touch, Vector, Vector2, Vector3, WebGLRender };
+export { Application, Audio, BaseTexture, CanvasRender, CanvasTexture, Clock, Collision, Color, Container, Event, FontTexture, Image, Loader, Matrix4, Random, RichText, Shader, Shape, Sprite, Time, Touch, Transform, Vector, Vector2, Vector3, WebGLRender };
