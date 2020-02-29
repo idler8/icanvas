@@ -2618,6 +2618,10 @@ function (_Loader2) {
   return Audio;
 }(Loader$1);
 
+var GetAB = function GetAB(a, b) {
+  return a;
+};
+
 var CanvasRender =
 /*#__PURE__*/
 function () {
@@ -2625,6 +2629,12 @@ function () {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     _classCallCheck(this, CanvasRender);
+
+    _defineProperty(this, "updateTexture", GetAB);
+
+    _defineProperty(this, "updateBuffer", GetAB);
+
+    _defineProperty(this, "updateIndices", GetAB);
 
     this.renderArray = [];
     this.context = options.context || options.canvas.getContext('2d');
@@ -2634,55 +2644,75 @@ function () {
   _createClass(CanvasRender, [{
     key: "look",
     value: function look(matrix, x, y) {
-      matrix.translate(-x / 2, -y / 2);
+      matrix.translate(x / 2, y / 2);
       return this;
     }
   }, {
-    key: "updateTexture",
-    value: function updateTexture(image, texture) {
-      return image;
+    key: "useProgram",
+    value: function useProgram() {
+      return this;
     }
   }, {
-    key: "updateBuffer",
-    value: function updateBuffer(array, buffer) {
-      return array;
-    }
+    key: "shapeToBuffer",
+    //形状混合
+    value: function shapeToBuffer(shape) {
+      if (!shape.buffer) shape.buffer = {};
+      shape.buffer.morph = shape.morph;
+
+      if (shape.morph == 'Rectangle') {
+        shape.buffer.morph = 'Rectangle';
+        shape.buffer.clipData = [shape.clipPosition.x, shape.clipPosition.y, shape.clipSize.x, shape.clipSize.y];
+        shape.buffer.drawData = [shape.left, shape.top, shape.width, shape.height];
+      } else if (shape.morph == 'Circle') {
+        shape.buffer.morph = 'Circle';
+        shape.buffer.clipData = [shape.clipPosition.x, shape.clipPosition.y, shape.clipSize.x, shape.clipSize.y];
+        shape.buffer.drawData = [shape.left, shape.top, shape.width, shape.height]; //TODO 椭圆
+
+        shape.buffer.circle = [-shape.anchor.x, -shape.anchor.y, Math.min(shape.size.x, shape.size.y) * 0.5];
+      } else if (_typeof(shape.morph) == 'object') {
+        shape.buffer.morph = 'Polygon'; //TODO 多边形
+      }
+    } //颜色混合
+
   }, {
-    key: "updateIndices",
-    value: function updateIndices(array, buffer) {
-      return array;
-    }
+    key: "blend",
+    value: function blend(color) {} //颜色混合
+
   }, {
     key: "transform",
-    value: function transform(_transform) {
-      if (this.beforeTransform === _transform && this.beforeTransformId == _transform.cid) return this;
-      this.beforeTransform = _transform;
-      this.beforeTransformId = _transform.cid;
-      var e = _transform.matrix.elements;
+    value: function transform(matrix) {
+      var e = matrix.elements || matrix;
       this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
       return this;
     }
   }, {
-    key: "vetices",
-    value: function vetices(_vetices) {}
-  }, {
-    key: "uvs",
-    value: function uvs(_uvs) {}
-  }, {
-    key: "indices",
-    value: function indices(_indices) {}
-  }, {
-    key: "blend",
-    value: function blend(color) {}
-  }, {
     key: "texture",
-    value: function texture(_texture) {}
+    value: function texture(_texture) {
+      if (this.beforeTexture === _texture) return false;
+      this.beforeTexture = _texture;
+    }
   }, {
     key: "draw",
-    value: function draw(length) {}
-  }, {
-    key: "text",
-    value: function text(length) {}
+    value: function draw(buffer) {
+      if (!buffer) return;
+      if (!this.beforeTexture) return;
+      var ctx = this.context;
+
+      if (buffer.morph == 'Circle') {
+        ctx.save(); // 保存当前ctx的状态
+
+        ctx.arc(buffer.circle[0], buffer.circle[1], buffer.circle[2], 0, 2 * Math.PI); //画出圆
+
+        ctx.clip(); //裁剪上面的圆形
+
+        ctx.drawImage(this.beforeTexture, buffer.clipData[0] * this.beforeTexture.width, buffer.clipData[1] * this.beforeTexture.height, buffer.clipData[2] * this.beforeTexture.width, buffer.clipData[3] * this.beforeTexture.height, buffer.drawData[0], buffer.drawData[1], buffer.drawData[2], buffer.drawData[3]);
+        ctx.restore(); // 还原状态
+      }
+
+      if (buffer.morph == 'Rectangle') {
+        ctx.drawImage(this.beforeTexture, buffer.clipData[0] * this.beforeTexture.width, buffer.clipData[1] * this.beforeTexture.height, buffer.clipData[2] * this.beforeTexture.width, buffer.clipData[3] * this.beforeTexture.height, buffer.drawData[0], buffer.drawData[1], buffer.drawData[2], buffer.drawData[3]);
+      }
+    }
   }]);
 
   return CanvasRender;
