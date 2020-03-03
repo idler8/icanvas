@@ -1,11 +1,12 @@
 import Vector2 from '../vector/vector2.js';
 import Event from './event.js';
 class TouchEvent extends Vector2 {
-	constructor(time, x, y) {
+	constructor(id, time, x, y) {
 		super(x, y); //当前位置
 		this.start = new Vector2(x, y); //起始位置
 		this.tick = new Vector2(0, 0); //本帧移动
 		this.begin = this.over = time; //触摸时长
+		this.id = id;
 	}
 	get long() {
 		return this.over - this.begin;
@@ -54,7 +55,7 @@ export default class Touch extends Event {
 		for (let i = 0, l = e.changedTouches.length; i < l; i++) {
 			let touch = e.changedTouches[i];
 			let id = touch.identifier;
-			this.touches[id] = new TouchEvent(now, this.getX(touch.clientX), this.getY(touch.clientY));
+			this.touches[id] = new TouchEvent(id, now, this.getX(touch.clientX), this.getY(touch.clientY));
 			this.emit('touchStart', this.touches[id]);
 		}
 		return this;

@@ -1441,7 +1441,7 @@
   function (_Vector) {
     inherits(TouchEvent, _Vector);
 
-    function TouchEvent(time, x, y) {
+    function TouchEvent(id, time, x, y) {
       var _this;
 
       classCallCheck(this, TouchEvent);
@@ -1454,6 +1454,7 @@
 
       _this.begin = _this.over = time; //触摸时长
 
+      _this.id = id;
       return _this;
     }
 
@@ -1543,7 +1544,7 @@
         for (var i = 0, l = e.changedTouches.length; i < l; i++) {
           var touch = e.changedTouches[i];
           var id = touch.identifier;
-          this.touches[id] = new TouchEvent(now, this.getX(touch.clientX), this.getY(touch.clientY));
+          this.touches[id] = new TouchEvent(id, now, this.getX(touch.clientX), this.getY(touch.clientY));
           this.emit('touchStart', this.touches[id]);
         }
 
