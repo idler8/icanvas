@@ -1585,79 +1585,6 @@
     return Touch;
   }(Event);
 
-  var Loader =
-  /*#__PURE__*/
-  function () {
-    function Loader() {
-      classCallCheck(this, Loader);
-
-      this.resources = {};
-    }
-
-    createClass(Loader, [{
-      key: "Set",
-      value: function Set(url) {
-        throw Error('请先挂载加载函数(Set)');
-      }
-    }, {
-      key: "load",
-      value: function load(key, url) {
-        var _this = this;
-
-        return this.Set(url).then(function (res) {
-          _this.resources[key] = res;
-        });
-      }
-    }, {
-      key: "preLoad",
-      value: function preLoad() {
-        var _this2 = this;
-
-        var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-        var loaded = arguments.length > 2 ? arguments[2] : undefined;
-        var Keys = Object.keys(map);
-        return Promise.all(Keys.map(function (key) {
-          var load = _this2.load(prefix + key, map[key]);
-
-          return loaded ? load.then(loaded) : load;
-        }));
-      }
-    }, {
-      key: "loadMap",
-      value: function loadMap() {
-        var _this3 = this;
-
-        var map = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-        var perfix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
-        var exts = arguments.length > 3 ? arguments[3] : undefined;
-        var Result = {};
-        Object.keys(map).forEach(function (k) {
-          if (k == '_') {
-            if (exts.indexOf(map[k]) == -1) return;
-            var key = perfix.slice(0, -1);
-            var url = root + perfix.slice(0, -1) + '.' + map[k];
-            Result[key] = url;
-          } else if (typeof map[k] == 'string') {
-            if (exts.indexOf(map[k]) == -1) return;
-
-            var _key = perfix + k;
-
-            var _url = root + perfix + k + '.' + map[k];
-
-            Result[_key] = _url;
-          } else {
-            Object.assign(Result, _this3.loadMap(map[k], root, perfix + k + '/', exts));
-          }
-        });
-        return Result;
-      }
-    }]);
-
-    return Loader;
-  }();
-
   var Clock =
   /*#__PURE__*/
   function (_Event) {
@@ -1707,7 +1634,7 @@
           requestAnimationFrame(HandleUpdate);
           if (!render.step()) return;
           render.emit('start');
-          render.emit('tick', render.time);
+          render.emit('tick');
           render.emit('end');
         };
 
@@ -1719,49 +1646,225 @@
     return Clock;
   }(Event);
 
-  var Transform =
+  var Dirty =
   /*#__PURE__*/
   function () {
-    function Transform() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    function Dirty() {
+      var interval = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 600;
 
-      classCallCheck(this, Transform);
+      classCallCheck(this, Dirty);
 
-      this.matrix = new Matrix4();
-      this.position = new Vector2(options.x || 0, options.y || 0);
-      this.scale = new Vector2(options.scaleX || 1, options.scaleY || 1);
-      this._radian = options.radian || 0;
-      if (options.angle) this.angle = options.angle;
-      this.id = Transform.id ? ++Transform.id : Transform.id = 1;
-      this.loopId = 0;
-      this.parentId = 0;
-      this.worldId = 1;
-      this.needUpdate = true;
+      this.collect = [];
+      this.used = [];
+      this.running = false;
+      this.interval = interval;
+      this.tickid = 0;
     }
 
-    createClass(Transform, [{
-      key: "isStop",
-      value: function isStop(now) {
-        if (this.loopId === now) return true;
-        this.loopId = now;
+    createClass(Dirty, [{
+      key: "add",
+      value: function add(cache) {
+        if (cache.destroy) this.collect.push(cache);
       }
     }, {
-      key: "isFollow",
-      value: function isFollow(transform) {
-        if (transform.worldId == this.parentId) return;
-        this.parentId = transform.worldId;
-        this.needUpdate = true;
+      key: "use",
+      value: function use(cache) {
+        if (this.running) this.used.push(cache);
       }
     }, {
-      key: "update",
-      value: function update(matrix) {
-        if (!this.needUpdate) return;
-        matrix ? this.matrix.setApply(matrix) : this.matrix.identity();
-        this.matrix.translate(this.position.x, this.position.y, 0);
+      key: "dispose",
+      value: function dispose() {
+        var _this = this,
+            _arguments = arguments;
+
+        if (!this.running) return;
+        this.collect.forEach(function (cache) {
+          if (_this.used.indexOf(cache) === -1) {
+            cache.destroy.apply(cache, _arguments);
+          }
+        });
+        this.collect = [].concat(this.used);
+        this.used.length = 0;
+        this.running = false;
+      }
+    }, {
+      key: "tick",
+      value: function tick() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+        this.tickid += n;
+        if (this.tickid <= this.interval) return;
+        this.tickid = 0;
+        this.running = true;
+      }
+    }]);
+
+    return Dirty;
+  }();
+
+  var Container =
+  /*#__PURE__*/
+  function (_Event) {
+    inherits(Container, _Event);
+
+    function Container() {
+      var _this;
+
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      classCallCheck(this, Container);
+
+      _this = possibleConstructorReturn(this, getPrototypeOf(Container).call(this));
+      _this.id = Container.id ? ++Container.id : Container.id = 1;
+      _this.parent = null;
+      _this.children = [];
+      _this.touchChildren = true;
+      _this.visible = !(options.visible === false);
+      _this.zIndex = options.zIndex || 0;
+      _this.transformParentId = 0;
+      _this.transformId = 1;
+      _this.needUpdateTransform = true;
+      _this.matrix = new Matrix4();
+      _this.position = new Vector2(options.x || 0, options.y || 0);
+      _this.scale = new Vector2(options.scaleX || 1, options.scaleY || 1);
+      _this.angle = options.angle || 0;
+      if (options.radian) _this.radian = options.radian;
+
+      _this.on('destroy', function () {
+        for (var i = 0; i < this.children.length; i++) {
+          this.children[i].emit('destroy');
+        }
+      });
+
+      return _this;
+    }
+
+    createClass(Container, [{
+      key: "updateTransform",
+      value: function updateTransform() {
+        var trace = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+        if (this.parent) {
+          if (trace) this.parent.updateTransform(trace);
+          if (!this.needUpdateTransform && this.transformParentId == this.parent.transformId) return;
+          this.matrix.setApply(this.parent.matrix);
+        } else {
+          if (!this.needUpdateTransform) return;
+          this.matrix.identity();
+        }
+
+        this.matrix.translate(this.x, this.y, 0);
         this.matrix.rotate(this.radian, 0, 0, 1);
-        this.matrix.scale(this.scale.x, this.scale.y, 1);
-        this.needUpdate = false;
-        this.worldId++;
+        this.matrix.scale(this.scaleX, this.scaleY, 1);
+        this.needUpdateTransform = false;
+        this.transformId++;
+        this.transformParentId = this.parent ? this.parent.transformId : 0;
+      }
+    }, {
+      key: "setPosition",
+      value: function setPosition(x, y) {
+        this.x = x;
+        this.y = y;
+        return this;
+      }
+    }, {
+      key: "setScale",
+      value: function setScale(x, y) {
+        this.scaleX = x;
+        this.scaleY = y;
+        return this;
+      }
+    }, {
+      key: "setRadian",
+      value: function setRadian(a) {
+        this.radian = a;
+        return this;
+      }
+    }, {
+      key: "setAngle",
+      value: function setAngle(a) {
+        this.angle = a;
+        return this;
+      }
+    }, {
+      key: "getWorldVector",
+      value: function getWorldVector(vector) {
+        var clone = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        vector = clone ? vector.clone() : vector;
+        return vector.multiplyMatrix4(this.matrix);
+      }
+    }, {
+      key: "put",
+      value: function put(object3d) {
+        if (this.parent) this.parent.remove(this);
+        if (!object3d) return this;
+        this.emit('create');
+        object3d.children.push(this);
+        this.parent = object3d;
+        this.transformParentId = 0;
+        this.emit('created');
+        return this;
+      }
+    }, {
+      key: "add",
+      value: function add(object3d) {
+        if (arguments.length > 1) {
+          for (var i = 0; i < arguments.length; i++) {
+            this.add(arguments[i]);
+          }
+        } else if (object3d instanceof Array) {
+          for (var _i = 0; _i < object3d.length; _i++) {
+            this.add(object3d[_i]);
+          }
+        } else if (object3d) {
+          object3d.put(this);
+        }
+
+        return this;
+      }
+    }, {
+      key: "remove",
+      value: function remove(object3d) {
+        if (arguments.length > 1) {
+          for (var i = 0; i < arguments.length; i++) {
+            this.remove(arguments[i]);
+          }
+        } else if (object3d instanceof Array) {
+          for (var _i2 = 0; _i2 < object3d.length; _i2++) {
+            this.remove(object3d[_i2]);
+          }
+        } else if (object3d) {
+          object3d.emit('destroy', this);
+          var index = this.children.indexOf(object3d);
+          this.children.splice(index, 1);
+          object3d.parent = null;
+          object3d.emit('destroyed', this);
+        }
+
+        return this;
+      }
+    }, {
+      key: "clear",
+      value: function clear() {
+        for (var i = 0; i < this.children.length; i++) {
+          this.children[i].emit('destroy', this);
+          this.children[i].parent = null;
+          this.children[i].emit('destroyed', this);
+        }
+
+        this.children.length = 0;
+        return this;
+      }
+    }, {
+      key: "pushTo",
+      value: function pushTo() {
+        var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+        if (!this.visible) return;
+        this.updateTransform(false);
+        this.emit('check', array);
+
+        for (var i = 0, len = this.children.length; i < len; i++) {
+          this.children[i].pushTo(array);
+        }
       }
     }, {
       key: "x",
@@ -1771,7 +1874,7 @@
       set: function set(x) {
         if (this.position.x == x) return;
         this.position.x = x;
-        this.needUpdate = true;
+        this.needUpdateTransform = true;
       }
     }, {
       key: "y",
@@ -1781,7 +1884,7 @@
       set: function set(y) {
         if (this.position.y == y) return;
         this.position.y = y;
-        this.needUpdate = true;
+        this.needUpdateTransform = true;
       }
     }, {
       key: "scaleX",
@@ -1791,7 +1894,7 @@
       set: function set(x) {
         if (this.scale.x == x) return;
         this.scale.x = x;
-        this.needUpdate = true;
+        this.needUpdateTransform = true;
       }
     }, {
       key: "scaleY",
@@ -1801,7 +1904,7 @@
       set: function set(y) {
         if (this.scale.y == y) return;
         this.scale.y = y;
-        this.needUpdate = true;
+        this.needUpdateTransform = true;
       }
     }, {
       key: "radian",
@@ -1811,7 +1914,7 @@
       set: function set(r) {
         if (r == this._radian) return;
         this._radian = r;
-        this.needUpdate = true;
+        this.needUpdateTransform = true;
       }
     }, {
       key: "angle",
@@ -1822,48 +1925,277 @@
         var a = v * Math.PI / 180;
         if (a == this._radian) return;
         this._radian = a;
-        this.needUpdate = true;
+        this.needUpdateTransform = true;
       }
     }]);
 
-    return Transform;
-  }();
-  var Shape =
-  /*#__PURE__*/
-  function () {
-    function Shape() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    return Container;
+  }(Event);
 
-      classCallCheck(this, Shape);
+  var construct = createCommonjsModule(function (module) {
+  function isNativeReflectConstruct() {
+    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+    if (Reflect.construct.sham) return false;
+    if (typeof Proxy === "function") return true;
 
-      this.anchor = new Vector2(options.anchorX || 0, options.anchorY || 0);
-      this.size = new Vector2(options.width || 0, options.height || 0);
-      this.staticWidth = options.width ? true : false;
-      this.staticHeight = options.height ? true : false;
-      this.clipPosition = new Vector2();
-      this.clipSize = new Vector2();
-      this.morph = options.morph || 'Rectangle';
-      this.needUpdate = true;
-      this.buffer = null;
+    try {
+      Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function _construct(Parent, args, Class) {
+    if (isNativeReflectConstruct()) {
+      module.exports = _construct = Reflect.construct;
+    } else {
+      module.exports = _construct = function _construct(Parent, args, Class) {
+        var a = [null];
+        a.push.apply(a, args);
+        var Constructor = Function.bind.apply(Parent, a);
+        var instance = new Constructor();
+        if (Class) setPrototypeOf(instance, Class.prototype);
+        return instance;
+      };
     }
 
-    createClass(Shape, [{
-      key: "updateTexture",
-      value: function updateTexture(texture) {
+    return _construct.apply(null, arguments);
+  }
+
+  module.exports = _construct;
+  });
+
+  function _arrayWithoutHoles(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) {
+        arr2[i] = arr[i];
+      }
+
+      return arr2;
+    }
+  }
+
+  var arrayWithoutHoles = _arrayWithoutHoles;
+
+  function _iterableToArray(iter) {
+    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+  }
+
+  var iterableToArray = _iterableToArray;
+
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance");
+  }
+
+  var nonIterableSpread = _nonIterableSpread;
+
+  function _toConsumableArray(arr) {
+    return arrayWithoutHoles(arr) || iterableToArray(arr) || nonIterableSpread();
+  }
+
+  var toConsumableArray = _toConsumableArray;
+
+  var Director =
+  /*#__PURE__*/
+  function (_Container) {
+    inherits(Director, _Container);
+
+    function Director(options) {
+      var _this;
+
+      classCallCheck(this, Director);
+
+      _this = possibleConstructorReturn(this, getPrototypeOf(Director).call(this, options));
+      _this.scenes = {};
+      _this.needUpdateTransform = false;
+      _this.widthCache = {};
+      _this.heightCache = {};
+      return _this;
+    }
+
+    createClass(Director, [{
+      key: "getX",
+      value: function getX() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+        return this.widthCache[n] || (this.widthCache[n] = this._width * n);
+      }
+    }, {
+      key: "getY",
+      value: function getY() {
+        var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+        return this.heightCache[n] || (this.heightCache[n] = this._height * n);
+      }
+    }, {
+      key: "set",
+      value: function set(scene) {
+        if (arguments.length > 1) {
+          for (var i = 0; i < arguments.length; i++) {
+            this.set(arguments[i]);
+          }
+        } else if (scene instanceof Array) {
+          for (var _i = 0; _i < scene.length; _i++) {
+            this.set(scene[_i]);
+          }
+        } else {
+          if (Object.prototype.toString.call(scene) == '[object Function]') {
+            if (scene.constructor && scene.name) this.scenes[scene.name] = scene;
+          }
+        }
+
+        return this;
+      }
+    }, {
+      key: "go",
+      value: function go(scene) {
+        var type = Object.prototype.toString.call(scene);
+
+        if (type == '[object String]') {
+          if (this.scenes[scene]) this.clear().add(construct(this.scenes[scene], toConsumableArray(Array.prototype.splice(1))));
+        } else if (type == '[object Function]') {
+          if (scene.constructor) {
+            this.clear().add(construct(scene, toConsumableArray(Array.prototype.splice(1))));
+          } else {
+            var res = scene.apply(void 0, toConsumableArray(Array.prototype.splice(1)));
+            if (res instanceof Container) this.clear().add(res);
+          }
+        } else if (type == '[object Object]') {
+          if (scene instanceof Container) this.clear().add(scene);
+        }
+
+        return this;
+      }
+    }, {
+      key: "width",
+      get: function get() {
+        return this._width;
+      },
+      set: function set(w) {
+        this._width = w;
+        this.widthCache = {};
+      }
+    }, {
+      key: "height",
+      get: function get() {
+        return this._height;
+      },
+      set: function set(h) {
+        this._height = h;
+        this.heightCache = {};
+      }
+    }, {
+      key: "center",
+      get: function get() {
+        return this.getX(0.5);
+      }
+    }, {
+      key: "middle",
+      get: function get() {
+        return this.getY(0.5);
+      }
+    }]);
+
+    return Director;
+  }(Container);
+
+  var Sprite =
+  /*#__PURE__*/
+  function (_Container) {
+    inherits(Sprite, _Container);
+
+    function Sprite() {
+      var _this;
+
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      classCallCheck(this, Sprite);
+
+      _this = possibleConstructorReturn(this, getPrototypeOf(Sprite).call(this, options));
+      _this.morph = options.morph || 'Rectangle';
+      _this.anchor = new Vector2(options.anchorX || 0, options.anchorY || 0);
+      _this.size = new Vector2(options.width || 0, options.height || 0);
+      _this.staticWidth = options.width ? true : false;
+      _this.staticHeight = options.height ? true : false;
+      _this.clip = null;
+      _this.texture = options.texture;
+      _this.invertMatrixId = 0;
+      _this.invertMatrix = new Matrix4();
+
+      _this.on('check', function (array) {
+        if (!this.visible) return;
+        if (this.texture) array.push(this);
+      });
+
+      return _this;
+    }
+
+    createClass(Sprite, [{
+      key: "updateTransformInvert",
+      value: function updateTransformInvert() {
+        if (this.invertMatrixId == this.transformId) return; // this.updateTransform(false);
+
+        this.invertMatrix.invert(this.matrix);
+        this.invertMatrixId = this.transformId;
+      }
+    }, {
+      key: "setClip",
+      value: function setClip(sprite) {
+        this.clip = [sprite.x, sprite.y, sprite.width, sprite.height];
+        if (!this.staticWidth) this.size.x = sprite.width;
+        if (!this.staticHeight) this.size.y = sprite.height;
+        this.needUpdate = true;
+        return this;
+      }
+    }, {
+      key: "setSize",
+      value: function setSize(x, y) {
+        this.width = x;
+        this.height = y;
+        return this;
+      }
+    }, {
+      key: "setAnchor",
+      value: function setAnchor(x, y) {
+        this.anchorX = x;
+        this.anchorY = y;
+        return this;
+      }
+    }, {
+      key: "setAnchorSize",
+      value: function setAnchorSize() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        this.anchorX = this.width * x;
+        this.anchorY = this.height * y;
+        return this;
+      }
+    }, {
+      key: "checkPoint",
+      value: function checkPoint(vector) {
+        this.updateTransformInvert();
+        vector.multiplyMatrix4(this.invertMatrix);
+        return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
+      }
+    }, {
+      key: "texture",
+      get: function get() {
+        return this._texture;
+      },
+      set: function set(texture) {
+        this._texture = texture;
         if (!texture) return this.needUpdate = false;
         if (!this.staticWidth) this.size.x = texture.width;
         if (!this.staticHeight) this.size.y = texture.height;
-        var real = texture.baseTexture || texture;
-        this.clipPosition.set(texture.x ? texture.x / real.width : 0, texture.y ? texture.y / real.height : 0);
-        this.clipSize.set(texture.width ? texture.width / real.width : 0, texture.height ? texture.height / real.height : 0);
         this.needUpdate = true;
       }
     }, {
-      key: "update",
-      value: function update(render) {
-        if (!this.needUpdate) return;
-        render.shapeToBuffer(this);
-        this.needUpdate = false;
+      key: "morph",
+      set: function set(a) {
+        this._morph = a;
+        this.needUpdate = true;
+      },
+      get: function get() {
+        return this._morph;
       }
     }, {
       key: "width",
@@ -1925,715 +2257,8 @@
       }
     }]);
 
-    return Shape;
-  }();
-  var RichText =
-  /*#__PURE__*/
-  function () {
-    function RichText(context) {
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      classCallCheck(this, RichText);
-
-      this.fillStyle = options.fillStyle || '#FFFFFF';
-      this.strokeStyle = options.strokeStyle || '#000000';
-      this.lineWidth = options.lineWidth || 0;
-      this.family = options.family || 'icanvas';
-      this.size = options.size || 36;
-      this.weight = options.weight || false;
-      this.align = options.align || 'center';
-      this.baseline = options.baseline || 'middle';
-      this.wrapWidth = options.wrapWidth || -1;
-
-      if (options.lineHeight > 0) {
-        this.lineHeight = options.lineHeight;
-        this.autoLineHeight = false;
-      } else {
-        this.lineHeight = this.size;
-        this.autoLineHeight = true;
-      }
-
-      this.context = context;
-      this.icons = options.icons;
-    }
-
-    createClass(RichText, [{
-      key: "mergeStyle",
-      value: function mergeStyle(handle) {
-        handle.fillStyle = this.fillStyle;
-        handle.strokeStyle = this.strokeStyle;
-        handle.lineWidth = this.lineWidth;
-        handle.family = this.family;
-        handle.size = this.size;
-        handle.weight = this.weight;
-      }
-    }, {
-      key: "mergeContext",
-      value: function mergeContext(handle) {
-        var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-        var context = this.context;
-        context.fillStyle = handle.fillStyle;
-        context.strokeStyle = handle.strokeStyle;
-        context.lineWidth = handle.lineWidth;
-        if (!init) return;
-        context.textAlign = 'left';
-        context.textBaseline = 'top';
-      }
-    }, {
-      key: "mergeFamily",
-      value: function mergeFamily(handle) {
-        this.context.font = handle.size + 'px ' + handle.family + (handle.weight ? ' bold' : '');
-      }
-    }, {
-      key: "checkSize",
-      value: function checkSize(structure, width, height) {
-        var lines = structure.contents;
-        if (this.wrapWidth >= 0 && lines[0].width + width > this.wrapWidth) this.addLine();
-        if (this.autoLineHeight && height > lines[0].height) lines[0].height = height;
-        lines[0].width += width;
-      }
-    }, {
-      key: "addLine",
-      value: function addLine(structure) {
-        var lines = structure.contents;
-        structure.height += lines[0].height;
-        if (lines[0].width > structure.width) structure.width = lines[0].width;
-        structure.contents.unshift({
-          width: 0,
-          height: this.lineHeight,
-          contents: []
-        });
-      }
-    }, {
-      key: "updateValue",
-      value: function updateValue(values, icons) {
-        if (!values) return; //this.Empty;
-
-        var context = this.context;
-        var handle = {};
-        this.mergeStyle(handle);
-        this.mergeFamily(handle);
-        var tags = {}; //文本内特殊标签
-
-        values.replace(/\<(fillStyle|strokeStyle|lineWidth|family|weight|size|i)\=(\S+?)\>/g, function (tag, action, arg, index) {
-          if (action == 'i') {
-            if (!icons[arg]) return tag;
-            tags[index] = {
-              action: action,
-              arg: icons[arg],
-              length: tag.length - 1
-            };
-          } else {
-            tags[index] = {
-              action: action,
-              arg: arg == '@' ? family[action] : arg,
-              length: tag.length - 1
-            };
-          }
-
-          return tag;
-        });
-        var structure = {
-          width: this.wrapWidth,
-          height: 0,
-          contents: [{
-            width: 0,
-            height: this.lineHeight,
-            contents: []
-          }]
-        };
-
-        for (var i = 0, len = values.length; i < len; i++) {
-          var v = values[i];
-
-          if (tags[i]) {
-            var tag = tags[i];
-            i += tag.length;
-
-            if (tag.action != 'i') {
-              handle[tag.action] = tag.arg;
-              this.mergeFamily(handle);
-            } else {
-              this.checkSize(structure, tag.arg.width, tag.arg.height);
-            }
-
-            structure.contents[0].contents.push(tag);
-          } else if (v === '\n') {
-            this.addLine(structure);
-          } else {
-            var width = context.measureText(v).width;
-            this.checkSize(structure, width, handle.size);
-            structure.contents[0].contents.push({
-              value: v,
-              width: width,
-              height: handle.size
-            });
-          }
-        }
-
-        structure.height += structure.contents[0].height;
-        if (structure.contents[0].width > structure.width) structure.width = structure.contents[0].width;
-        this.mergeStyle(handle);
-        var totalWidth = context.canvas.width = structure.width;
-        context.canvas.height = structure.height;
-        this.mergeFamily(handle);
-        this.mergeContext(handle, true);
-        var offsetTop = 0;
-
-        for (var _i = structure.contents.length - 1; _i >= 0; _i--) {
-          var _structure$contents$_ = structure.contents[_i],
-              _width = _structure$contents$_.width,
-              height = _structure$contents$_.height,
-              contents = _structure$contents$_.contents;
-          var offsetLeft = (totalWidth - _width) * 0.5; //handle.align
-
-          for (var j = 0; j < contents.length; j++) {
-            var element = contents[j];
-
-            if (element.value) {
-              context.fillText(element.value, offsetLeft, offsetTop + (height - element.height) * 0.5); //handle.baseline
-
-              offsetLeft += element.width;
-            } else if (element.action == 'i') {
-              var texture = element.arg;
-              var dy = offsetTop + (height - element.arg.height) * 0.5;
-
-              if (texture.baseTexture) {
-                var image = texture.baseTexture.source;
-                context.drawImage(image, texture.x, texture.y, texture.width, texture.height, offsetLeft, dy, texture.width, texture.height);
-              } else {
-                var _image = texture.source;
-                context.drawImage(_image, offsetLeft, dy, texture.width, texture.height);
-              }
-
-              offsetLeft += element.arg.width;
-            } else {
-              handle[element.action] = element.arg;
-              this.mergeFamily(handle);
-              this.mergeContext(handle);
-            }
-          }
-
-          offsetTop += height;
-        }
-      }
-    }, {
-      key: "value",
-      get: function get() {
-        return this._value;
-      },
-      set: function set(v) {
-        v = '' + v;
-        if (v == this._value) return;
-        this._value = v;
-        this.updateValue(v, this.icons);
-        if (this.update) this.update();
-      }
-    }]);
-
-    return RichText;
-  }();
-
-  var Container =
-  /*#__PURE__*/
-  function (_Event) {
-    inherits(Container, _Event);
-
-    function Container() {
-      var _this;
-
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      classCallCheck(this, Container);
-
-      _this = possibleConstructorReturn(this, getPrototypeOf(Container).call(this));
-      _this.id = Container.id ? ++Container.id : Container.id = 1;
-      _this.parent = null;
-      _this.children = [];
-      _this.touchChildren = true;
-      _this.visible = !(options.visible === false);
-      _this.zIndex = options.zIndex || 0;
-
-      _this.on('destroy', function () {
-        for (var i = 0; i < this.children.length; i++) {
-          this.children[i].emit('destroy');
-        }
-      });
-
-      _this.transform = options.transform || new Transform(options);
-
-      _this.on('updateTransform', function (now) {
-        if (now && this.transform.isStop(now)) return;
-
-        if (this.parent) {
-          this.parent.emit('updateTransform', now);
-          this.transform.isFollow(this.parent.transform);
-          this.transform.update(this.parent.transform.matrix);
-        } else {
-          this.transform.update();
-        }
-      });
-
-      return _this;
-    }
-
-    createClass(Container, [{
-      key: "setPosition",
-      value: function setPosition(x, y) {
-        this.transform.x = x;
-        this.transform.y = y;
-        return this;
-      }
-    }, {
-      key: "setScale",
-      value: function setScale(x, y) {
-        this.transform.scaleX = x;
-        this.transform.scaleY = y;
-        return this;
-      }
-    }, {
-      key: "setRadian",
-      value: function setRadian(a) {
-        this.transform.radian = a;
-        return this;
-      }
-    }, {
-      key: "setAngle",
-      value: function setAngle(a) {
-        this.transform.angle = a;
-        return this;
-      }
-    }, {
-      key: "getWorldVector",
-      value: function getWorldVector(vector) {
-        var clone = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-        vector = clone ? vector.clone() : vector;
-        this.emit('updateTransform');
-        return vector.multiplyMatrix4(this.transform.matrix);
-      }
-    }, {
-      key: "put",
-      value: function put(object3d) {
-        if (this.parent) this.parent.remove(this);
-        if (!object3d) return this;
-        this.emit('create');
-        object3d.children.push(this);
-        this.parent = object3d;
-        this.transform.parentId = 0;
-        this.emit('created');
-        return this;
-      }
-    }, {
-      key: "add",
-      value: function add(object3d) {
-        if (arguments.length > 1) {
-          for (var i = 0; i < arguments.length; i++) {
-            this.add(arguments[i]);
-          }
-        } else if (object3d instanceof Array) {
-          for (var _i = 0; _i < object3d.length; _i++) {
-            this.add(object3d[_i]);
-          }
-        } else if (object3d) {
-          object3d.put(this);
-        }
-
-        return this;
-      }
-    }, {
-      key: "remove",
-      value: function remove(object3d) {
-        if (arguments.length > 1) {
-          for (var i = 0; i < arguments.length; i++) {
-            this.remove(arguments[i]);
-          }
-        } else if (object3d instanceof Array) {
-          for (var _i2 = 0; _i2 < object3d.length; _i2++) {
-            this.remove(object3d[_i2]);
-          }
-        } else if (object3d) {
-          object3d.emit('destroy', this);
-          var index = this.children.indexOf(object3d);
-          this.children.splice(index, 1);
-          object3d.parent = null;
-          object3d.emit('destroyed', this);
-        }
-
-        return this;
-      }
-    }, {
-      key: "clear",
-      value: function clear() {
-        for (var i = 0; i < this.children.length; i++) {
-          this.children[i].emit('destroy', this);
-          this.children[i].parent = null;
-          this.children[i].emit('destroyed', this);
-        }
-
-        this.children.length = 0;
-        return this;
-      }
-    }, {
-      key: "x",
-      set: function set(a) {
-        this.transform.x = a;
-      },
-      get: function get() {
-        return this.transform.x;
-      }
-    }, {
-      key: "y",
-      set: function set(a) {
-        this.transform.y = a;
-      },
-      get: function get() {
-        return this.transform.y;
-      }
-    }, {
-      key: "scaleX",
-      set: function set(a) {
-        this.transform.scaleX = a;
-      },
-      get: function get() {
-        return this.transform.scaleX;
-      }
-    }, {
-      key: "scaleY",
-      set: function set(a) {
-        this.transform.scaleY = a;
-      },
-      get: function get() {
-        return this.transform.scaleY;
-      }
-    }, {
-      key: "radian",
-      set: function set(a) {
-        this.transform.radian = a;
-      },
-      get: function get() {
-        return this.transform.radian;
-      }
-    }, {
-      key: "angle",
-      set: function set(a) {
-        this.transform.angle = a;
-      },
-      get: function get() {
-        return this.transform.angle;
-      }
-    }]);
-
-    return Container;
-  }(Event);
-
-  var Sprite =
-  /*#__PURE__*/
-  function (_Container) {
-    inherits(Sprite, _Container);
-
-    function Sprite() {
-      var _this;
-
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      classCallCheck(this, Sprite);
-
-      _this = possibleConstructorReturn(this, getPrototypeOf(Sprite).call(this, options));
-      _this.invertId = 0;
-      _this.invertMatrix = new Matrix4();
-      _this.shape = options.shape || new Shape(options);
-      _this.texture = options.texture;
-      return _this;
-    }
-
-    createClass(Sprite, [{
-      key: "setSize",
-      value: function setSize(x, y) {
-        this.shape.width = x;
-        this.shape.height = y;
-        return this;
-      }
-    }, {
-      key: "setAnchor",
-      value: function setAnchor(x, y) {
-        this.shape.anchorX = x;
-        this.shape.anchorY = y;
-        return this;
-      }
-    }, {
-      key: "setAnchorSize",
-      value: function setAnchorSize() {
-        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-        this.shape.anchorX = this.shape.width * x;
-        this.shape.anchorY = this.shape.height * y;
-        return this;
-      }
-    }, {
-      key: "draw",
-      value: function draw(app, now) {
-        if (!this.texture) return;
-        app.render.blend(this.blend);
-        this.emit('updateTransform', now);
-        app.render.transform(this.transform.matrix);
-        this.texture.update(app.render);
-        app.render.texture(this.texture.texture);
-        this.shape.update(app.render);
-        app.render.draw(this.shape.buffer);
-      }
-    }, {
-      key: "checkPoint",
-      value: function checkPoint(vector) {
-        this.emit('updateTransform', 0);
-
-        if (this.invertId != this.transform.worldId) {
-          this.invertMatrix.invert(this.transform.matrix);
-          this.invertId = this.transform.worldId;
-        }
-
-        vector.multiplyMatrix4(this.invertMatrix);
-        return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
-      }
-    }, {
-      key: "texture",
-      get: function get() {
-        return this._texture;
-      },
-      set: function set(a) {
-        if (!a) return this._texture = null;
-        this._texture = a.baseTexture || a;
-        this.shape.updateTexture(a);
-      }
-    }, {
-      key: "width",
-      set: function set(a) {
-        this.shape.width = a;
-      },
-      get: function get() {
-        return this.shape.width;
-      }
-    }, {
-      key: "height",
-      set: function set(a) {
-        this.shape.height = a;
-      },
-      get: function get() {
-        return this.shape.height;
-      }
-    }, {
-      key: "anchorX",
-      set: function set(a) {
-        this.shape.anchorX = a;
-      },
-      get: function get() {
-        return this.shape.anchorX;
-      }
-    }, {
-      key: "anchorY",
-      set: function set(a) {
-        this.shape.anchorY = a;
-      },
-      get: function get() {
-        return this.shape.anchorY;
-      }
-    }]);
-
     return Sprite;
   }(Container);
-
-  var Application =
-  /*#__PURE__*/
-  function () {
-    function Application() {
-      var _this = this;
-
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      classCallCheck(this, Application);
-
-      this.collision = options.collision || new Collision();
-      this.stage = options.stage || new Container();
-      this.touch = options.touch || new Touch();
-      this.clock = options.clock || new Clock();
-      this.clock.on('tick', function (now) {
-        return _this.tick(now);
-      });
-      this.time = options.time || new Time();
-      this.renderArray = [];
-      Object.keys(options).forEach(function (key) {
-        if (!_this[key]) _this[key] = options[key];
-      });
-    }
-
-    createClass(Application, [{
-      key: "go",
-      value: function go(scene) {
-        this.stage.clear().add(scene);
-        return this;
-      }
-    }, {
-      key: "check",
-      value: function check(stage) {
-        if (!stage.visible) return;
-        stage.emit('check', this);
-        if (stage.visible && stage.draw) this.renderArray.push(stage);
-
-        for (var i = 0, len = stage.children.length; i < len; i++) {
-          this.check(stage.children[i]);
-        }
-      }
-    }, {
-      key: "tick",
-      value: function tick(now) {
-        this.check(this.stage); //TODO 排序
-
-        for (var i = 0, len = this.renderArray.length; i < len; i++) {
-          this.renderArray[i].emit('draw');
-          this.renderArray[i].draw(this, now);
-          this.renderArray[i].emit('drawn');
-        }
-
-        this.renderArray.length = 0;
-        return this;
-      }
-    }, {
-      key: "look",
-      value: function look(x, y) {
-        this.stage.transform.update();
-        this.render.look(this.stage.transform.matrix, x, y);
-        return this;
-      }
-    }]);
-
-    return Application;
-  }();
-
-  /**
-   * baseTexture基本纹理类型
-   */
-  //全图纹理
-
-  var BaseTexture =
-  /*#__PURE__*/
-  function () {
-    function BaseTexture(source) {
-      classCallCheck(this, BaseTexture);
-
-      this.source = source;
-      this.size = new Vector2(source.width, source.height);
-      this.texture = null;
-      this.needUpdate = true;
-    }
-
-    createClass(BaseTexture, [{
-      key: "update",
-      value: function update(render) {
-        if (!this.needUpdate) return;
-        this.texture = render.updateTexture(this.source, this.texture);
-        this.needUpdate = false;
-      }
-    }, {
-      key: "getTexture",
-      value: function getTexture(x, y, width, height) {
-        return {
-          baseTexture: this,
-          x: x || 0,
-          y: y || 0,
-          width: width || this.width,
-          height: height || this.height
-        };
-      }
-    }, {
-      key: "width",
-      get: function get() {
-        return this.size.x;
-      }
-    }, {
-      key: "height",
-      get: function get() {
-        return this.size.y;
-      }
-    }]);
-
-    return BaseTexture;
-  }(); //Canvas全图纹理
-
-  var CanvasTexture =
-  /*#__PURE__*/
-  function (_BaseTexture) {
-    inherits(CanvasTexture, _BaseTexture);
-
-    function CanvasTexture(canvas) {
-      var _this;
-
-      classCallCheck(this, CanvasTexture);
-
-      var context = null;
-
-      if (canvas.getContext) {
-        context = canvas.getContext('2d');
-      } else {
-        context = canvas;
-        canvas = context.canvas;
-      }
-
-      _this = possibleConstructorReturn(this, getPrototypeOf(CanvasTexture).call(this, canvas));
-      _this.context = context;
-      _this.canvas = canvas;
-      return _this;
-    }
-
-    createClass(CanvasTexture, [{
-      key: "refresh",
-      value: function refresh() {
-        this.size.set(this.canvas.width, this.canvas.height);
-        return this;
-      }
-    }]);
-
-    return CanvasTexture;
-  }(BaseTexture); //字体Canvas全图纹理
-
-  var FontTexture =
-  /*#__PURE__*/
-  function (_CanvasTexture) {
-    inherits(FontTexture, _CanvasTexture);
-
-    function FontTexture(canvas, family, weight, size) {
-      var _this2;
-
-      classCallCheck(this, FontTexture);
-
-      _this2 = possibleConstructorReturn(this, getPrototypeOf(FontTexture).call(this, canvas));
-      _this2.x = _this2.source.width / size | 0;
-      _this2.y = _this2.source.height / size | 0;
-      _this2.size = size;
-      _this2.max = _this2.x * _this2.y;
-      _this2.used = 0;
-      _this2.context.font = weight + ' ' + size + 'px ' + family;
-      _this2.context.textBaseline = 'middle';
-      _this2.context.textAlign = 'center';
-      _this2.context.fillStyle = '#FFFFFF';
-      return _this2;
-    }
-
-    createClass(FontTexture, [{
-      key: "getTexture",
-      value: function getTexture(value) {
-        if (this.used >= this.max) return;
-        this.needUpdate = true;
-        var x = this.used % this.x * this.size + this.size / 2;
-        var y = (this.used / this.x | 0) * this.size + this.size / 2;
-        this.used++;
-        this.context.fillText(value, x, y);
-        var width = this.context.measureText(value).width;
-        var height = this.size;
-        return new Texture(this, x - width / 2, y - height / 2, width, height);
-      }
-    }]);
-
-    return FontTexture;
-  }(CanvasTexture);
 
   function _defineProperty(obj, key, value) {
     if (key in obj) {
@@ -2652,7 +2277,7 @@
 
   var defineProperty = _defineProperty;
 
-  var Loader$1 =
+  var Loader =
   /*#__PURE__*/
   function () {
     function Loader(loader) {
@@ -2704,23 +2329,13 @@
         var _this2 = this;
 
         return this.loader.load(url).then(function (image) {
-          _this2.resources[key] = new BaseTexture(image);
+          _this2.resources[key] = image;
         });
-      } //生成雪碧图对象
-
-    }, {
-      key: "sprite",
-      value: function sprite(key, name, x, y, width, height) {
-        if (!this.resources[key]) return this;
-        var texture = this.resources[key];
-        var baseTexture = texture.baseTexture || texture;
-        this.resources[key + '//' + name] = baseTexture.getTexture(x, y, width, height);
-        return this;
       }
     }]);
 
     return Image;
-  }(Loader$1);
+  }(Loader);
   var Audio =
   /*#__PURE__*/
   function (_Loader2) {
@@ -2776,239 +2391,497 @@
     }]);
 
     return Audio;
-  }(Loader$1);
+  }(Loader);
 
-  var GetAB = function GetAB(a, b) {
-    return a;
-  };
-
-  var CanvasRender =
+  var Rectangle =
   /*#__PURE__*/
   function () {
-    function CanvasRender() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    function Rectangle(sprite) {
+      classCallCheck(this, Rectangle);
 
-      classCallCheck(this, CanvasRender);
+      //生成绘制参数
+      this.drawImage = [];
+      var image = sprite.texture;
+      this.drawImage.push(image);
 
-      defineProperty(this, "updateTexture", GetAB);
+      if (sprite.clip) {
+        var clipX = sprite.clip[0];
+        var clipY = sprite.clip[1];
+        var clipWidth = sprite.clip[2];
+        var clipHeight = sprite.clip[3];
+        Array.prototype.push.call(this.drawImage, clipX, clipY, clipWidth, clipHeight);
+      }
 
-      defineProperty(this, "updateBuffer", GetAB);
-
-      defineProperty(this, "updateIndices", GetAB);
-
-      this.renderArray = [];
-      this.context = options.context || options.canvas.getContext('2d');
-      this.canvas = this.context.canvas;
+      this.drawImage.push(sprite.left, sprite.top, sprite.width, sprite.height);
+      sprite.needUpdate = false;
     }
 
-    createClass(CanvasRender, [{
-      key: "look",
-      value: function look(matrix, x, y) {
-        matrix.translate(x / 2, y / 2);
-        return this;
-      }
-    }, {
-      key: "useProgram",
-      value: function useProgram() {
-        return this;
-      }
-    }, {
-      key: "shapeToBuffer",
-      //形状混合
-      value: function shapeToBuffer(shape) {
-        if (!shape.buffer) shape.buffer = {};
-        shape.buffer.morph = shape.morph;
-
-        if (shape.morph == 'Rectangle') {
-          shape.buffer.morph = 'Rectangle';
-          shape.buffer.clipData = [shape.clipPosition.x, shape.clipPosition.y, shape.clipSize.x, shape.clipSize.y];
-          shape.buffer.drawData = [shape.left, shape.top, shape.width, shape.height];
-        } else if (shape.morph == 'Circle') {
-          shape.buffer.morph = 'Circle';
-          shape.buffer.clipData = [shape.clipPosition.x, shape.clipPosition.y, shape.clipSize.x, shape.clipSize.y];
-          shape.buffer.drawData = [shape.left, shape.top, shape.width, shape.height]; //TODO 椭圆
-
-          shape.buffer.circle = [-shape.anchor.x, -shape.anchor.y, Math.min(shape.size.x, shape.size.y) * 0.5];
-        } else if (_typeof_1(shape.morph) == 'object') {
-          shape.buffer.morph = 'Polygon'; //TODO 多边形
-        }
-      } //颜色混合
-
-    }, {
-      key: "blend",
-      value: function blend(color) {} //颜色混合
-
-    }, {
-      key: "transform",
-      value: function transform(matrix) {
-        var e = matrix.elements || matrix;
-        this.context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
-        return this;
-      }
-    }, {
-      key: "texture",
-      value: function texture(_texture) {
-        if (this.beforeTexture === _texture) return false;
-        this.beforeTexture = _texture;
-      }
-    }, {
+    createClass(Rectangle, [{
       key: "draw",
-      value: function draw(buffer) {
-        if (!buffer) return;
-        if (!this.beforeTexture) return;
-        var ctx = this.context;
-
-        if (buffer.morph == 'Circle') {
-          ctx.save(); // 保存当前ctx的状态
-
-          ctx.arc(buffer.circle[0], buffer.circle[1], buffer.circle[2], 0, 2 * Math.PI); //画出圆
-
-          ctx.clip(); //裁剪上面的圆形
-
-          ctx.drawImage(this.beforeTexture, buffer.clipData[0] * this.beforeTexture.width, buffer.clipData[1] * this.beforeTexture.height, buffer.clipData[2] * this.beforeTexture.width, buffer.clipData[3] * this.beforeTexture.height, buffer.drawData[0], buffer.drawData[1], buffer.drawData[2], buffer.drawData[3]);
-          ctx.restore(); // 还原状态
-        }
-
-        if (buffer.morph == 'Rectangle') {
-          ctx.drawImage(this.beforeTexture, buffer.clipData[0] * this.beforeTexture.width, buffer.clipData[1] * this.beforeTexture.height, buffer.clipData[2] * this.beforeTexture.width, buffer.clipData[3] * this.beforeTexture.height, buffer.drawData[0], buffer.drawData[1], buffer.drawData[2], buffer.drawData[3]);
-        }
+      value: function draw(context) {
+        context.drawImage.apply(context, this.drawImage); //绘制元素
       }
     }]);
 
-    return CanvasRender;
+    return Rectangle;
   }();
+  var Circle =
+  /*#__PURE__*/
+  function (_Rectangle) {
+    inherits(Circle, _Rectangle);
 
-  function getActiveAttrib(gl, Program) {
-    var Attributes = {};
+    function Circle(sprite) {
+      var _this;
 
-    for (var i = 0, len = gl.getProgramParameter(Program, gl.ACTIVE_ATTRIBUTES); i < len; i++) {
-      var attr = gl.getActiveAttrib(Program, i); //size,type,name
+      classCallCheck(this, Circle);
 
-      var id = Attributes[attr.name] = gl.getAttribLocation(Program, attr.name);
-      gl.enableVertexAttribArray(id);
+      _this = possibleConstructorReturn(this, getPrototypeOf(Circle).call(this, sprite)); //生成圆形裁切参数
+
+      _this.clip = [-sprite.anchorX, -sprite.anchorY, Math.min(sprite.width, sprite.height) * 0.5, 0, 2 * Math.PI];
+      return _this;
     }
 
-    return Attributes;
-  }
-  function getActiveUniform(gl, Program) {
-    var Uniforms = {};
+    createClass(Circle, [{
+      key: "draw",
+      value: function draw(context) {
+        context.save(); // 保存当前ctx的状态
 
-    for (var i = 0, len = gl.getProgramParameter(Program, gl.ACTIVE_UNIFORMS); i < len; i++) {
-      var attr = gl.getActiveUniform(Program, i); //size,type,name
+        context.arc.apply(context, this.clip); //画出圆
 
-      Uniforms[attr.name] = gl.getUniformLocation(Program, attr.name);
+        context.clip(); //裁剪上面的圆形
+
+        context.drawImage.apply(context, this.drawImage); //绘制元素
+
+        context.restore(); // 还原状态
+      }
+    }]);
+
+    return Circle;
+  }(Rectangle);
+  var Polygon =
+  /*#__PURE__*/
+  function (_Rectangle2) {
+    inherits(Polygon, _Rectangle2);
+
+    function Polygon(sprite) {
+      var _this2;
+
+      classCallCheck(this, Polygon);
+
+      _this2 = possibleConstructorReturn(this, getPrototypeOf(Polygon).call(this, sprite)); //生成裁切参数
+
+      _this2.clip = [-sprite.anchorX, -sprite.anchorY, Math.min(sprite.width, shapspritee.height) * 0.5, 0, 2 * Math.PI]; //TODO 多边形裁切
+
+      return _this2;
     }
 
-    return Uniforms;
-  }
-  function createShader(gl, type, text) {
-    var shader = gl.createShader(gl[type]);
-    gl.shaderSource(shader, text);
-    gl.compileShader(shader);
+    createClass(Polygon, [{
+      key: "draw",
+      value: function draw(context) {
+        context.save(); // 保存当前ctx的状态
 
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.log(gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      return null;
+        context.arc.apply(context, this.clip); //画出圆
+
+        context.clip(); //裁剪上面的圆形
+
+        context.drawImage.apply(context, this.drawImage); //绘制元素
+
+        context.restore(); // 还原状态
+      }
+    }]);
+
+    return Polygon;
+  }(Rectangle);
+
+  var Builder = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    Rectangle: Rectangle,
+    Circle: Circle,
+    Polygon: Polygon
+  });
+
+  function CanvasRender(sprite, context) {
+    sprite.emit('draw', context, dirty);
+
+    if (sprite.morph && Builder[sprite.morph]) {
+      if (!sprite.builder || sprite.needUpdate) sprite.builder = new Builder[sprite.morph](sprite, context);
+      var e = sprite.matrix.elements;
+      context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
+      sprite.builder.draw(context);
+    }
+  }
+
+  var Rectangle$1 =
+  /*#__PURE__*/
+  function () {
+    function Rectangle(sprite, gl) {
+      classCallCheck(this, Rectangle);
+
+      var left = sprite.left,
+          top = sprite.top,
+          right = sprite.right,
+          bottom = sprite.bottom;
+      var cLeft = 0;
+      var cTop = 0;
+      var cRight = 1;
+      var cBottom = 1;
+
+      if (sprite.clip) {
+        cLeft = sprite.clip[0] / sprite.texture.width;
+        cTop = sprite.clip[1] / sprite.texture.height;
+        cRight = (sprite.clip[0] + sprite.clip[2]) / sprite.texture.width;
+        cBottom = (sprite.clip[1] + sprite.clip[3]) / sprite.texture.height;
+      }
+
+      this.vectices = new Float32Array([left, top, cLeft, cTop, right, top, cRight, cTop, left, bottom, cLeft, cBottom, right, bottom, cRight, cBottom]);
+      this.bufferLength = this.vectices.length / 4;
+      this.drawType = gl.TRIANGLE_STRIP;
+      sprite.needUpdate = false;
     }
 
-    return shader;
-  }
-  function createProgram(gl, vert, frag) {
-    var program = gl.createProgram();
-    gl.attachShader(program, createShader(gl, 'VERTEX_SHADER', vert));
-    gl.attachShader(program, createShader(gl, 'FRAGMENT_SHADER', frag));
-    gl.linkProgram(program);
+    createClass(Rectangle, [{
+      key: "createTexture",
+      value: function createTexture(gl, image) {
+        if (this.texture) this.deleteTexture(gl);
+        if (image.texture) this.texture = image.texture;
+        this.texture = image.texture = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        this.texture.forever = image.src || image.forever;
+        image.needUpdate = false;
+      }
+    }, {
+      key: "createBuffer",
+      value: function createBuffer(gl) {
+        if (!this.buffer) this.buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vectices, gl.STATIC_DRAW);
+      }
+    }, {
+      key: "updateTexture",
+      value: function updateTexture(gl, image) {
+        if (this.texture !== image.texture) return;
 
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      gl.deleteProgram(program);
-      gl.deleteShader(program);
-      gl.deleteShader(program);
-      throw '链接程序失败';
+        if (image.texture && image.needUpdate) {
+          gl.bindTexture(gl.TEXTURE_2D, image.texture);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+          image.needUpdate = false;
+        }
+      }
+    }, {
+      key: "draw",
+      value: function draw(gl) {
+        gl.shader.texture(this.texture);
+        gl.shader.buffer(this.buffer, 2, 2, 0, 4);
+        gl.drawArrays(this.drawType, 0, this.bufferLength);
+      }
+    }, {
+      key: "destroy",
+      value: function destroy(gl) {
+        if (this.buffer) gl.deleteBuffer(this.buffer);
+        this.buffer = null;
+        if (this.texture && !this.texture.forever) gl.deleteTexture(this.texture);
+        this.texture = null;
+        this.destroyed = true;
+      }
+    }]);
+
+    return Rectangle;
+  }();
+  var Circle$1 =
+  /*#__PURE__*/
+  function () {
+    function Circle(sprite, gl) {
+      classCallCheck(this, Circle);
+
+      var length = (sprite.width + sprite.height) / 20 | 0;
+      var radian = 2 * Math.PI / length;
+      var cx = -sprite.anchorX;
+      var cy = -sprite.anchor.y;
+      var rx = sprite.width * 0.5;
+      var ry = sprite.height * 0.5;
+      var rx1 = 0.5;
+      var ry1 = 0.5;
+      var cx1 = 0.5;
+      var cy1 = 0.5;
+
+      if (sprite.clip) {
+        rx1 = sprite.clip[2] * 0.5;
+        ry1 = sprite.clip[3] * 0.5;
+        cx1 = sprite.clip[0] + rx1;
+        cy1 = sprite.clip[1] + ry1;
+      }
+
+      var points = [cx, cy, cx1, cy1];
+
+      for (var i = 0; i <= length; i++) {
+        var r = i * radian;
+        var cos = Math.cos(r);
+        var sin = Math.sin(r);
+        points.push(rx * cos + cx, ry * sin + cy, rx1 * cos + cx1, ry1 * sin + cy1);
+      }
+
+      this.vectices = new Float32Array(points);
+      this.bufferLength = this.vectices.length / 4;
+      this.drawType = gl.TRIANGLE_STRIP;
+      sprite.needUpdate = false;
     }
 
-    return program;
-  }
-  function createTexture(gl, img, options) {
-    var texture = gl.createTexture(); // this.pixelStorei(this.UNPACK_FLIP_Y_WEBGL, 1);
+    createClass(Circle, [{
+      key: "createTexture",
+      value: function createTexture(gl, image) {
+        if (this.texture) this.deleteTexture(gl);
+        if (image.texture) this.texture = image.texture;
+        this.texture = image.texture = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        this.texture.forever = image.src || image.forever;
+        image.needUpdate = false;
+      }
+    }, {
+      key: "createBuffer",
+      value: function createBuffer(gl) {
+        if (!this.buffer) this.buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vectices, gl.STATIC_DRAW);
+      }
+    }, {
+      key: "updateTexture",
+      value: function updateTexture(gl, image) {
+        if (this.texture !== image.texture) return;
 
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img || null);
-    return texture;
-  }
-  function createBuffer(gl, type, data, draw, buffer) {
-    if (!buffer) buffer = gl.createBuffer();
-    gl.bindBuffer(type, buffer);
-    gl.bufferData(type, data, draw);
-    return buffer;
+        if (image.texture && image.needUpdate) {
+          gl.bindTexture(gl.TEXTURE_2D, image.texture);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+          image.needUpdate = false;
+        }
+      }
+    }, {
+      key: "draw",
+      value: function draw(gl) {
+        gl.shader.texture(this.texture);
+        gl.shader.buffer(this.buffer, 2, 2, 0, 4);
+        gl.drawArrays(this.drawType, 0, this.bufferLength);
+      }
+    }, {
+      key: "destroy",
+      value: function destroy(gl) {
+        if (this.buffer) gl.deleteBuffer(this.buffer);
+        this.buffer = null;
+        if (this.texture && !this.texture.forever) gl.deleteTexture(this.texture);
+        this.texture = null;
+        this.destroyed = true;
+      }
+    }]);
+
+    return Circle;
+  }();
+  var Polygon$1 = function Polygon() {
+    classCallCheck(this, Polygon);
+  };
+
+  var Builder$1 = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    Rectangle: Rectangle$1,
+    Circle: Circle$1,
+    Polygon: Polygon$1
+  });
+
+  function WebglRender(sprite, gl, dirty) {
+    sprite.emit('draw', gl, dirty);
+
+    if (sprite.morph && Builder$1[sprite.morph]) {
+      if (!sprite.builder || sprite.needUpdate || sprite.builder.destroyed) {
+        sprite.builder = new Builder$1[sprite.morph](sprite, gl);
+        sprite.builder.createBuffer(gl);
+        sprite.builder.createTexture(gl, sprite.texture);
+        dirty.add(sprite.builder);
+      }
+
+      sprite.builder.updateTexture(gl, sprite.texture);
+      gl.shader.blend();
+      gl.shader.transform(sprite.matrix);
+      sprite.builder.draw(gl);
+      dirty.use(sprite.builder);
+    }
   }
 
+  // export function getExtension(gl) {
+  // 	//用WEBGL1就够了
+  // 	// let drawBuffers = gl.getExtension('WEBGL_draw_buffers');
+  // 	// let depthTexture = gl.getExtension('WEBKIT_WEBGL_depth_texture');
+  // 	// let loseContext = gl.getExtension('WEBGL_lose_context');
+  // 	let vertexArrayObject =
+  // 		gl.getExtension('OES_vertex_array_object') || gl.getExtension('MOZ_OES_vertex_array_object') || gl.getExtension('WEBKIT_OES_vertex_array_object');
+  // 	// let anisotropicFiltering = gl.getExtension('EXT_texture_filter_anisotropic');
+  // 	// let uint32ElementIndex = gl.getExtension('OES_element_index_uint');
+  // 	// // Floats and half-floats
+  // 	// let floatTexture = gl.getExtension('OES_texture_float');
+  // 	// let floatTextureLinear = gl.getExtension('OES_texture_float_linear');
+  // 	// let textureHalfFloat = gl.getExtension('OES_texture_half_float');
+  // 	// let textureHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
+  // 	let vertexAttribDivisor = gl.getExtension('ANGLE_instanced_arrays');
+  // 	gl.createVertexArray = () => vertexArrayObject.createVertexArrayOES();
+  // 	gl.bindVertexArray = vao => vertexArrayObject.bindVertexArrayOES(vao);
+  // 	gl.deleteVertexArray = vao => vertexArrayObject.deleteVertexArrayOES(vao);
+  // 	gl.vertexAttribDivisor = (a, b) => vertexAttribDivisor.vertexAttribDivisorANGLE(a, b);
+  // 	gl.drawElementsInstanced = (a, b, c, d, e) => vertexAttribDivisor.drawElementsInstancedANGLE(a, b, c, d, e);
+  // 	gl.drawArraysInstanced = (a, b, c, d) => vertexAttribDivisor.drawArraysInstancedANGLE(a, b, c, d);
+  // 	return gl;
+  // }
   var Shader =
   /*#__PURE__*/
   function () {
     function Shader(gl) {
       classCallCheck(this, Shader);
 
-      this.gl = gl.gl || gl;
-      this.options = {};
+      this.gl = gl;
+      this.attributes = {};
+      this.uniforms = {};
+      this.createProgram();
+      this.getActiveAttrib();
+      this.getActiveUniform();
     }
 
     createClass(Shader, [{
-      key: "use",
-      value: function use() {
+      key: "createShader",
+      value: function createShader(type, text) {
         var gl = this.gl;
+        var shader = gl.createShader(gl[type]);
+        gl.shaderSource(shader, text);
+        gl.compileShader(shader);
 
-        if (!this.program) {
-          this.program = createProgram(gl, this.vert, this.frag);
-          this.attributes = getActiveAttrib(gl, this.program);
-          this.uniforms = getActiveUniform(gl, this.program);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.log(gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
         }
 
-        gl.useProgram(this.program);
-        return this;
+        return shader;
       }
     }, {
-      key: "bindTexture",
-      value: function bindTexture(texture) {
-        if (this.beforeTexture === texture) return false;
+      key: "getActiveAttrib",
+      value: function getActiveAttrib() {
+        var gl = this.gl,
+            program = this.program,
+            attributes = this.attributes;
+
+        for (var i = 0, len = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES); i < len; i++) {
+          var attr = gl.getActiveAttrib(program, i); //size,type,name
+
+          var id = attributes[attr.name] = gl.getAttribLocation(program, attr.name);
+          gl.enableVertexAttribArray(id);
+        }
+      }
+    }, {
+      key: "getActiveUniform",
+      value: function getActiveUniform() {
+        var gl = this.gl,
+            program = this.program,
+            uniforms = this.uniforms;
+
+        for (var i = 0, len = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS); i < len; i++) {
+          var attr = gl.getActiveUniform(program, i); //size,type,name
+
+          uniforms[attr.name] = gl.getUniformLocation(program, attr.name);
+        }
+      }
+    }, {
+      key: "createProgram",
+      value: function createProgram() {
         var gl = this.gl;
-        this.beforeTexture = texture;
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(this.uniforms.uSampler, 0);
-        return true;
+        var program = gl.createProgram();
+        gl.attachShader(program, this.createShader('VERTEX_SHADER', this.vert));
+        gl.attachShader(program, this.createShader('FRAGMENT_SHADER', this.frag));
+        gl.linkProgram(program);
+
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+          gl.deleteProgram(program);
+          gl.deleteShader(program);
+          gl.deleteShader(program);
+          throw '链接程序失败';
+        }
+
+        this.program = program;
       }
     }, {
-      key: "bindBuffer",
-      value: function bindBuffer(buffer) {
+      key: "vert",
+      get: function get() {
+        return '';
+      }
+    }, {
+      key: "frag",
+      get: function get() {
+        return '';
+      }
+    }]);
+
+    return Shader;
+  }();
+
+  var WebGLShader =
+  /*#__PURE__*/
+  function (_Shader) {
+    inherits(WebGLShader, _Shader);
+
+    function WebGLShader() {
+      classCallCheck(this, WebGLShader);
+
+      return possibleConstructorReturn(this, getPrototypeOf(WebGLShader).apply(this, arguments));
+    }
+
+    createClass(WebGLShader, [{
+      key: "buffer",
+      value: function buffer(_buffer) {
         var vetices = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
         var uvs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 2;
         var offset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
         var bpe = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 4;
-        if (this.beforeBuffer === buffer) return false;
-        this.beforeBuffer = buffer;
-        var gl = this.gl;
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.vertexAttribPointer(this.attributes.aPosition, vetices, gl.FLOAT, false, (vetices + uvs) * bpe, offset * bpe);
-        gl.enableVertexAttribArray(this.attributes.aPosition);
-        gl.vertexAttribPointer(this.attributes.aTextureCoord, uvs, gl.FLOAT, false, (vetices + uvs) * bpe, (offset + vetices) * bpe);
-        gl.enableVertexAttribArray(this.attributes.aTextureCoord);
+        var gl = this.gl,
+            attributes = this.attributes;
+        if (gl.BufferRecord === _buffer) return;
+        gl.BufferRecord = _buffer;
+        gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
+        gl.vertexAttribPointer(attributes.aPosition, vetices, gl.FLOAT, false, (vetices + uvs) * bpe, offset * bpe);
+        gl.enableVertexAttribArray(attributes.aPosition);
+        gl.vertexAttribPointer(attributes.aTextureCoord, uvs, gl.FLOAT, false, (vetices + uvs) * bpe, (offset + vetices) * bpe);
+        gl.enableVertexAttribArray(attributes.aTextureCoord);
+      }
+    }, {
+      key: "texture",
+      value: function texture(_texture) {
+        var gl = this.gl,
+            uniforms = this.uniforms;
+        if (gl.TextureRecord === _texture) return;
+        gl.TextureRecord = _texture;
+        gl.bindTexture(gl.TEXTURE_2D, _texture);
+        gl.uniform1i(uniforms.uSampler, 0);
       }
     }, {
       key: "transform",
       value: function transform(matrix) {
-        this.gl.uniformMatrix4fv(this.uniforms.uModelMatrix, false, matrix.elements);
+        var gl = this.gl,
+            uniforms = this.uniforms;
+        gl.uniformMatrix4fv(uniforms.uModelMatrix, false, matrix.elements);
       }
     }, {
       key: "blend",
       value: function blend(color) {
+        var gl = this.gl,
+            uniforms = this.uniforms;
+
         if (color) {
-          this.gl.uniform4f(this.uniforms.uColor, color.elements[0], color.elements[1], color.elements[2], color.elements[3]);
+          gl.uniform4f(uniforms.uColor, color.elements[0], color.elements[1], color.elements[2], color.elements[3]);
         } else {
-          this.gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
+          gl.uniform4f(uniforms.uColor, 1, 1, 1, 1);
         }
       }
     }, {
@@ -3027,168 +2900,29 @@
       }
     }]);
 
-    return Shader;
-  }();
+    return WebGLShader;
+  }(Shader);
 
-  var WebGLRender =
-  /*#__PURE__*/
-  function () {
-    function WebGLRender() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      classCallCheck(this, WebGLRender);
-
-      this.renderArray = [];
-      this.context = options.context || options.canvas.getContext('webgl');
-      this.canvas = this.context.canvas;
-      var gl = this.context;
-      gl.clearColor(1.0, 1.0, 1.0, 1.0);
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); // Webgl.getExtension(gl);
-
-      this.useProgram(new Shader(gl));
-    }
-
-    createClass(WebGLRender, [{
-      key: "look",
-      value: function look(matrix, x, y) {
-        matrix.setOrtho(-x / 2, x / 2, y / 2, -y / 2, 0, 1);
-        this.context.viewport(0, 0, x, y);
-        return this;
-      }
-    }, {
-      key: "useProgram",
-      value: function useProgram(shader) {
-        if (shader === this.shader) return this;
-        this.shader = shader.use();
-        return this;
-      }
-    }, {
-      key: "updateTexture",
-      value: function updateTexture(image, texture) {
-        var gl = this.context;
-        if (!texture) return createTexture(gl, image);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        return texture;
-      }
-    }, {
-      key: "updateBuffer",
-      value: function updateBuffer(array, buffer) {
-        var gl = this.context;
-        if (buffer) gl.deleteBuffer(buffer);
-        if (!array) return;
-        return createBuffer(gl, gl.ARRAY_BUFFER, new Float32Array(array), gl.STATIC_DRAW);
-      }
-    }, {
-      key: "updateIndices",
-      value: function updateIndices(array, buffer) {
-        var gl = this.context;
-        if (buffer) gl.deleteBuffer(buffer);
-        if (!array) return;
-        return createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(array), gl.STATIC_DRAW);
-      }
-    }, {
-      key: "shapeToBuffer",
-      value: function shapeToBuffer(shape) {
-        if (!shape.buffer) shape.buffer = {};
-
-        if (shape.morph == 'Rectangle') {
-          var left = shape.left;
-          var top = shape.top;
-          var right = shape.right;
-          var bottom = shape.bottom;
-          var cLeft = shape.clipPosition.x;
-          var cTop = shape.clipPosition.y;
-          var cRight = shape.clipPosition.x + shape.clipSize.x;
-          var cBottom = shape.clipPosition.y + shape.clipSize.y;
-          shape.buffer.array = [left, top, cLeft, cTop, right, top, cRight, cTop, left, bottom, cLeft, cBottom, right, bottom, cRight, cBottom];
-          shape.buffer.buffers = this.updateBuffer(shape.buffer.array, shape.buffer.buffers);
-          shape.buffer.length = 4;
-          shape.buffer.type = this.gl.TRIANGLE_STRIP;
-        } else if (shape.morph == 'Circle') {
-          var length = (shape.size.x + shape.size.y) / 20 | 0;
-          var radian = 2 * Math.PI / length;
-          var cx = -shape.anchor.x;
-          var cy = -shape.anchor.y;
-          var rx = shape.size.x * 0.5;
-          var ry = shape.size.y * 0.5;
-          var rx1 = shape.clipSize.x * 0.5;
-          var ry1 = shape.clipSize.y * 0.5;
-          var cx1 = shape.clipPosition.x + rx1;
-          var cy1 = shape.clipPosition.y + ry1;
-          shape.buffer.array = [cx, cy, cx1, cy1];
-
-          for (var i = 0; i <= length; i++) {
-            var r = i * radian;
-            var cos = Math.cos(r);
-            var sin = Math.sin(r);
-            shape.buffer.array.push(rx * cos + cx, ry * sin + cy, rx1 * cos + cx1, ry1 * sin + cy1);
-          }
-
-          shape.buffer.buffers = this.updateBuffer(shape.buffer.array, shape.buffer.buffers);
-          shape.buffer.length = shape.buffer.array.length / 4;
-          shape.buffer.type = this.gl.TRIANGLE_FAN;
-        } else if (_typeof_1(shape.morph) == 'object') ;
-      }
-    }, {
-      key: "blend",
-      value: function blend() {
-        this.shader.blend();
-      }
-    }, {
-      key: "transform",
-      value: function transform(matrix) {
-        this.shader.transform(matrix);
-      }
-    }, {
-      key: "texture",
-      value: function texture(_texture) {
-        this.shader.bindTexture(_texture);
-      }
-    }, {
-      key: "draw",
-      value: function draw(buffer) {
-        if (!buffer) return;
-        this.shader.bindBuffer(buffer.buffers, 2, 2, 0, 4);
-        this.gl.drawArrays(buffer.type, 0, buffer.length);
-      }
-    }, {
-      key: "gl",
-      get: function get() {
-        return this.context;
-      }
-    }]);
-
-    return WebGLRender;
-  }();
-
-  exports.Application = Application;
   exports.Audio = Audio;
-  exports.BaseTexture = BaseTexture;
   exports.CanvasRender = CanvasRender;
-  exports.CanvasTexture = CanvasTexture;
   exports.Clock = Clock;
   exports.Collision = Collision;
   exports.Color = Color;
   exports.Container = Container;
+  exports.Director = Director;
+  exports.Dirty = Dirty;
   exports.Event = Event;
-  exports.FontTexture = FontTexture;
   exports.Image = Image;
-  exports.Loader = Loader;
   exports.Matrix4 = Matrix4;
   exports.Random = Random;
-  exports.RichText = RichText;
-  exports.Shader = Shader;
-  exports.Shape = Shape;
   exports.Sprite = Sprite;
   exports.Time = Time;
   exports.Touch = Touch;
-  exports.Transform = Transform;
   exports.Vector = Vector;
   exports.Vector2 = Vector2;
   exports.Vector3 = Vector3;
-  exports.WebGLRender = WebGLRender;
+  exports.WebGLRender = WebglRender;
+  exports.WebGLShader = WebGLShader;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

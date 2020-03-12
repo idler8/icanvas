@@ -1,19 +1,85 @@
-import * as Webgl from './webgl.js';
-export default class Shader {
+// export function getExtension(gl) {
+// 	//用WEBGL1就够了
+// 	// let drawBuffers = gl.getExtension('WEBGL_draw_buffers');
+// 	// let depthTexture = gl.getExtension('WEBKIT_WEBGL_depth_texture');
+// 	// let loseContext = gl.getExtension('WEBGL_lose_context');
+// 	let vertexArrayObject =
+// 		gl.getExtension('OES_vertex_array_object') || gl.getExtension('MOZ_OES_vertex_array_object') || gl.getExtension('WEBKIT_OES_vertex_array_object');
+// 	// let anisotropicFiltering = gl.getExtension('EXT_texture_filter_anisotropic');
+// 	// let uint32ElementIndex = gl.getExtension('OES_element_index_uint');
+// 	// // Floats and half-floats
+// 	// let floatTexture = gl.getExtension('OES_texture_float');
+// 	// let floatTextureLinear = gl.getExtension('OES_texture_float_linear');
+// 	// let textureHalfFloat = gl.getExtension('OES_texture_half_float');
+// 	// let textureHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
+// 	let vertexAttribDivisor = gl.getExtension('ANGLE_instanced_arrays');
+// 	gl.createVertexArray = () => vertexArrayObject.createVertexArrayOES();
+// 	gl.bindVertexArray = vao => vertexArrayObject.bindVertexArrayOES(vao);
+// 	gl.deleteVertexArray = vao => vertexArrayObject.deleteVertexArrayOES(vao);
+// 	gl.vertexAttribDivisor = (a, b) => vertexAttribDivisor.vertexAttribDivisorANGLE(a, b);
+// 	gl.drawElementsInstanced = (a, b, c, d, e) => vertexAttribDivisor.drawElementsInstancedANGLE(a, b, c, d, e);
+// 	gl.drawArraysInstanced = (a, b, c, d) => vertexAttribDivisor.drawArraysInstancedANGLE(a, b, c, d);
+// 	return gl;
+// }
+class Shader {
 	constructor(gl) {
-		this.gl = gl.gl || gl;
-		this.options = {};
+		this.gl = gl;
+		this.attributes = {};
+		this.uniforms = {};
+
+		this.createProgram();
+		this.getActiveAttrib();
+		this.getActiveUniform();
 	}
-	use() {
-		let gl = this.gl;
-		if (!this.program) {
-			this.program = Webgl.createProgram(gl, this.vert, this.frag);
-			this.attributes = Webgl.getActiveAttrib(gl, this.program);
-			this.uniforms = Webgl.getActiveUniform(gl, this.program);
+	get vert() {
+		return '';
+	}
+	get frag() {
+		return '';
+	}
+	createShader(type, text) {
+		let { gl } = this;
+		let shader = gl.createShader(gl[type]);
+		gl.shaderSource(shader, text);
+		gl.compileShader(shader);
+		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			console.log(gl.getShaderInfoLog(shader));
+			gl.deleteShader(shader);
+			return null;
 		}
-		gl.useProgram(this.program);
-		return this;
+		return shader;
 	}
+	getActiveAttrib() {
+		let { gl, program, attributes } = this;
+		for (let i = 0, len = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES); i < len; i++) {
+			let attr = gl.getActiveAttrib(program, i); //size,type,name
+			let id = (attributes[attr.name] = gl.getAttribLocation(program, attr.name));
+			gl.enableVertexAttribArray(id);
+		}
+	}
+	getActiveUniform() {
+		let { gl, program, uniforms } = this;
+		for (let i = 0, len = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS); i < len; i++) {
+			let attr = gl.getActiveUniform(program, i); //size,type,name
+			uniforms[attr.name] = gl.getUniformLocation(program, attr.name);
+		}
+	}
+	createProgram() {
+		let gl = this.gl;
+		let program = gl.createProgram();
+		gl.attachShader(program, this.createShader('VERTEX_SHADER', this.vert));
+		gl.attachShader(program, this.createShader('FRAGMENT_SHADER', this.frag));
+		gl.linkProgram(program);
+		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+			gl.deleteProgram(program);
+			gl.deleteShader(program);
+			gl.deleteShader(program);
+			throw '链接程序失败';
+		}
+		this.program = program;
+	}
+}
+export default class WebGLShader extends Shader {
 	get vert() {
 		return [
 			'attribute vec4 aPosition;',
@@ -46,32 +112,33 @@ export default class Shader {
 			'}',
 		].join('\n');
 	}
-	bindTexture(texture) {
-		if (this.beforeTexture === texture) return false;
-		let gl = this.gl;
-		this.beforeTexture = texture;
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-		gl.uniform1i(this.uniforms.uSampler, 0);
-		return true;
-	}
-	bindBuffer(buffer, vetices = 2, uvs = 2, offset = 0, bpe = 4) {
-		if (this.beforeBuffer === buffer) return false;
-		this.beforeBuffer = buffer;
-		let gl = this.gl;
+	buffer(buffer, vetices = 2, uvs = 2, offset = 0, bpe = 4) {
+		let { gl, attributes } = this;
+		if (gl.BufferRecord === buffer) return;
+		gl.BufferRecord = buffer;
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.vertexAttribPointer(this.attributes.aPosition, vetices, gl.FLOAT, false, (vetices + uvs) * bpe, offset * bpe);
-		gl.enableVertexAttribArray(this.attributes.aPosition);
-		gl.vertexAttribPointer(this.attributes.aTextureCoord, uvs, gl.FLOAT, false, (vetices + uvs) * bpe, (offset + vetices) * bpe);
-		gl.enableVertexAttribArray(this.attributes.aTextureCoord);
+		gl.vertexAttribPointer(attributes.aPosition, vetices, gl.FLOAT, false, (vetices + uvs) * bpe, offset * bpe);
+		gl.enableVertexAttribArray(attributes.aPosition);
+		gl.vertexAttribPointer(attributes.aTextureCoord, uvs, gl.FLOAT, false, (vetices + uvs) * bpe, (offset + vetices) * bpe);
+		gl.enableVertexAttribArray(attributes.aTextureCoord);
+	}
+	texture(texture) {
+		let { gl, uniforms } = this;
+		if (gl.TextureRecord === texture) return;
+		gl.TextureRecord = texture;
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.uniform1i(uniforms.uSampler, 0);
 	}
 	transform(matrix) {
-		this.gl.uniformMatrix4fv(this.uniforms.uModelMatrix, false, matrix.elements);
+		let { gl, uniforms } = this;
+		gl.uniformMatrix4fv(uniforms.uModelMatrix, false, matrix.elements);
 	}
 	blend(color) {
+		let { gl, uniforms } = this;
 		if (color) {
-			this.gl.uniform4f(this.uniforms.uColor, color.elements[0], color.elements[1], color.elements[2], color.elements[3]);
+			gl.uniform4f(uniforms.uColor, color.elements[0], color.elements[1], color.elements[2], color.elements[3]);
 		} else {
-			this.gl.uniform4f(this.uniforms.uColor, 1, 1, 1, 1);
+			gl.uniform4f(uniforms.uColor, 1, 1, 1, 1);
 		}
 	}
 }

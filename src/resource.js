@@ -1,4 +1,3 @@
-import { BaseTexture } from './texture.js';
 export class Loader {
 	constructor(loader) {
 		this.resources = {};
@@ -21,16 +20,8 @@ export class Image extends Loader {
 	//读取并生成贴图对象
 	load(key, url) {
 		return this.loader.load(url).then(image => {
-			this.resources[key] = new BaseTexture(image);
+			this.resources[key] = image;
 		});
-	}
-	//生成雪碧图对象
-	sprite(key, name, x, y, width, height) {
-		if (!this.resources[key]) return this;
-		let texture = this.resources[key];
-		let baseTexture = texture.baseTexture || texture;
-		this.resources[key + '//' + name] = baseTexture.getTexture(x, y, width, height);
-		return this;
 	}
 }
 export class Audio extends Loader {

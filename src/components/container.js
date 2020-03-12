@@ -1,5 +1,6 @@
 import Event from '../utils/event.js';
-import { Transform } from '../prototype.js';
+import Vector2 from '../vector/vector2.js';
+import Matrix4 from '../vector/matrix4.js';
 export default class Container extends Event {
 	constructor(options = {}) {
 		super();
@@ -9,81 +10,107 @@ export default class Container extends Event {
 		this.touchChildren = true;
 		this.visible = !(options.visible === false);
 		this.zIndex = options.zIndex || 0;
+
+		this.transformParentId = 0;
+		this.transformId = 1;
+		this.needUpdateTransform = true;
+		this.matrix = new Matrix4();
+		this.position = new Vector2(options.x || 0, options.y || 0);
+		this.scale = new Vector2(options.scaleX || 1, options.scaleY || 1);
+		this.angle = options.angle || 0;
+		if (options.radian) this.radian = options.radian;
+
 		this.on('destroy', function() {
 			for (let i = 0; i < this.children.length; i++) this.children[i].emit('destroy');
 		});
-
-		this.transform = options.transform || new Transform(options);
-		this.on('updateTransform', function(now) {
-			if (now && this.transform.isStop(now)) return;
-			if (this.parent) {
-				this.parent.emit('updateTransform', now);
-				this.transform.isFollow(this.parent.transform);
-				this.transform.update(this.parent.transform.matrix);
-			} else {
-				this.transform.update();
-			}
-		});
 	}
-	set x(a) {
-		this.transform.x = a;
+	updateTransform(trace = true) {
+		if (this.parent) {
+			if (trace) this.parent.updateTransform(trace);
+			if (!this.needUpdateTransform && this.transformParentId == this.parent.transformId) return;
+			this.matrix.setApply(this.parent.matrix);
+		} else {
+			if (!this.needUpdateTransform) return;
+			this.matrix.identity();
+		}
+		this.matrix.translate(this.x, this.y, 0);
+		this.matrix.rotate(this.radian, 0, 0, 1);
+		this.matrix.scale(this.scaleX, this.scaleY, 1);
+		this.needUpdateTransform = false;
+		this.transformId++;
+		this.transformParentId = this.parent ? this.parent.transformId : 0;
 	}
 	get x() {
-		return this.transform.x;
+		return this.position.x;
 	}
-	set y(a) {
-		this.transform.y = a;
+	set x(x) {
+		if (this.position.x == x) return;
+		this.position.x = x;
+		this.needUpdateTransform = true;
 	}
 	get y() {
-		return this.transform.y;
+		return this.position.y;
+	}
+	set y(y) {
+		if (this.position.y == y) return;
+		this.position.y = y;
+		this.needUpdateTransform = true;
 	}
 	setPosition(x, y) {
-		this.transform.x = x;
-		this.transform.y = y;
+		this.x = x;
+		this.y = y;
 		return this;
-	}
-	set scaleX(a) {
-		this.transform.scaleX = a;
 	}
 	get scaleX() {
-		return this.transform.scaleX;
+		return this.scale.x;
 	}
-	set scaleY(a) {
-		this.transform.scaleY = a;
+	set scaleX(x) {
+		if (this.scale.x == x) return;
+		this.scale.x = x;
+		this.needUpdateTransform = true;
 	}
 	get scaleY() {
-		return this.transform.scaleY;
+		return this.scale.y;
+	}
+	set scaleY(y) {
+		if (this.scale.y == y) return;
+		this.scale.y = y;
+		this.needUpdateTransform = true;
 	}
 	setScale(x, y) {
-		this.transform.scaleX = x;
-		this.transform.scaleY = y;
+		this.scaleX = x;
+		this.scaleY = y;
 		return this;
-	}
-	set radian(a) {
-		this.transform.radian = a;
 	}
 	get radian() {
-		return this.transform.radian;
+		return this._radian;
+	}
+	set radian(r) {
+		if (r == this._radian) return;
+		this._radian = r;
+		this.needUpdateTransform = true;
 	}
 	setRadian(a) {
-		this.transform.radian = a;
+		this.radian = a;
 		return this;
 	}
-	set angle(a) {
-		this.transform.angle = a;
-	}
 	get angle() {
-		return this.transform.angle;
+		return (this.radian * 180) / Math.PI;
+	}
+	set angle(v) {
+		let a = (v * Math.PI) / 180;
+		if (a == this._radian) return;
+		this._radian = a;
+		this.needUpdateTransform = true;
 	}
 	setAngle(a) {
-		this.transform.angle = a;
+		this.angle = a;
 		return this;
 	}
 
 	getWorldVector(vector, clone = false) {
 		vector = clone ? vector.clone() : vector;
-		this.emit('updateTransform');
-		return vector.multiplyMatrix4(this.transform.matrix);
+		return vector.multiplyMatrix4(this.matrix);
 	}
 	put(object3d) {
 		if (this.parent) this.parent.remove(this);
@@ -91,7 +118,7 @@ export default class Container extends Event {
 		this.emit('create');
 		object3d.children.push(this);
 		this.parent = object3d;
-		this.transform.parentId = 0;
+		this.transformParentId = 0;
 		this.emit('created');
 		return this;
 	}
@@ -127,5 +154,13 @@ export default class Container extends Event {
 		}
 		this.children.length = 0;
 		return this;
+	}
+	pushTo(array = []) {
+		if (!this.visible) return;
+		this.updateTransform(false);
+		this.emit('check', array);
+		for (let i = 0, len = this.children.length; i < len; i++) {
+			this.children[i].pushTo(array);
+		}
 	}
 }
