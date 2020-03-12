@@ -836,9 +836,7 @@ function (_Vector) {
     _classCallCheck(this, Color);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Color).call(this, 1, 1, 1, 1));
-
-    _this.setApply(arguments.length > 1 ? arguments : color);
-
+    if (color !== undefined) _this.setApply(arguments.length > 1 ? arguments : color);
     return _this;
   }
 
@@ -1579,6 +1577,8 @@ function (_Event) {
     _this.children = [];
     _this.touchChildren = true;
     _this.visible = !(options.visible === false);
+    _this.color = options.color || new Color(options.red || 1, options.green || 1, options.blue || 1, options.alpha || 1);
+    _this.opacity = options.opacity || 1;
     _this.zIndex = options.zIndex || 0;
     _this.transformParentId = 0;
     _this.transformId = 1;
@@ -1718,13 +1718,18 @@ function (_Event) {
     key: "pushTo",
     value: function pushTo() {
       var array = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-      if (!this.visible) return;
+      var opacity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+      if (!this.visible) return array;
+      if (this.preUpdate && this.preUpdate(array)) return array;
       this.updateTransform(false);
-      this.emit('check', array);
+      this._opacity = this.opacity == 1 ? opacity : this.opacity;
+      array.push(this);
 
       for (var i = 0, len = this.children.length; i < len; i++) {
-        this.children[i].pushTo(array);
+        this.children[i].pushTo(array, this._opacity);
       }
+
+      return array;
     }
   }, {
     key: "x",
@@ -1916,12 +1921,6 @@ function (_Container) {
     _this.texture = options.texture;
     _this.invertMatrixId = 0;
     _this.invertMatrix = new Matrix4();
-
-    _this.on('check', function (array) {
-      if (!this.visible) return;
-      if (this.texture) array.push(this);
-    });
-
     return _this;
   }
 
@@ -1937,9 +1936,9 @@ function (_Container) {
     key: "setClip",
     value: function setClip(sprite) {
       this.clip = [sprite.x, sprite.y, sprite.width, sprite.height];
+      this.needUpdateClip = true;
       if (!this.staticWidth) this.size.x = sprite.width;
       if (!this.staticHeight) this.size.y = sprite.height;
-      this.needUpdate = true;
       return this;
     }
   }, {
@@ -1978,27 +1977,15 @@ function (_Container) {
       return this._texture;
     },
     set: function set(texture) {
-      this._texture = texture;
-      if (!texture) return this.needUpdate = false;
+      if (!(this._texture = texture)) return;
       if (!this.staticWidth) this.size.x = texture.width;
       if (!this.staticHeight) this.size.y = texture.height;
-      this.needUpdate = true;
-    }
-  }, {
-    key: "morph",
-    set: function set(a) {
-      this._morph = a;
-      this.needUpdate = true;
-    },
-    get: function get() {
-      return this._morph;
     }
   }, {
     key: "width",
     set: function set(a) {
       this.size.x = a;
       this.staticWidth = true;
-      this.needUpdate = true;
     },
     get: function get() {
       return this.size.x;
@@ -2008,7 +1995,6 @@ function (_Container) {
     set: function set(a) {
       this.size.y = a;
       this.staticHeight = true;
-      this.needUpdate = true;
     },
     get: function get() {
       return this.size.y;
@@ -2017,7 +2003,6 @@ function (_Container) {
     key: "anchorX",
     set: function set(x) {
       this.anchor.x = x;
-      this.needUpdate = true;
     },
     get: function get() {
       return this.anchor.x;
@@ -2026,7 +2011,6 @@ function (_Container) {
     key: "anchorY",
     set: function set(y) {
       this.anchor.y = y;
-      this.needUpdate = true;
     },
     get: function get() {
       return this.anchor.y;
@@ -2090,6 +2074,50 @@ function () {
 
   return Loader;
 }();
+var ImageSource =
+/*#__PURE__*/
+function () {
+  function ImageSource(image) {
+    _classCallCheck(this, ImageSource);
+
+    this.source = image;
+    this.src = image.src;
+    this.sourceId = 0; //资源Id
+
+    this.width = 0; //资源宽
+
+    this.height = 0; //资源高
+
+    this.texture = null; //webgl纹理储存位置
+
+    this.textureId = 0; //纹理ID
+
+    this.forever = this.src ? true : false; //生成纹理后禁止删除
+
+    this.optimization = false; //在生成纹理后干掉源内存
+
+    this.update();
+  }
+
+  _createClass(ImageSource, [{
+    key: "update",
+    value: function update() {
+      this.sourceId++;
+      this.width = this.source.width;
+      this.height = this.source.height;
+    }
+  }, {
+    key: "getContext",
+    value: function getContext(type) {
+      if (this.context) return this.context;
+      if (!this.source || !this.source.getContext) return;
+      this.context = this.source.getContext(type);
+      return this.context;
+    }
+  }]);
+
+  return ImageSource;
+}();
 var Image =
 /*#__PURE__*/
 function (_Loader) {
@@ -2108,7 +2136,7 @@ function (_Loader) {
       var _this2 = this;
 
       return this.loader.load(url).then(function (image) {
-        _this2.resources[key] = image;
+        _this2.resources[key] = new ImageSource(image);
       });
     }
   }]);
@@ -2172,134 +2200,69 @@ function (_Loader2) {
   return Audio;
 }(Loader);
 
-var Rectangle =
-/*#__PURE__*/
-function () {
-  function Rectangle(sprite) {
-    _classCallCheck(this, Rectangle);
+function Render(sprite, context, dirty) {
+  var targetAlpha = sprite.color.alpha < 1 ? sprite.color.alpha : sprite._opacity;
+  if (targetAlpha == 0) return;
+  if (context.globalAlpha != targetAlpha) context.globalAlpha = targetAlpha;
+  if (sprite.render) sprite.render(context, dirty);
 
-    //生成绘制参数
-    this.drawImage = [];
-    var image = sprite.texture;
-    this.drawImage.push(image);
-
-    if (sprite.clip) {
-      var clipX = sprite.clip[0];
-      var clipY = sprite.clip[1];
-      var clipWidth = sprite.clip[2];
-      var clipHeight = sprite.clip[3];
-      Array.prototype.push.call(this.drawImage, clipX, clipY, clipWidth, clipHeight);
-    }
-
-    this.drawImage.push(sprite.left, sprite.top, sprite.width, sprite.height);
-    sprite.needUpdate = false;
-  }
-
-  _createClass(Rectangle, [{
-    key: "draw",
-    value: function draw(context) {
-      context.drawImage.apply(context, this.drawImage); //绘制元素
-    }
-  }]);
-
-  return Rectangle;
-}();
-var Circle =
-/*#__PURE__*/
-function (_Rectangle) {
-  _inherits(Circle, _Rectangle);
-
-  function Circle(sprite) {
-    var _this;
-
-    _classCallCheck(this, Circle);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, sprite)); //生成圆形裁切参数
-
-    _this.clip = [-sprite.anchorX, -sprite.anchorY, Math.min(sprite.width, sprite.height) * 0.5, 0, 2 * Math.PI];
-    return _this;
-  }
-
-  _createClass(Circle, [{
-    key: "draw",
-    value: function draw(context) {
-      context.save(); // 保存当前ctx的状态
-
-      context.arc.apply(context, this.clip); //画出圆
-
-      context.clip(); //裁剪上面的圆形
-
-      context.drawImage.apply(context, this.drawImage); //绘制元素
-
-      context.restore(); // 还原状态
-    }
-  }]);
-
-  return Circle;
-}(Rectangle);
-var Polygon =
-/*#__PURE__*/
-function (_Rectangle2) {
-  _inherits(Polygon, _Rectangle2);
-
-  function Polygon(sprite) {
-    var _this2;
-
-    _classCallCheck(this, Polygon);
-
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Polygon).call(this, sprite)); //生成裁切参数
-
-    _this2.clip = [-sprite.anchorX, -sprite.anchorY, Math.min(sprite.width, shapspritee.height) * 0.5, 0, 2 * Math.PI]; //TODO 多边形裁切
-
-    return _this2;
-  }
-
-  _createClass(Polygon, [{
-    key: "draw",
-    value: function draw(context) {
-      context.save(); // 保存当前ctx的状态
-
-      context.arc.apply(context, this.clip); //画出圆
-
-      context.clip(); //裁剪上面的圆形
-
-      context.drawImage.apply(context, this.drawImage); //绘制元素
-
-      context.restore(); // 还原状态
-    }
-  }]);
-
-  return Polygon;
-}(Rectangle);
-
-var Builder = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	Rectangle: Rectangle,
-	Circle: Circle,
-	Polygon: Polygon
-});
-
-function CanvasRender(sprite, context, dirty) {
-  sprite.emit('draw', context, dirty);
-
-  if (sprite.morph && Builder[sprite.morph]) {
-    if (!sprite.builder || sprite.needUpdate) sprite.builder = new Builder[sprite.morph](sprite, context);
+  if (sprite.texture) {
     var e = sprite.matrix.elements;
     context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
-    sprite.builder.draw(context);
+    if (!sprite.builder) sprite.builder = [];
+    sprite.builder.length = 0;
+    sprite.builder.push(sprite.texture.source);
+    if (sprite.clip) Array.prototype.push.apply(sprite.builder, sprite.clip);
+    sprite.builder.push(sprite.left, sprite.top, sprite.width, sprite.height);
+
+    if (sprite.morph == 'Cricle') {
+      context.save(); // 保存当前ctx的状态
+
+      context.arc(-sprite.anchorX, -sprite.anchorY, Math.min(sprite.width, sprite.height) * 0.5, 0, 2 * Math.PI); //画出圆
+
+      context.clip(); //裁剪上面的圆形
+    }
+
+    context.drawImage.apply(context, sprite.builder); //绘制元素
+
+    if (sprite.morph == 'Cricle') context.restore(); // 还原状态
   }
 }
 
-var Rectangle$1 =
-/*#__PURE__*/
-function () {
-  function Rectangle(sprite, gl) {
-    _classCallCheck(this, Rectangle);
+function CanvasRender(sprite, context, dirty) {
+  if (!(sprite instanceof Array)) return Render(sprite, context, dirty);
 
-    var left = sprite.left,
-        top = sprite.top,
-        right = sprite.right,
-        bottom = sprite.bottom;
+  for (var i = 0; i < sprite.length; i++) {
+    Render(sprite[i], context, dirty);
+  }
+}
+
+var Shape = {
+  Circle: function Circle(sprite, vetices) {
+    var length = (sprite.width + sprite.height) / 20 | 0;
+    var radian = 2 * Math.PI / length;
+    var cx1 = 0.5;
+    var cy1 = 0.5;
+    var rx1 = 0.5;
+    var ry1 = 0.5;
+
+    if (sprite.clip) {
+      cx1 = sprite.clip[0] / sprite.texture.width;
+      cy1 = sprite.clip[1] / sprite.texture.height;
+      rx1 = sprite.clip[2] / sprite.texture.width / 2;
+      ry1 = sprite.clip[3] / sprite.texture.height / 2;
+    }
+
+    vetices.push(0, 0, cx1, cy1);
+
+    for (var i = 0; i <= length; i++) {
+      var r = i * radian;
+      var cos = Math.cos(r);
+      var sin = Math.sin(r);
+      vetices.push(0.5 * cos, 0.5 * sin, rx1 * cos + cx1, ry1 * sin + cy1);
+    }
+  },
+  Rectangle: function Rectangle(sprite, vetices) {
     var cLeft = 0;
     var cTop = 0;
     var cRight = 1;
@@ -2312,184 +2275,146 @@ function () {
       cBottom = (sprite.clip[1] + sprite.clip[3]) / sprite.texture.height;
     }
 
-    this.vectices = new Float32Array([left, top, cLeft, cTop, right, top, cRight, cTop, left, bottom, cLeft, cBottom, right, bottom, cRight, cBottom]);
-    this.bufferLength = this.vectices.length / 4;
-    this.drawType = gl.TRIANGLE_STRIP;
-    sprite.needUpdate = false;
+    vetices.push(-0.5, -0.5, cLeft, cTop, 0.5, -0.5, cRight, cTop, -0.5, 0.5, cLeft, cBottom, 0.5, 0.5, cRight, cBottom);
+  } //TODO 多边形
+
+};
+var CompareUpdate = {
+  updateRenderMatrix: ['transformId', 'width', 'height', 'anchorX', 'anchorY'],
+  updateVetices: ['morph', 'clip'],
+  updateBlendColor: [],
+  equal: function equal(name, compare, sprite) {
+    return this[name].every(function (key) {
+      return compare[key] === sprite[key];
+    });
+  },
+  set: function set(name, compare, sprite) {
+    this[name].forEach(function (key) {
+      return compare[key] = sprite[key];
+    });
   }
-
-  _createClass(Rectangle, [{
-    key: "createTexture",
-    value: function createTexture(gl, image) {
-      if (this.texture) this.deleteTexture(gl);
-      if (image.texture) this.texture = image.texture;
-      this.texture = image.texture = gl.createTexture();
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-      this.texture.forever = image.src || image.forever;
-      image.needUpdate = false;
-    }
-  }, {
-    key: "createBuffer",
-    value: function createBuffer(gl) {
-      if (!this.buffer) this.buffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, this.vectices, gl.STATIC_DRAW);
-    }
-  }, {
-    key: "updateTexture",
-    value: function updateTexture(gl, image) {
-      if (this.texture !== image.texture) return;
-
-      if (image.texture && image.needUpdate) {
-        gl.bindTexture(gl.TEXTURE_2D, image.texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        image.needUpdate = false;
-      }
-    }
-  }, {
-    key: "draw",
-    value: function draw(gl) {
-      gl.shader.texture(this.texture);
-      gl.shader.buffer(this.buffer, 2, 2, 0, 4);
-      gl.drawArrays(this.drawType, 0, this.bufferLength);
-    }
-  }, {
-    key: "destroy",
-    value: function destroy(gl) {
-      if (this.buffer) gl.deleteBuffer(this.buffer);
-      this.buffer = null;
-      if (this.texture && !this.texture.forever) gl.deleteTexture(this.texture);
-      this.texture = null;
-      this.destroyed = true;
-    }
-  }]);
-
-  return Rectangle;
-}();
-var Circle$1 =
+};
+var Builder =
 /*#__PURE__*/
 function () {
-  function Circle(sprite, gl) {
-    _classCallCheck(this, Circle);
+  function Builder(gl, sprite) {
+    _classCallCheck(this, Builder);
 
-    var length = (sprite.width + sprite.height) / 20 | 0;
-    var radian = 2 * Math.PI / length;
-    var cx = -sprite.anchorX;
-    var cy = -sprite.anchor.y;
-    var rx = sprite.width * 0.5;
-    var ry = sprite.height * 0.5;
-    var rx1 = 0.5;
-    var ry1 = 0.5;
-    var cx1 = 0.5;
-    var cy1 = 0.5;
+    this.compare = {};
+    this.vetices = [];
+    this.image = null;
+    this.matrix = new Matrix4();
+    this.color = new Color();
+  } //更新纹理
 
-    if (sprite.clip) {
-      rx1 = sprite.clip[2] * 0.5;
-      ry1 = sprite.clip[3] * 0.5;
-      cx1 = sprite.clip[0] + rx1;
-      cy1 = sprite.clip[1] + ry1;
-    }
 
-    var points = [cx, cy, cx1, cy1];
-
-    for (var i = 0; i <= length; i++) {
-      var r = i * radian;
-      var cos = Math.cos(r);
-      var sin = Math.sin(r);
-      points.push(rx * cos + cx, ry * sin + cy, rx1 * cos + cx1, ry1 * sin + cy1);
-    }
-
-    this.vectices = new Float32Array(points);
-    this.bufferLength = this.vectices.length / 4;
-    this.drawType = gl.TRIANGLE_STRIP;
-    sprite.needUpdate = false;
-  }
-
-  _createClass(Circle, [{
-    key: "createTexture",
-    value: function createTexture(gl, image) {
-      if (this.texture) this.deleteTexture(gl);
-      if (image.texture) this.texture = image.texture;
-      this.texture = image.texture = gl.createTexture();
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-      this.texture.forever = image.src || image.forever;
-      image.needUpdate = false;
-    }
-  }, {
-    key: "createBuffer",
-    value: function createBuffer(gl) {
-      if (!this.buffer) this.buffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, this.vectices, gl.STATIC_DRAW);
-    }
-  }, {
+  _createClass(Builder, [{
     key: "updateTexture",
     value: function updateTexture(gl, image) {
-      if (this.texture !== image.texture) return;
+      if (this.image != image) {
+        if (this.image && !this.image.forever) {
+          gl.deleteTexture(this.image.texture);
+          this.image.texture = null;
+        }
 
-      if (image.texture && image.needUpdate) {
-        gl.bindTexture(gl.TEXTURE_2D, image.texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        image.needUpdate = false;
+        this.image = image;
       }
-    }
+
+      if (!image) return;
+
+      if (!image.texture) {
+        image.texture = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, image.texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      } else if (image.textureId != image.sourceId) {
+        gl.bindTexture(gl.TEXTURE_2D, image.texture);
+      } else {
+        return;
+      }
+
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image.source);
+      if (image.optimization && image.src) image.source = null;
+      image.textureId = image.sourceId;
+    } //更新绘制矩阵
+
   }, {
-    key: "draw",
-    value: function draw(gl) {
-      gl.shader.texture(this.texture);
+    key: "updateRenderMatrix",
+    value: function updateRenderMatrix(gl, sprite) {
+      if (CompareUpdate.equal('updateRenderMatrix', this.compare, sprite)) return;
+      this.matrix.setApply(sprite.matrix);
+      this.matrix.translate(-sprite.anchorX, -sprite.anchorY);
+      this.matrix.scale(sprite.width, sprite.height);
+      CompareUpdate.set('updateRenderMatrix', this.compare, sprite);
+    } //更新顶点
+
+  }, {
+    key: "updateVetices",
+    value: function updateVetices(gl, sprite) {
+      if (this.buffer && CompareUpdate.equal('updateVetices', this.compare, sprite)) return;
+      this.vetices.length = 0;
+      Shape[sprite.morph] ? Shape[sprite.morph](sprite, this.vetices) : Shape.Rectangle(sprite, this.vetices);
+      this.bufferLength = this.vetices.length / 4;
+      this.drawType = gl.TRIANGLE_STRIP;
+      if (!this.buffer) this.buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vetices), gl.STATIC_DRAW);
+      CompareUpdate.set('updateVetices', this.compare, sprite);
+    } //更新颜色
+
+  }, {
+    key: "updateBlendColor",
+    value: function updateBlendColor(gl, sprite) {
+      this.color.setApply(sprite.color);
+      if (this.color.alpha == 1) this.color.alpha = sprite.opacity;
+    } //单帧处理
+
+  }, {
+    key: "update",
+    value: function update(gl, sprite) {
+      this.updateTexture(gl, sprite.texture);
+      this.updateRenderMatrix(gl, sprite);
+      this.updateVetices(gl, sprite);
+      this.updateBlendColor(gl, sprite);
+      if (!this.buffer) return;
+      gl.shader.texture(sprite.texture.texture);
+      gl.shader.transform(this.matrix);
+      gl.shader.blend(this.color);
       gl.shader.buffer(this.buffer, 2, 2, 0, 4);
       gl.drawArrays(this.drawType, 0, this.bufferLength);
     }
   }, {
     key: "destroy",
     value: function destroy(gl) {
-      if (this.buffer) gl.deleteBuffer(this.buffer);
-      this.buffer = null;
-      if (this.texture && !this.texture.forever) gl.deleteTexture(this.texture);
-      this.texture = null;
-      this.destroyed = true;
+      if (this.buffer) {
+        gl.deleteBuffer(this.buffer);
+        this.buffer = null;
+      }
+
+      this.updateTexture(gl);
     }
   }]);
 
-  return Circle;
+  return Builder;
 }();
-var Polygon$1 = function Polygon() {
-  _classCallCheck(this, Polygon);
-};
 
-var Builder$1 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	Rectangle: Rectangle$1,
-	Circle: Circle$1,
-	Polygon: Polygon$1
-});
+function Render$1(sprite, gl, dirty) {
+  if (sprite.render) sprite.render(gl, dirty);
 
-function WebglRender(sprite, gl, dirty) {
-  sprite.emit('draw', gl, dirty);
-
-  if (sprite.morph && Builder$1[sprite.morph]) {
-    if (!sprite.builder || sprite.needUpdate || sprite.builder.destroyed) {
-      sprite.builder = new Builder$1[sprite.morph](sprite, gl);
-      sprite.builder.createBuffer(gl);
-      sprite.builder.createTexture(gl, sprite.texture);
-      dirty.add(sprite.builder);
-    }
-
-    sprite.builder.updateTexture(gl, sprite.texture);
-    gl.shader.blend();
-    gl.shader.transform(sprite.matrix);
-    sprite.builder.draw(gl);
+  if (sprite.texture) {
+    if (!sprite.builder) dirty.add(sprite.builder = new Builder(gl, sprite));
+    sprite.builder.update(gl, sprite);
     dirty.use(sprite.builder);
+  }
+}
+
+function WebglRender(sprite, context, dirty) {
+  if (!(sprite instanceof Array)) return Render$1(sprite, context, dirty);
+
+  for (var i = 0; i < sprite.length; i++) {
+    Render$1(sprite[i], context, dirty);
   }
 }
 
@@ -2649,7 +2574,7 @@ function (_Shader) {
     value: function transform(matrix) {
       var gl = this.gl,
           uniforms = this.uniforms;
-      gl.uniformMatrix4fv(uniforms.uModelMatrix, false, matrix.elements);
+      gl.uniformMatrix4fv(uniforms.uModelMatrix, false, matrix.elements || matrix);
     }
   }, {
     key: "blend",
@@ -2682,4 +2607,4 @@ function (_Shader) {
   return WebGLShader;
 }(Shader);
 
-export { Audio, CanvasRender, Clock, Collision, Color, Container, Director, Dirty, Event, Image, Matrix4, Random, Sprite, Time, Touch, Vector, Vector2, Vector3, WebglRender as WebGLRender, WebGLShader };
+export { Audio, CanvasRender, Clock, Collision, Color, Container, Director, Dirty, Event, Image, ImageSource, Matrix4, Random, Sprite, Time, Touch, Vector, Vector2, Vector3, WebglRender as WebGLRender, WebGLShader };

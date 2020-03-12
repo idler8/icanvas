@@ -1,18 +1,13 @@
-import * as Builder from './builder.js';
-export default function WebglRender(sprite, gl, dirty) {
-	sprite.emit('draw', gl, dirty);
-	if (sprite.morph && Builder[sprite.morph]) {
-		if (!sprite.builder || sprite.needUpdate || sprite.builder.destroyed) {
-			sprite.builder = new Builder[sprite.morph](sprite, gl);
-			sprite.builder.createBuffer(gl);
-			sprite.builder.createTexture(gl, sprite.texture);
-			dirty.add(sprite.builder);
-		}
-
-		sprite.builder.updateTexture(gl, sprite.texture);
-		gl.shader.blend();
-		gl.shader.transform(sprite.matrix);
-		sprite.builder.draw(gl);
+import { Builder } from './builder.js';
+function Render(sprite, gl, dirty) {
+	if (sprite.render) sprite.render(gl, dirty);
+	if (sprite.texture) {
+		if (!sprite.builder) dirty.add((sprite.builder = new Builder(gl, sprite)));
+		sprite.builder.update(gl, sprite);
 		dirty.use(sprite.builder);
 	}
+}
+export default function WebglRender(sprite, context, dirty) {
+	if (!(sprite instanceof Array)) return Render(sprite, context, dirty);
+	for (let i = 0; i < sprite.length; i++) Render(sprite[i], context, dirty);
 }

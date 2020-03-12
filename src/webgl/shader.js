@@ -131,7 +131,7 @@ export default class WebGLShader extends Shader {
 	}
 	transform(matrix) {
 		let { gl, uniforms } = this;
-		gl.uniformMatrix4fv(uniforms.uModelMatrix, false, matrix.elements);
+		gl.uniformMatrix4fv(uniforms.uModelMatrix, false, matrix.elements || matrix);
 	}
 	blend(color) {
 		let { gl, uniforms } = this;

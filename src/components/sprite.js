@@ -11,17 +11,10 @@ export default class Sprite extends Container {
 		this.size = new Vector2(options.width || 0, options.height || 0);
 		this.staticWidth = options.width ? true : false;
 		this.staticHeight = options.height ? true : false;
-
 		this.clip = null;
-
 		this.texture = options.texture;
-
 		this.invertMatrixId = 0;
 		this.invertMatrix = new Matrix4();
-		this.on('check', function(array) {
-			if (!this.visible) return;
-			if (this.texture) array.push(this);
-		});
 	}
 	updateTransformInvert() {
 		if (this.invertMatrixId == this.transformId) return;
@@ -33,30 +26,20 @@ export default class Sprite extends Container {
 		return this._texture;
 	}
 	set texture(texture) {
-		this._texture = texture;
-		if (!texture) return (this.needUpdate = false);
+		if (!(this._texture = texture)) return;
 		if (!this.staticWidth) this.size.x = texture.width;
 		if (!this.staticHeight) this.size.y = texture.height;
-		this.needUpdate = true;
-	}
-	set morph(a) {
-		this._morph = a;
-		this.needUpdate = true;
-	}
-	get morph() {
-		return this._morph;
 	}
 	setClip(sprite) {
 		this.clip = [sprite.x, sprite.y, sprite.width, sprite.height];
+		this.needUpdateClip = true;
 		if (!this.staticWidth) this.size.x = sprite.width;
 		if (!this.staticHeight) this.size.y = sprite.height;
-		this.needUpdate = true;
 		return this;
 	}
 	set width(a) {
 		this.size.x = a;
 		this.staticWidth = true;
-		this.needUpdate = true;
 	}
 	get width() {
 		return this.size.x;
@@ -64,7 +47,6 @@ export default class Sprite extends Container {
 	set height(a) {
 		this.size.y = a;
 		this.staticHeight = true;
-		this.needUpdate = true;
 	}
 	get height() {
 		return this.size.y;
@@ -76,14 +58,12 @@ export default class Sprite extends Container {
 	}
 	set anchorX(x) {
 		this.anchor.x = x;
-		this.needUpdate = true;
 	}
 	get anchorX() {
 		return this.anchor.x;
 	}
 	set anchorY(y) {
 		this.anchor.y = y;
-		this.needUpdate = true;
 	}
 	get anchorY() {
 		return this.anchor.y;

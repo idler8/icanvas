@@ -28,7 +28,7 @@ export function rgb2hex(rgb) {
 export default class Color extends Vector {
 	constructor(color) {
 		super(1, 1, 1, 1);
-		this.setApply(arguments.length > 1 ? arguments : color);
+		if (color !== undefined) this.setApply(arguments.length > 1 ? arguments : color);
 	}
 	set number(n) {
 		hex2rgb(n, this.elements);

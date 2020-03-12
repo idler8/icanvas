@@ -16,11 +16,37 @@ export class Loader {
 		return this.resources[key];
 	}
 }
+export class ImageSource {
+	constructor(image) {
+		this.source = image;
+		this.src = image.src;
+		this.sourceId = 0; //资源Id
+		this.width = 0; //资源宽
+		this.height = 0; //资源高
+
+		this.texture = null; //webgl纹理储存位置
+		this.textureId = 0; //纹理ID
+		this.forever = this.src ? true : false; //生成纹理后禁止删除
+		this.optimization = false; //在生成纹理后干掉源内存
+		this.update();
+	}
+	update() {
+		this.sourceId++;
+		this.width = this.source.width;
+		this.height = this.source.height;
+	}
+	getContext(type) {
+		if (this.context) return this.context;
+		if (!this.source || !this.source.getContext) return;
+		this.context = this.source.getContext(type);
+		return this.context;
+	}
+}
 export class Image extends Loader {
 	//读取并生成贴图对象
 	load(key, url) {
 		return this.loader.load(url).then(image => {
-			this.resources[key] = image;
+			this.resources[key] = new ImageSource(image);
 		});
 	}
 }

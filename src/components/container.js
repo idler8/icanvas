@@ -1,5 +1,6 @@
 import Event from '../utils/event.js';
 import Vector2 from '../vector/vector2.js';
+import Color from '../vector/color.js';
 import Matrix4 from '../vector/matrix4.js';
 export default class Container extends Event {
 	constructor(options = {}) {
@@ -9,6 +10,8 @@ export default class Container extends Event {
 		this.children = [];
 		this.touchChildren = true;
 		this.visible = !(options.visible === false);
+		this.color = options.color || new Color(options.red || 1, options.green || 1, options.blue || 1, options.alpha || 1);
+		this.opacity = options.opacity || 1;
 		this.zIndex = options.zIndex || 0;
 
 		this.transformParentId = 0;
@@ -155,12 +158,15 @@ export default class Container extends Event {
 		this.children.length = 0;
 		return this;
 	}
-	pushTo(array = []) {
-		if (!this.visible) return;
+	pushTo(array = [], opacity = 1) {
+		if (!this.visible) return array;
+		if (this.preUpdate && this.preUpdate(array)) return array;
 		this.updateTransform(false);
-		this.emit('check', array);
+		this._opacity = this.opacity == 1 ? opacity : this.opacity;
+		array.push(this);
 		for (let i = 0, len = this.children.length; i < len; i++) {
-			this.children[i].pushTo(array);
+			this.children[i].pushTo(array, this._opacity);
 		}
+		return array;
 	}
 }
