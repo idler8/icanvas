@@ -2500,7 +2500,7 @@
     Polygon: Polygon
   });
 
-  function CanvasRender(sprite, context) {
+  function CanvasRender(sprite, context, dirty) {
     sprite.emit('draw', context, dirty);
 
     if (sprite.morph && Builder[sprite.morph]) {

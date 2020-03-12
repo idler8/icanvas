@@ -1,5 +1,5 @@
 import * as Builder from './builder.js';
-export default function CanvasRender(sprite, context) {
+export default function CanvasRender(sprite, context, dirty) {
 	sprite.emit('draw', context, dirty);
 	if (sprite.morph && Builder[sprite.morph]) {
 		if (!sprite.builder || sprite.needUpdate) sprite.builder = new Builder[sprite.morph](sprite, context);
