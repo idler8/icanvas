@@ -33,15 +33,9 @@ export default class Director extends Container {
 	get middle() {
 		return this.getY(0.5);
 	}
-	set(scene) {
-		if (arguments.length > 1) {
-			for (let i = 0; i < arguments.length; i++) this.set(arguments[i]);
-		} else if (scene instanceof Array) {
-			for (let i = 0; i < scene.length; i++) this.set(scene[i]);
-		} else {
-			if (Object.prototype.toString.call(scene) == '[object Function]') {
-				if (scene.constructor && scene.name) this.scenes[scene.name] = scene;
-			}
+	set(name, scene) {
+		if (Object.prototype.toString.call(scene) == '[object Function]') {
+			if (scene.constructor) this.scenes[name] = scene;
 		}
 		return this;
 	}

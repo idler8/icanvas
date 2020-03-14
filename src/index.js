@@ -16,7 +16,7 @@ export { default as Container } from './components/container.js';
 export { default as Director } from './components/director.js';
 export { default as Sprite } from './components/sprite.js';
 
-export { Image, Audio, ImageSource } from './resource.js';
+export { ImageLoader, AudioLoader, ImageSource, AudioSource, Loader } from './resource.js';
 
 export { default as CanvasRender } from './canvas/render.js';
 export { default as WebGLRender } from './webgl/render.js';

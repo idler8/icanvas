@@ -2033,19 +2033,9 @@
       }
     }, {
       key: "set",
-      value: function set(scene) {
-        if (arguments.length > 1) {
-          for (var i = 0; i < arguments.length; i++) {
-            this.set(arguments[i]);
-          }
-        } else if (scene instanceof Array) {
-          for (var _i = 0; _i < scene.length; _i++) {
-            this.set(scene[_i]);
-          }
-        } else {
-          if (Object.prototype.toString.call(scene) == '[object Function]') {
-            if (scene.constructor && scene.name) this.scenes[scene.name] = scene;
-          }
+      value: function set(name, scene) {
+        if (Object.prototype.toString.call(scene) == '[object Function]') {
+          if (scene.constructor) this.scenes[name] = scene;
         }
 
         return this;
@@ -2244,31 +2234,13 @@
     return Sprite;
   }(Container);
 
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-
-    return obj;
-  }
-
-  var defineProperty = _defineProperty;
-
   var Loader =
   /*#__PURE__*/
   function () {
-    function Loader(loader) {
+    function Loader() {
       classCallCheck(this, Loader);
 
       this.resources = {};
-      this.loader = loader;
     }
 
     createClass(Loader, [{
@@ -2339,86 +2311,227 @@
 
     return ImageSource;
   }();
-  var Image =
+  var ImageLoader =
   /*#__PURE__*/
   function (_Loader) {
-    inherits(Image, _Loader);
+    inherits(ImageLoader, _Loader);
 
-    function Image() {
-      classCallCheck(this, Image);
+    function ImageLoader() {
+      classCallCheck(this, ImageLoader);
 
-      return possibleConstructorReturn(this, getPrototypeOf(Image).apply(this, arguments));
+      return possibleConstructorReturn(this, getPrototypeOf(ImageLoader).apply(this, arguments));
     }
 
-    createClass(Image, [{
+    createClass(ImageLoader, [{
       key: "load",
       //读取并生成贴图对象
       value: function load(key, url) {
         var _this2 = this;
 
-        return this.loader.load(url).then(function (image) {
-          _this2.resources[key] = new ImageSource(image);
+        return new Promise(function (resolve, reject) {
+          var image = new Image();
+
+          image.onload = function () {
+            return resolve(_this2.resources[key] = new ImageSource(image));
+          };
+
+          image.onerror = reject;
+          image.key = image.src = url;
         });
       }
     }]);
 
-    return Image;
+    return ImageLoader;
   }(Loader);
-  var Audio =
+  var AudioSource =
   /*#__PURE__*/
-  function (_Loader2) {
-    inherits(Audio, _Loader2);
+  function () {
+    function AudioSource() {
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    function Audio() {
-      var _getPrototypeOf2;
+      classCallCheck(this, AudioSource);
 
-      var _this3;
-
-      classCallCheck(this, Audio);
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      _this3 = possibleConstructorReturn(this, (_getPrototypeOf2 = getPrototypeOf(Audio)).call.apply(_getPrototypeOf2, [this].concat(args)));
-
-      defineProperty(assertThisInitialized(_this3), "_mute", false);
-
-      return _this3;
+      if (!options.src) throw '错误的音频地址';
+      this._src = options.src;
+      this._volume = options.volume || 1;
+      this._loop = options.loop || false;
+      this._muted = options.muted || false;
+      this._loaded = false;
+      this._onload = options.onload;
+      this._sounds = [];
+      this.load();
     }
 
-    createClass(Audio, [{
+    createClass(AudioSource, [{
       key: "load",
-      value: function load(key, url) {
-        var _this4 = this;
+      value: function load() {
+        var _this3 = this;
 
-        return this.loader.load(url).then(function (audio) {
-          return _this4.resources[key] = audio;
+        var sound = this._sounds.find(function (s) {
+          return s.paused;
         });
-      } //静音
 
+        if (!sound) {
+          sound = new Audio();
+          sound.muted = this.muted();
+          sound.volume = this.volume();
+          sound.loop = this.loop();
+
+          if (!this._loaded) {
+            sound.oncanplay = function () {
+              if (!_this3._loaded && _this3._onload) {
+                _this3._onload();
+              }
+            };
+          }
+
+          sound.src = this._src;
+
+          this._sounds.push(sound);
+        }
+
+        return sound;
+      }
     }, {
-      key: "mute",
-      get: function get() {
-        return this._mute;
-      },
-      set: function set(mute) {
-        this._mute = mute;
-        this.loader.mute(mute);
-      } //设置音量
+      key: "play",
+      value: function play(loop) {
+        this.loop(loop);
+        return this.load().play();
+      }
+    }, {
+      key: "pause",
+      value: function pause() {
+        this._sounds.forEach(function (sound) {
+          return sound.pause();
+        });
 
+        return this;
+      }
+    }, {
+      key: "stop",
+      value: function stop() {
+        for (var i = 0; i < this._sounds.length; i++) {
+          this._sounds[i].pause();
+
+          this._sounds[i].currentTime = 0;
+        }
+
+        return this;
+      }
+    }, {
+      key: "loop",
+      value: function loop(_loop) {
+        if (_loop === undefined) return this._loop;
+        this._loop = _loop;
+
+        for (var i = 0; i < this._sounds.length; i++) {
+          this._sounds[i].loop = _loop;
+        }
+
+        return this;
+      }
     }, {
       key: "volume",
-      set: function set() {
-        var v = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-        this.loader.volume(v);
-      },
-      get: function get() {
-        return this.loader.volume();
+      value: function volume(_volume) {
+        if (_volume === undefined) return this._volume;
+        this._volume = _volume;
+
+        for (var i = 0; i < this._sounds.length; i++) {
+          this._sounds[i].volume = _volume;
+        }
+
+        return this;
+      }
+    }, {
+      key: "muted",
+      value: function muted(_muted) {
+        if (_muted === undefined) return this._muted;
+        this._muted = _muted;
+
+        for (var i = 0; i < this._sounds.length; i++) {
+          this._sounds[i].muted = _muted;
+        }
+
+        return this;
+      }
+    }, {
+      key: "destroy",
+      value: function destroy() {
+        var ready = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+        var clearArr = ready ? this._sounds.splice(ready) : this._sounds;
+        clearArr.forEach(function (sound) {
+          return sound.destroy && sound.destroy();
+        });
+        return this;
       }
     }]);
 
-    return Audio;
+    return AudioSource;
+  }();
+  var AudioLoader =
+  /*#__PURE__*/
+  function (_Loader2) {
+    inherits(AudioLoader, _Loader2);
+
+    function AudioLoader() {
+      var _this4;
+
+      classCallCheck(this, AudioLoader);
+
+      _this4 = possibleConstructorReturn(this, getPrototypeOf(AudioLoader).call(this));
+      _this4._muted = false;
+      _this4._volume = 1;
+      return _this4;
+    }
+
+    createClass(AudioLoader, [{
+      key: "load",
+      value: function load(key, url) {
+        var _this5 = this;
+
+        return new Promise(function (resolve, reject) {
+          _this5.resources[key] = new AudioSource({
+            src: url,
+            onload: resolve
+          });
+        });
+      }
+    }, {
+      key: "muted",
+      value: function muted(_muted2) {
+        var _this6 = this;
+
+        if (_muted2 === undefined) return this._muted;
+        this._muted = _muted2;
+        return Object.keys(this.resources).forEach(function (key) {
+          _this6.resources[key].muted(_muted2);
+        });
+      }
+    }, {
+      key: "volume",
+      value: function volume(_volume2) {
+        var _this7 = this;
+
+        if (_volume2 === undefined) return this._volume;
+        this._volume = _volume2;
+        return Object.keys(this.resources).forEach(function (key) {
+          _this7.resources[key].volume(_volume2);
+        });
+      }
+    }, {
+      key: "play",
+      value: function play(key, loop) {
+        if (!this.resources[key]) return;
+        return this.resources[key].play().loop(loop);
+      }
+    }, {
+      key: "loop",
+      value: function loop(key) {
+        return this.play(key, true);
+      }
+    }]);
+
+    return AudioLoader;
   }(Loader);
 
   function Render(sprite, context, dirty) {
@@ -2828,7 +2941,8 @@
     return WebGLShader;
   }(Shader);
 
-  exports.Audio = Audio;
+  exports.AudioLoader = AudioLoader;
+  exports.AudioSource = AudioSource;
   exports.CanvasRender = CanvasRender;
   exports.Clock = Clock;
   exports.Collision = Collision;
@@ -2837,8 +2951,9 @@
   exports.Director = Director;
   exports.Dirty = Dirty;
   exports.Event = Event;
-  exports.Image = Image;
+  exports.ImageLoader = ImageLoader;
   exports.ImageSource = ImageSource;
+  exports.Loader = Loader;
   exports.Matrix4 = Matrix4;
   exports.Random = Random;
   exports.Sprite = Sprite;
