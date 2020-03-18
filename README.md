@@ -25,7 +25,7 @@
 
 ### 界面组件
 #### [容器组件](src/components/container.js)`ICanvas.Container`
-#### [场景管理容器组件]](src/component/director.js)`ICanvas.Director`
+#### [场景管理容器组件](src/component/director.js)`ICanvas.Director`
 #### [图片精灵组件](src/components/sprite.js)`ICanvas.Sprite`
 
 ### 工具包
