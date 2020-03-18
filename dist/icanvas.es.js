@@ -1578,9 +1578,9 @@ function () {
     value: function play() {
       var position = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       if (!this.context) return this;
-      this.currentTime = Date.now() - position; //开始时间戳
+      this.currentTime = Date.now(); //开始时间戳
 
-      this.stepTime = 0; //上一步时序
+      this.stepTime = position; //上一步时序
 
       this.paused = false; //不暂停
 
@@ -1647,7 +1647,9 @@ function () {
             var mult = (stepEnd - start) / duration;
 
             for (var _key2 in to) {
-              this.context[_key2] = (to[_key2] - this.runtime[_key2]) * mult;
+              if (typeof to[_key2] == 'number') {
+                this.context[_key2] = this.runtime[_key2] + (to[_key2] - this.runtime[_key2]) * mult;
+              }
             }
           }
         }

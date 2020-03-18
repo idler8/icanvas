@@ -51,8 +51,8 @@ export default class Animation {
 	}
 	play(position = 0) {
 		if (!this.context) return this;
-		this.currentTime = Date.now() - position; //开始时间戳
-		this.stepTime = 0; //上一步时序
+		this.currentTime = Date.now(); //开始时间戳
+		this.stepTime = position; //上一步时序
 		this.paused = false; //不暂停
 		return this;
 	}
@@ -98,7 +98,9 @@ export default class Animation {
 				if (stepEnd > start && stepEnd < end) {
 					let mult = (stepEnd - start) / duration;
 					for (let key in to) {
-						this.context[key] = (to[key] - this.runtime[key]) * mult;
+						if (typeof to[key] == 'number') {
+							this.context[key] = this.runtime[key] + (to[key] - this.runtime[key]) * mult;
+						}
 					}
 				}
 			}
