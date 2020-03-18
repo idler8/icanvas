@@ -1797,8 +1797,7 @@
         }
 
         if (stepEnd >= this.duration) {
-          this.stop();
-          if (this.repeat) this.play(stepEnd - this.duration);
+          this.repeat ? this.play(stepEnd - this.duration) : this.pause();
         } else {
           this.stepTime = stepEnd;
         }
