@@ -1647,7 +1647,12 @@ function () {
       }
 
       if (stepEnd >= this.duration) {
-        this.repeat ? this.play(stepEnd - this.duration) : this.stop(0);
+        if (this.repeat) {
+          this.play(0);
+          this.currentTime -= stepEnd - this.duration;
+        } else {
+          this.stop(0);
+        }
       } else {
         this.stepTime = stepEnd;
       }
