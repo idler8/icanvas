@@ -49,36 +49,30 @@ export default class Animation {
 	}
 	play(position = 0) {
 		if (!this.context) return this;
-		if (this.pauseTime) this.pauseTime = 0;
-		if (!this.startTime) this.startTime = Date.now();
-		this.startTime -= position;
-		return this;
-	}
-	pause() {
-		this.pauseTime = Date.now();
-		return this;
-	}
-	stop() {
-		this.startTime = 0; //开始时间戳
-		this.pauseTime = 0; //暂停时间戳
+		this.currentTime = Date.now() - position; //开始时间戳
 		this.stepTime = 0; //上一步时序
+		this.paused = false; //不暂停
+		return this;
+	}
+	pause(paused) {
+		this.paused = paused;
 		return this;
 	}
 	scale(scale) {
 		if (scale === undefined) return this.speed;
 		// let step = this.stepTime / this.duration;
-		// this.startTime += this.stepTime - (this.stepTime * scale) / this.speed;
+		// this.currentTime += this.stepTime - (this.stepTime * scale) / this.speed;
 		// console.log(step, this.stepTime, step - this.stepTime);
 		// this.stepTime = step;
 		this.speed = scale;
 		return this;
 	}
 	step(current) {
-		if (!this.startTime) return;
+		if (!this.currentTime) return;
 		if (!current) current = Date.now();
-		let longTime = current - this.startTime;
-		this.startTime = current;
-		if (this.pauseTime) return;
+		let longTime = current - this.currentTime;
+		this.currentTime = current;
+		if (this.paused) return;
 		let stepStart = this.stepTime;
 		let stepEnd = stepStart + longTime * this.speed;
 		for (let i = 0; i < this.timing.length; i++) {

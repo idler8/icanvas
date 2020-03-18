@@ -1717,33 +1717,25 @@
       value: function play() {
         var position = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
         if (!this.context) return this;
-        if (this.pauseTime) this.pauseTime = 0;
-        if (!this.startTime) this.startTime = Date.now();
-        this.startTime -= position;
+        this.currentTime = Date.now() - position; //开始时间戳
+
+        this.stepTime = 0; //上一步时序
+
+        this.paused = false; //不暂停
+
         return this;
       }
     }, {
       key: "pause",
-      value: function pause() {
-        this.pauseTime = Date.now();
-        return this;
-      }
-    }, {
-      key: "stop",
-      value: function stop() {
-        this.startTime = 0; //开始时间戳
-
-        this.pauseTime = 0; //暂停时间戳
-
-        this.stepTime = 0; //上一步时序
-
+      value: function pause(paused) {
+        this.paused = paused;
         return this;
       }
     }, {
       key: "scale",
       value: function scale(_scale) {
         if (_scale === undefined) return this.speed; // let step = this.stepTime / this.duration;
-        // this.startTime += this.stepTime - (this.stepTime * scale) / this.speed;
+        // this.currentTime += this.stepTime - (this.stepTime * scale) / this.speed;
         // console.log(step, this.stepTime, step - this.stepTime);
         // this.stepTime = step;
 
@@ -1753,11 +1745,11 @@
     }, {
       key: "step",
       value: function step(current) {
-        if (!this.startTime) return;
+        if (!this.currentTime) return;
         if (!current) current = Date.now();
-        var longTime = current - this.startTime;
-        this.startTime = current;
-        if (this.pauseTime) return;
+        var longTime = current - this.currentTime;
+        this.currentTime = current;
+        if (this.paused) return;
         var stepStart = this.stepTime;
         var stepEnd = stepStart + longTime * this.speed;
 
