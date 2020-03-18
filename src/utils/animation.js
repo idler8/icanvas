@@ -6,7 +6,9 @@ export default class Animation {
 		this.repeat = options.repeat || 0; //重复次数
 		this.speed = options.scale || 1; //动画速度
 		this.runtime = {};
-		this.stop();
+		this.currentTime = 0; //开始时间戳
+		this.stepTime = 0; //上一步时序
+		this.paused = options.paused || false; //暂停状态
 	}
 	clone(context) {
 		return new this.constructor(context, this).set(this.timing);
