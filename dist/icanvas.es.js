@@ -1611,9 +1611,9 @@ function () {
             duration = _this$timing$i.duration,
             end = _this$timing$i.end,
             call = _this$timing$i.call,
-            to = _this$timing$i.to;
+            to = _this$timing$i.to; // if (call && call() == 1) console.log(start, stepStart, stepEnd);
 
-        if (call && start > stepStart && start <= stepEnd) {
+        if (call && start >= stepStart && start < stepEnd) {
           if (typeof call == 'string') {
             if (this.context[call]) this.context[call]();
           } else if (typeof call == 'function') {
@@ -1623,7 +1623,7 @@ function () {
 
         if (!to) continue;
 
-        if (end > stepStart && end <= stepEnd) {
+        if (end <= stepEnd) {
           for (var key in to) {
             this.context[key] = to[key];
           }
@@ -1646,10 +1646,10 @@ function () {
         }
       }
 
-      if (stepEnd >= this.duration) {
+      if (stepEnd > this.duration) {
         if (this.repeat) {
           this.play(0);
-          this.currentTime -= stepEnd - this.duration;
+          this.step(current);
         } else {
           this.stop(0);
         }

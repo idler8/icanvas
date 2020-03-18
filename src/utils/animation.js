@@ -72,7 +72,8 @@ export default class Animation {
 		let stepEnd = stepStart + longTime * this.scale;
 		for (let i = 0; i < this.timing.length; i++) {
 			let { start, duration, end, call, to } = this.timing[i];
-			if (call && start > stepStart && start <= stepEnd) {
+			// if (call && call() == 1) console.log(start, stepStart, stepEnd);
+			if (call && start >= stepStart && start < stepEnd) {
 				if (typeof call == 'string') {
 					if (this.context[call]) this.context[call]();
 				} else if (typeof call == 'function') {
@@ -80,7 +81,7 @@ export default class Animation {
 				}
 			}
 			if (!to) continue;
-			if (end > stepStart && end <= stepEnd) {
+			if (end <= stepEnd) {
 				for (let key in to) this.context[key] = to[key];
 			} else {
 				if (start >= stepStart && start < stepEnd) {
@@ -98,10 +99,10 @@ export default class Animation {
 				}
 			}
 		}
-		if (stepEnd >= this.duration) {
+		if (stepEnd > this.duration) {
 			if (this.repeat) {
 				this.play(0);
-				this.currentTime -= stepEnd - this.duration;
+				this.step(current);
 			} else {
 				this.stop(0);
 			}
