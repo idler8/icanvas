@@ -114,7 +114,7 @@ export default class Animation {
 		}
 		if (stepEnd >= this.duration) {
 			this.stop();
-			if (this._repeat) this.play(stepEnd - this.duration);
+			if (this.repeat) this.play(stepEnd - this.duration);
 		} else {
 			this.stepTime = stepEnd;
 		}
