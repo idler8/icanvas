@@ -1046,189 +1046,122 @@
     return Color;
   }(Vector);
 
-  var Week = ['日', '一', '二', '三', '四', '五', '六'];
+  function polyfill() {
+    JSON.parseForce = function (obj, def) {
+      try {
+        return JSON.parse(obj) || def || {};
+      } catch (e) {
+        return def || {};
+      }
+    };
 
-  var Time =
-  /*#__PURE__*/
-  function () {
-    function Time() {
-      classCallCheck(this, Time);
+    var numberText = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+    var numberUnit = ['', '十', '百', '千', '万', '亿', '兆', '京', '垓', '秭', '穣', '沟', '涧', '正', '载', '极'];
+    var formatActions = {
+      Y: function Y(date) {
+        return date.getFullYear();
+      },
+      m: function m(date) {
+        return ('00' + (date.getMonth() + 1)).slice(-2);
+      },
+      d: function d(date) {
+        return ('00' + date.getDate()).slice(-2);
+      },
+      H: function H(date) {
+        return ('00' + date.getHours()).slice(-2);
+      },
+      i: function i(date) {
+        return ('00' + date.getMinutes()).slice(-2);
+      },
+      s: function s(date) {
+        return ('00' + date.getSeconds()).slice(-2);
+      },
+      S: function S(date) {
+        return ('000' + date.getMilliseconds()).slice(-3);
+      },
+      w: function w(date) {
+        return date.getDay();
+      },
+      W: function W(date) {
+        return numberText[formatActions.w(date)];
+      },
+      q: function q(date) {
+        return (date.getMonth() + 3) / 3 | 0;
+      },
+      Q: function Q(date) {
+        return numberText[formatActions.q(date)];
+      }
+    };
 
-      this.Date = null;
-    }
-    /**
-     * 设置时间
-     * @param {Any} value 设置时间值
-     * @param {String} fmt 源格式
-     * jstimestamp 13位时间戳 到毫秒
-     * timestamp 10位时间戳 到秒
-     */
+    Date.prototype.format = function (fmt) {
+      var _this = this;
+
+      return fmt.replace(/[YmdHisSwWqQ]/g, function (k) {
+        return formatActions[k](_this);
+      });
+    }; //前往本周第几天
 
 
-    createClass(Time, [{
-      key: "Set",
-      value: function Set(value) {
-        var fmt = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'jstimestamp';
+    Date.prototype.toWeek = function () {
+      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+      this.setDate(this.getDate() - (formatActions.w(this) || 7) + n);
+      return this;
+    }; //判断两个时间是否是同一天
 
-        if (!value) {
-          this.Date = null;
-        } else if (value instanceof Date) {
-          this.Data = value;
-        } else if (_typeof_1(value) == 'object') {
-          this.Data = null;
-        } else if (typeof value == 'function') {
-          this.Set(value(), fmt);
-        } else if (value > 0) {
-          this.Date = fmt == 'jstimestamp' ? new Date(value * 1) : new Date(value * 1000);
-        } else if (typeof value == 'string') {
-          this.Date = new Date(value); //todo 格式化年月日时分秒
+
+    Date.prototype.oneDay = function (date) {
+      return this.format('Ymd') == date.format('Ymd');
+    }; //判断两个时间是否是同一周
+
+
+    Date.prototype.oneWeek = function (date) {
+      return new Date(this).toWeek().format('Ymd') == new Date(date).toWeek().format('Ymd');
+    };
+
+    Number.prototype.chinese = function () {
+      if (this < 10) return numberText[parseInt(this)];
+      var nums = parseInt(this).toString().split('');
+      var str = '';
+      var uid = 3;
+      var index = -1;
+      var zero1 = true;
+      var zero2 = false;
+
+      for (var i = nums.length - 1; i >= 0; i--) {
+        if (++index >= 4) {
+          if (zero1) str = str.substr(1);
+          uid++;
+          index = 0;
+          zero1 = true;
+          zero2 = false;
+          str = numberUnit[uid] + str;
+        }
+
+        if (nums[i] === '0' && zero1) continue;
+        zero1 = false;
+
+        if (index == 0) {
+          str = numberText[nums[i]] + str;
+          continue;
+        } else if (index == 1) {
+          if (nums[i] === '1' && i == 0) {
+            str = numberUnit[index] + str;
+            continue;
+          }
+        }
+
+        if (nums[i] === '0') {
+          if (zero2) continue;
+          str = numberText[nums[i]] + str;
+          zero2 = true;
         } else {
-          this.Date = null;
+          str = numberText[nums[i]] + numberUnit[index] + str;
         }
+      }
 
-        if (!this.Date) this.Date = new Date();
-        return this;
-      }
-      /**
-       * 获取时间
-       * @param {String} fmt 获取格式
-       * jstimestamp 13位时间戳 到毫秒
-       * timestamp 10位时间戳 到秒
-       * Date 日期类格式
-       * YmdHisSwWqQ 根据不同格式取得得值合成字符串
-       */
-
-    }, {
-      key: "Get",
-      value: function Get() {
-        var _this = this;
-
-        var fmt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'jstimestamp';
-        if (!this.Date) this.Date = new Date();
-
-        switch (fmt) {
-          case 'Date':
-            return this.Date;
-
-          case 'timestamp':
-            return parseInt(this.Date.getTime() / 1000);
-
-          case 'jstimestamp':
-            return this.Date.getTime();
-        }
-
-        return fmt.replace(/[YmdHisSwWqQ]/g, function (k) {
-          return _this[k];
-        });
-      }
-      /**
-       * 判断两个时间是否是同一天
-       * @param {*} a 时间1
-       * @param {*} b 时间2
-       * @param {*} c 时间1格式
-       * @param {*} d 时间2格式
-       */
-
-    }, {
-      key: "OneDay",
-      value: function OneDay(a, b, c, d) {
-        return this.Set(a, c).Get('Ymd') == this.Set(b, d).Get('Ymd');
-      }
-      /**
-       * 判断两个时间是否是同一周
-       * @param {*} a 时间1
-       * @param {*} b 时间2
-       * @param {*} c 时间1格式
-       * @param {*} d 时间2格式
-       */
-
-    }, {
-      key: "OneWeek",
-      value: function OneWeek(a, b, c, d) {
-        return this.Set(a, c).ToWeek().Get('Ymd') == this.Set(b, d).ToWeek().Get('Ymd');
-      }
-      /**
-       * 将时间前往本周的某一天
-       * @param {*} WeekN
-       */
-
-    }, {
-      key: "ToWeek",
-      value: function ToWeek() {
-        var WeekN = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-        this.Date.setDate(this.Date.getDate() - (this.w || 7) + WeekN);
-        return this;
-      }
-      /**
-       * 获取本周某一天的当前时间
-       * @param {*} WeekN
-       * @param {*} fmt
-       */
-
-    }, {
-      key: "GetWeek",
-      value: function GetWeek(WeeN, fmt) {
-        return this.ToWeek(WeeN).Get(fmt);
-      }
-    }, {
-      key: "Y",
-      get: function get() {
-        return this.Date.getFullYear();
-      }
-    }, {
-      key: "m",
-      get: function get() {
-        return ('00' + (this.Date.getMonth() + 1)).slice(-2);
-      }
-    }, {
-      key: "d",
-      get: function get() {
-        return ('00' + this.Date.getDate()).slice(-2);
-      }
-    }, {
-      key: "H",
-      get: function get() {
-        return ('00' + this.Date.getHours()).slice(-2);
-      }
-    }, {
-      key: "i",
-      get: function get() {
-        return ('00' + this.Date.getMinutes()).slice(-2);
-      }
-    }, {
-      key: "s",
-      get: function get() {
-        return ('00' + this.Date.getSeconds()).slice(-2);
-      }
-    }, {
-      key: "S",
-      get: function get() {
-        return ('000' + this.Date.getMilliseconds()).slice(-3);
-      }
-    }, {
-      key: "w",
-      get: function get() {
-        return this.Date.getDay();
-      }
-    }, {
-      key: "W",
-      get: function get() {
-        return Week[this.w];
-      }
-    }, {
-      key: "q",
-      get: function get() {
-        return (this.Date.getMonth() + 3) / 3 | 0;
-      }
-    }, {
-      key: "Q",
-      get: function get() {
-        return Week[this.q];
-      }
-    }]);
-
-    return Time;
-  }();
+      return str;
+    };
+  }
 
   /**
    * 获取随机值
@@ -1448,7 +1381,7 @@
 
       _this.start = new Vector2(x, y); //起始位置
 
-      _this.tick = new Vector2(0, 0); //本帧移动
+      _this.step = new Vector2(0, 0); //本帧移动
 
       _this.begin = _this.over = time; //触摸时长
 
@@ -1459,7 +1392,7 @@
     createClass(TouchEvent, [{
       key: "set",
       value: function set(x, y) {
-        this.tick.set(x - this.x, y - this.y);
+        this.step.set(x - this.x, y - this.y);
         return get(getPrototypeOf(TouchEvent.prototype), "set", this).call(this, x, y);
       }
     }, {
@@ -1631,9 +1564,7 @@
         var HandleUpdate = function HandleUpdate() {
           requestAnimationFrame(HandleUpdate);
           if (!render.step()) return;
-          render.emit('start');
           render.emit('tick');
-          render.emit('end');
         };
 
         requestAnimationFrame(HandleUpdate);
@@ -1656,7 +1587,7 @@
       this.used = [];
       this.running = false;
       this.interval = interval;
-      this.tickid = 0;
+      this.stepid = 0;
     }
 
     createClass(Dirty, [{
@@ -1686,17 +1617,208 @@
         this.running = false;
       }
     }, {
-      key: "tick",
-      value: function tick() {
+      key: "step",
+      value: function step() {
         var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-        this.tickid += n;
-        if (this.tickid <= this.interval) return;
-        this.tickid = 0;
+        this.stepid += n;
+        if (this.stepid <= this.interval) return;
+        this.stepid = 0;
         this.running = true;
       }
     }]);
 
     return Dirty;
+  }();
+
+  var Animation =
+  /*#__PURE__*/
+  function () {
+    function Animation(context) {
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      classCallCheck(this, Animation);
+
+      this.context = context;
+      this.duration = 0; //总时长
+
+      this.timing = []; //时序列表
+
+      this.repeat = options.repeat || 0; //重复次数
+
+      this.speed = options.scale || 1; //动画速度
+
+      this.runtime = {};
+      this.stop();
+    }
+
+    createClass(Animation, [{
+      key: "clone",
+      value: function clone(context) {
+        return new this.constructor(context, this).set(this.timing);
+      }
+    }, {
+      key: "set",
+      value: function set(timing) {
+        if (timing instanceof Array) {
+          for (var i = 0; i < timing.length; i++) {
+            this.set(timing[i]);
+          }
+        } else {
+          var duration = timing.duration || 0;
+
+          if (timing.to) {
+            this.to(timing.to, duration, timing.position);
+          } else if (duration) {
+            this.wait(duration, timing.position);
+          }
+
+          this.call(timing.call, duration + timing.position);
+        }
+
+        return this;
+      }
+    }, {
+      key: "add",
+      value: function add(duration, position) {
+        var start = this.duration; //TODO position改变start时间
+
+        var end = start + duration;
+        var timing = {
+          start: start,
+          duration: duration,
+          end: end
+        };
+        this.timing.push(timing);
+        this.duration = Math.max(this.duration, end);
+        return timing;
+      }
+    }, {
+      key: "to",
+      value: function to(_to, duration, position) {
+        var timing = this.add(duration, position);
+        timing.to = _to;
+        return this;
+      }
+    }, {
+      key: "wait",
+      value: function wait(duration, position) {
+        this.add(duration, position);
+        return this;
+      }
+    }, {
+      key: "call",
+      value: function call(_call, position) {
+        var timing = this.add(0, position);
+        timing.call = _call;
+        return this;
+      }
+    }, {
+      key: "play",
+      value: function play() {
+        var position = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        if (!this.context) return this;
+
+        if (position) {
+          this.startTime = Date.now() - position;
+        } else {
+          this.startTime += Date.now() - this.pauseTime;
+        }
+
+        this.pauseTime = 0;
+        return this;
+      }
+    }, {
+      key: "pause",
+      value: function pause() {
+        if (!this.paused) this.pauseTime = Date.now();
+        return this;
+      }
+    }, {
+      key: "stop",
+      value: function stop() {
+        this.startTime = 0; //开始时间戳
+
+        this.pauseTime = 0; //暂停时间戳
+
+        this.stepTime = 0; //上一步时序
+
+        return this;
+      }
+    }, {
+      key: "scale",
+      value: function scale(_scale) {
+        if (_scale === undefined) return this.speed; // let step = this.stepTime / this.duration;
+        // this.startTime += this.stepTime - (this.stepTime * scale) / this.speed;
+        // console.log(step, this.stepTime, step - this.stepTime);
+        // this.stepTime = step;
+
+        this.speed = _scale;
+        return this;
+      }
+    }, {
+      key: "step",
+      value: function step(current) {
+        if (this.paused) return;
+        if (!current) current = Date.now();
+        var longTime = current - this.startTime;
+        this.startTime = current;
+        var stepStart = this.stepTime;
+        var stepEnd = stepStart + longTime * this.speed;
+
+        for (var i = 0; i < this.timing.length; i++) {
+          var _this$timing$i = this.timing[i],
+              start = _this$timing$i.start,
+              duration = _this$timing$i.duration,
+              end = _this$timing$i.end,
+              call = _this$timing$i.call,
+              to = _this$timing$i.to;
+
+          if (call && start > stepStart && start <= stepEnd) {
+            if (typeof call == 'string') {
+              if (this.context[call]) this.context[call]();
+            } else if (typeof call == 'function') {
+              call.call(this.context);
+            }
+          }
+
+          if (!to) continue;
+
+          if (end > stepStart && end <= stepEnd) {
+            for (var key in to) {
+              this.context[key] = to[key];
+            }
+          } else {
+            if (start >= stepStart && start < stepEnd) {
+              for (var _key in to) {
+                this.runtime[_key] = this.context[_key];
+              }
+            }
+
+            if (stepEnd > start && stepEnd < end) {
+              var mult = (stepEnd - start) / duration;
+
+              for (var _key2 in to) {
+                this.context[_key2] = (to[_key2] - this.runtime[_key2]) * mult;
+              }
+            }
+          }
+        }
+
+        if (stepEnd >= this.duration) {
+          this.stop();
+          if (this._repeat) this.play(stepEnd - this.duration);
+        } else {
+          this.stepTime = stepEnd;
+        }
+      }
+    }, {
+      key: "paused",
+      get: function get() {
+        return !this.startTime || this.pauseTime;
+      }
+    }]);
+
+    return Animation;
   }();
 
   var Container =
@@ -2373,9 +2495,9 @@
 
         if (!sound) {
           sound = new Audio();
-          sound.muted = this.muted();
-          sound.volume = this.volume();
-          sound.loop = this.loop();
+          sound.muted = this.muted;
+          sound.volume = this.volume;
+          sound.loop = this.loop;
 
           if (!this._loaded) {
             sound.oncanplay = function () {
@@ -2395,15 +2517,21 @@
     }, {
       key: "play",
       value: function play(loop) {
-        this.loop(loop);
-        return this.load().play();
+        if (loop !== undefined) this.loop = loop;
+        var sound = this.load();
+        sound.play()["catch"](function () {
+          return sound.__played = true;
+        });
+        return sound;
       }
     }, {
       key: "pause",
       value: function pause() {
-        this._sounds.forEach(function (sound) {
-          return sound.pause();
-        });
+        for (var i = 0; i < this._sounds.length; i++) {
+          if (this._sounds[i].__played) this._sounds[i].__played = false;
+
+          this._sounds[i].pause();
+        }
 
         return this;
       }
@@ -2411,45 +2539,11 @@
       key: "stop",
       value: function stop() {
         for (var i = 0; i < this._sounds.length; i++) {
+          if (this._sounds[i].__played) this._sounds[i].__played = false;
+
           this._sounds[i].pause();
 
           this._sounds[i].currentTime = 0;
-        }
-
-        return this;
-      }
-    }, {
-      key: "loop",
-      value: function loop(_loop) {
-        if (_loop === undefined) return this._loop;
-        this._loop = _loop;
-
-        for (var i = 0; i < this._sounds.length; i++) {
-          this._sounds[i].loop = _loop;
-        }
-
-        return this;
-      }
-    }, {
-      key: "volume",
-      value: function volume(_volume) {
-        if (_volume === undefined) return this._volume;
-        this._volume = _volume;
-
-        for (var i = 0; i < this._sounds.length; i++) {
-          this._sounds[i].volume = _volume;
-        }
-
-        return this;
-      }
-    }, {
-      key: "muted",
-      value: function muted(_muted) {
-        if (_muted === undefined) return this._muted;
-        this._muted = _muted;
-
-        for (var i = 0; i < this._sounds.length; i++) {
-          this._sounds[i].muted = _muted;
         }
 
         return this;
@@ -2459,10 +2553,59 @@
       value: function destroy() {
         var ready = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
         var clearArr = ready ? this._sounds.splice(ready) : this._sounds;
-        clearArr.forEach(function (sound) {
-          return sound.destroy && sound.destroy();
-        });
+
+        for (var i = 0; i < clearArr.length; i++) {
+          if (clearArr[i].destroy) clearArr[i].destroy();
+        }
+
         return this;
+      }
+    }, {
+      key: "check",
+      value: function check() {
+        for (var i = 0; i < this._sounds.length; i++) {
+          if (this._sounds[i].__played || !this._sounds[i].paused) {
+            this._sounds[i].play();
+          } else {
+            this._sounds[i].pause();
+          }
+        }
+      }
+    }, {
+      key: "loop",
+      get: function get() {
+        return this._loop;
+      },
+      set: function set(loop) {
+        this._loop = loop;
+
+        for (var i = 0; i < this._sounds.length; i++) {
+          this._sounds[i].loop = loop;
+        }
+      }
+    }, {
+      key: "volume",
+      get: function get() {
+        return this._volume;
+      },
+      set: function set(volume) {
+        this._volume = volume;
+
+        for (var i = 0; i < this._sounds.length; i++) {
+          this._sounds[i].volume = volume;
+        }
+      }
+    }, {
+      key: "muted",
+      get: function get() {
+        return this._muted;
+      },
+      set: function set(muted) {
+        this._muted = muted;
+
+        for (var i = 0; i < this._sounds.length; i++) {
+          this._sounds[i].muted = muted;
+        }
       }
     }]);
 
@@ -2497,37 +2640,45 @@
         });
       }
     }, {
-      key: "muted",
-      value: function muted(_muted2) {
+      key: "play",
+      value: function play(key, loop) {
+        if (!this.resources[key]) return;
+        return this.resources[key].play(loop);
+      }
+    }, {
+      key: "check",
+      value: function check() {
         var _this6 = this;
 
-        if (_muted2 === undefined) return this._muted;
-        this._muted = _muted2;
+        Object.keys(this.resources).forEach(function (key) {
+          _this6.resources[key].check();
+        });
+      }
+    }, {
+      key: "muted",
+      get: function get() {
+        return this._muted;
+      },
+      set: function set(muted) {
+        var _this7 = this;
+
+        this._muted = muted;
         return Object.keys(this.resources).forEach(function (key) {
-          _this6.resources[key].muted(_muted2);
+          _this7.resources[key].muted = muted;
         });
       }
     }, {
       key: "volume",
-      value: function volume(_volume2) {
-        var _this7 = this;
+      get: function get() {
+        return this._volume;
+      },
+      set: function set(volume) {
+        var _this8 = this;
 
-        if (_volume2 === undefined) return this._volume;
-        this._volume = _volume2;
+        this._volume = volume;
         return Object.keys(this.resources).forEach(function (key) {
-          _this7.resources[key].volume(_volume2);
+          _this8.resources[key].volume = volume;
         });
-      }
-    }, {
-      key: "play",
-      value: function play(key, loop) {
-        if (!this.resources[key]) return;
-        return this.resources[key].play().loop(loop);
-      }
-    }, {
-      key: "loop",
-      value: function loop(key) {
-        return this.play(key, true);
       }
     }]);
 
@@ -2941,6 +3092,7 @@
     return WebGLShader;
   }(Shader);
 
+  exports.Animation = Animation;
   exports.AudioLoader = AudioLoader;
   exports.AudioSource = AudioSource;
   exports.CanvasRender = CanvasRender;
@@ -2955,9 +3107,9 @@
   exports.ImageSource = ImageSource;
   exports.Loader = Loader;
   exports.Matrix4 = Matrix4;
+  exports.Polyfill = polyfill;
   exports.Random = Random;
   exports.Sprite = Sprite;
-  exports.Time = Time;
   exports.Touch = Touch;
   exports.Vector = Vector;
   exports.Vector2 = Vector2;
