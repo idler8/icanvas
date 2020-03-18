@@ -1645,7 +1645,7 @@
 
       this.repeat = options.repeat || 0; //重复次数
 
-      this.speed = options.scale || 1; //动画速度
+      this.scale = options.scale || 1; //动画速度
 
       this.runtime = {};
       this.currentTime = 0; //开始时间戳
@@ -1718,32 +1718,24 @@
       }
     }, {
       key: "play",
-      value: function play() {
-        var position = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      value: function play(position) {
         if (!this.context) return this;
         this.currentTime = Date.now(); //开始时间戳
 
-        this.stepTime = position; //上一步时序
+        if (position !== undefined) this.stepTime = position; //上一步时序
 
         this.paused = false; //不暂停
 
         return this;
       }
     }, {
-      key: "pause",
-      value: function pause(paused) {
-        this.paused = paused;
-        return this;
-      }
-    }, {
-      key: "scale",
-      value: function scale(_scale) {
-        if (_scale === undefined) return this.speed; // let step = this.stepTime / this.duration;
-        // this.currentTime += this.stepTime - (this.stepTime * scale) / this.speed;
-        // console.log(step, this.stepTime, step - this.stepTime);
-        // this.stepTime = step;
+      key: "stop",
+      value: function stop(position) {
+        if (!this.context) return this;
+        this.currentTime = 0;
+        if (position !== undefined) this.stepTime = position; //上一步时序
 
-        this.speed = _scale;
+        this.paused = true;
         return this;
       }
     }, {
@@ -1753,9 +1745,8 @@
         if (!current) current = Date.now();
         var longTime = current - this.currentTime;
         this.currentTime = current;
-        if (this.paused) return;
         var stepStart = this.stepTime;
-        var stepEnd = stepStart + longTime * this.speed;
+        var stepEnd = stepStart + longTime * this.scale;
 
         for (var i = 0; i < this.timing.length; i++) {
           var _this$timing$i = this.timing[i],
@@ -1799,7 +1790,7 @@
         }
 
         if (stepEnd >= this.duration) {
-          this.repeat ? this.play(stepEnd - this.duration) : this.pause();
+          this.repeat ? this.play(stepEnd - this.duration) : this.stop(0);
         } else {
           this.stepTime = stepEnd;
         }

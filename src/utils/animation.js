@@ -4,7 +4,7 @@ export default class Animation {
 		this.duration = 0; //总时长
 		this.timing = []; //时序列表
 		this.repeat = options.repeat || 0; //重复次数
-		this.speed = options.scale || 1; //动画速度
+		this.scale = options.scale || 1; //动画速度
 		this.runtime = {};
 		this.currentTime = 0; //开始时间戳
 		this.stepTime = 0; //上一步时序
@@ -49,24 +49,18 @@ export default class Animation {
 		timing.call = call;
 		return this;
 	}
-	play(position = 0) {
+	play(position) {
 		if (!this.context) return this;
 		this.currentTime = Date.now(); //开始时间戳
-		this.stepTime = position; //上一步时序
+		if (position !== undefined) this.stepTime = position; //上一步时序
 		this.paused = false; //不暂停
 		return this;
 	}
-	pause(paused) {
-		this.paused = paused;
-		return this;
-	}
-	scale(scale) {
-		if (scale === undefined) return this.speed;
-		// let step = this.stepTime / this.duration;
-		// this.currentTime += this.stepTime - (this.stepTime * scale) / this.speed;
-		// console.log(step, this.stepTime, step - this.stepTime);
-		// this.stepTime = step;
-		this.speed = scale;
+	stop(position) {
+		if (!this.context) return this;
+		this.currentTime = 0;
+		if (position !== undefined) this.stepTime = position; //上一步时序
+		this.paused = true;
 		return this;
 	}
 	step(current) {
@@ -74,9 +68,8 @@ export default class Animation {
 		if (!current) current = Date.now();
 		let longTime = current - this.currentTime;
 		this.currentTime = current;
-		if (this.paused) return;
 		let stepStart = this.stepTime;
-		let stepEnd = stepStart + longTime * this.speed;
+		let stepEnd = stepStart + longTime * this.scale;
 		for (let i = 0; i < this.timing.length; i++) {
 			let { start, duration, end, call, to } = this.timing[i];
 			if (call && start > stepStart && start <= stepEnd) {
@@ -106,7 +99,7 @@ export default class Animation {
 			}
 		}
 		if (stepEnd >= this.duration) {
-			this.repeat ? this.play(stepEnd - this.duration) : this.pause();
+			this.repeat ? this.play(stepEnd - this.duration) : this.stop(0);
 		} else {
 			this.stepTime = stepEnd;
 		}
