@@ -1574,20 +1574,15 @@ function () {
     value: function play() {
       var position = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       if (!this.context) return this;
-
-      if (position) {
-        this.startTime = Date.now() - position;
-      } else {
-        this.startTime += Date.now() - this.pauseTime;
-      }
-
-      this.pauseTime = 0;
+      if (this.pauseTime) this.pauseTime = 0;
+      if (!this.startTime) this.startTime = Date.now();
+      this.startTime -= position;
       return this;
     }
   }, {
     key: "pause",
     value: function pause() {
-      if (!this.paused) this.pauseTime = Date.now();
+      this.pauseTime = Date.now();
       return this;
     }
   }, {
@@ -1615,10 +1610,11 @@ function () {
   }, {
     key: "step",
     value: function step(current) {
-      if (this.paused) return;
+      if (!this.startTime) return;
       if (!current) current = Date.now();
       var longTime = current - this.startTime;
       this.startTime = current;
+      if (this.pauseTime) return;
       var stepStart = this.stepTime;
       var stepEnd = stepStart + longTime * this.speed;
 
@@ -1667,11 +1663,6 @@ function () {
       } else {
         this.stepTime = stepEnd;
       }
-    }
-  }, {
-    key: "paused",
-    get: function get() {
-      return !this.startTime || this.pauseTime;
     }
   }]);
 

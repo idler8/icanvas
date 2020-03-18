@@ -49,16 +49,13 @@ export default class Animation {
 	}
 	play(position = 0) {
 		if (!this.context) return this;
-		if (position) {
-			this.startTime = Date.now() - position;
-		} else {
-			this.startTime += Date.now() - this.pauseTime;
-		}
-		this.pauseTime = 0;
+		if (this.pauseTime) this.pauseTime = 0;
+		if (!this.startTime) this.startTime = Date.now();
+		this.startTime -= position;
 		return this;
 	}
 	pause() {
-		if (!this.paused) this.pauseTime = Date.now();
+		this.pauseTime = Date.now();
 		return this;
 	}
 	stop() {
@@ -76,14 +73,12 @@ export default class Animation {
 		this.speed = scale;
 		return this;
 	}
-	get paused() {
-		return !this.startTime || this.pauseTime;
-	}
 	step(current) {
-		if (this.paused) return;
+		if (!this.startTime) return;
 		if (!current) current = Date.now();
 		let longTime = current - this.startTime;
 		this.startTime = current;
+		if (this.pauseTime) return;
 		let stepStart = this.stepTime;
 		let stepEnd = stepStart + longTime * this.speed;
 		for (let i = 0; i < this.timing.length; i++) {
