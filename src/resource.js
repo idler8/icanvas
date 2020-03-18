@@ -70,9 +70,9 @@ export class AudioSource {
 		let sound = this._sounds.find(s => s.paused);
 		if (!sound) {
 			sound = new Audio();
-			sound.muted = this.muted();
-			sound.volume = this.volume();
-			sound.loop = this.loop();
+			sound.muted = this.muted;
+			sound.volume = this.volume;
+			sound.loop = this.loop;
 			if (!this._loaded) {
 				sound.oncanplay = () => {
 					if (!this._loaded && this._onload) {
@@ -85,43 +85,63 @@ export class AudioSource {
 		}
 		return sound;
 	}
+	get loop() {
+		return this._loop;
+	}
+	set loop(loop) {
+		this._loop = loop;
+		for (let i = 0; i < this._sounds.length; i++) this._sounds[i].loop = loop;
+	}
+	get volume() {
+		return this._volume;
+	}
+	set volume(volume) {
+		this._volume = volume;
+		for (let i = 0; i < this._sounds.length; i++) this._sounds[i].volume = volume;
+	}
+	get muted() {
+		return this._muted;
+	}
+	set muted(muted) {
+		this._muted = muted;
+		for (let i = 0; i < this._sounds.length; i++) this._sounds[i].muted = muted;
+	}
 	play(loop) {
-		this.loop(loop);
-		return this.load().play();
+		if (loop !== undefined) this.loop = loop;
+		let sound = this.load();
+		sound.play().catch(() => (sound.__played = true));
+		return sound;
 	}
 	pause() {
-		this._sounds.forEach(sound => sound.pause());
+		for (let i = 0; i < this._sounds.length; i++) {
+			if (this._sounds[i].__played) this._sounds[i].__played = false;
+			this._sounds[i].pause();
+		}
 		return this;
 	}
 	stop() {
 		for (let i = 0; i < this._sounds.length; i++) {
+			if (this._sounds[i].__played) this._sounds[i].__played = false;
 			this._sounds[i].pause();
 			this._sounds[i].currentTime = 0;
 		}
 		return this;
 	}
-	loop(loop) {
-		if (loop === undefined) return this._loop;
-		this._loop = loop;
-		for (let i = 0; i < this._sounds.length; i++) this._sounds[i].loop = loop;
-		return this;
-	}
-	volume(volume) {
-		if (volume === undefined) return this._volume;
-		this._volume = volume;
-		for (let i = 0; i < this._sounds.length; i++) this._sounds[i].volume = volume;
-		return this;
-	}
-	muted(muted) {
-		if (muted === undefined) return this._muted;
-		this._muted = muted;
-		for (let i = 0; i < this._sounds.length; i++) this._sounds[i].muted = muted;
-		return this;
-	}
 	destroy(ready = 1) {
 		let clearArr = ready ? this._sounds.splice(ready) : this._sounds;
-		clearArr.forEach(sound => sound.destroy && sound.destroy());
+		for (let i = 0; i < clearArr.length; i++) {
+			if (clearArr[i].destroy) clearArr[i].destroy();
+		}
 		return this;
+	}
+	check() {
+		for (let i = 0; i < this._sounds.length; i++) {
+			if (this._sounds[i].__played || !this._sounds[i].paused) {
+				this._sounds[i].play();
+			} else {
+				this._sounds[i].pause();
+			}
+		}
 	}
 }
 export class AudioLoader extends Loader {
@@ -135,25 +155,31 @@ export class AudioLoader extends Loader {
 			this.resources[key] = new AudioSource({ src: url, onload: resolve });
 		});
 	}
-	muted(muted) {
-		if (muted === undefined) return this._muted;
+	get muted() {
+		return this._muted;
+	}
+	set muted(muted) {
 		this._muted = muted;
 		return Object.keys(this.resources).forEach(key => {
-			this.resources[key].muted(muted);
+			this.resources[key].muted = muted;
 		});
 	}
-	volume(volume) {
-		if (volume === undefined) return this._volume;
+	get volume() {
+		return this._volume;
+	}
+	set volume(volume) {
 		this._volume = volume;
 		return Object.keys(this.resources).forEach(key => {
-			this.resources[key].volume(volume);
+			this.resources[key].volume = volume;
 		});
 	}
 	play(key, loop) {
 		if (!this.resources[key]) return;
-		return this.resources[key].play().loop(loop);
+		return this.resources[key].play(loop);
 	}
-	loop(key) {
-		return this.play(key, true);
+	check() {
+		Object.keys(this.resources).forEach(key => {
+			this.resources[key].check();
+		});
 	}
 }

@@ -4,13 +4,14 @@ export { default as Vector3 } from './vector/vector3.js';
 export { default as Matrix4 } from './vector/matrix4.js';
 export { default as Color } from './vector/color.js';
 
-export { default as Time } from './utils/time.js';
+export { default as Polyfill } from './utils/polyfill.js';
 export { default as Random } from './utils/random.js';
 export { default as Collision } from './utils/collision.js';
 export { default as Touch } from './utils/touch.js';
 export { default as Clock } from './utils/clock.js';
 export { default as Event } from './utils/event.js';
 export { default as Dirty } from './utils/dirty.js';
+export { default as Animation } from './utils/animation.js';
 
 export { default as Container } from './components/container.js';
 export { default as Director } from './components/director.js';

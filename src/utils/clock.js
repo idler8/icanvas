@@ -23,9 +23,7 @@ export default class Clock extends Event {
 		let HandleUpdate = function() {
 			requestAnimationFrame(HandleUpdate);
 			if (!render.step()) return;
-			render.emit('start');
 			render.emit('tick');
-			render.emit('end');
 		};
 		requestAnimationFrame(HandleUpdate);
 		return this;

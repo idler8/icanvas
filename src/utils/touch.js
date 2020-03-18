@@ -4,7 +4,7 @@ class TouchEvent extends Vector2 {
 	constructor(id, time, x, y) {
 		super(x, y); //当前位置
 		this.start = new Vector2(x, y); //起始位置
-		this.tick = new Vector2(0, 0); //本帧移动
+		this.step = new Vector2(0, 0); //本帧移动
 		this.begin = this.over = time; //触摸时长
 		this.id = id;
 	}
@@ -33,7 +33,7 @@ class TouchEvent extends Vector2 {
 		return this.distVector(this.start);
 	}
 	set(x, y) {
-		this.tick.set(x - this.x, y - this.y);
+		this.step.set(x - this.x, y - this.y);
 		return super.set(x, y);
 	}
 }

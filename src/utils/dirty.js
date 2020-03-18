@@ -4,7 +4,7 @@ export default class Dirty {
 		this.used = [];
 		this.running = false;
 		this.interval = interval;
-		this.tickid = 0;
+		this.stepid = 0;
 	}
 	add(cache) {
 		if (cache.destroy) this.collect.push(cache);
@@ -23,10 +23,10 @@ export default class Dirty {
 		this.used.length = 0;
 		this.running = false;
 	}
-	tick(n = 1) {
-		this.tickid += n;
-		if (this.tickid <= this.interval) return;
-		this.tickid = 0;
+	step(n = 1) {
+		this.stepid += n;
+		if (this.stepid <= this.interval) return;
+		this.stepid = 0;
 		this.running = true;
 	}
 }
