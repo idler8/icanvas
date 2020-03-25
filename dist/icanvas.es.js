@@ -2462,15 +2462,25 @@ function (_Loader2) {
   return AudioLoader;
 }(Loader);
 
+function TransformUpdate(context, matrix) {
+  var e = matrix.elements;
+  context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
+  return true;
+}
+
 function Render(sprite, context, dirty) {
   var targetAlpha = sprite.color.alpha < 1 ? sprite.color.alpha : sprite._opacity;
   if (targetAlpha == 0) return;
   if (context.globalAlpha != targetAlpha) context.globalAlpha = targetAlpha;
-  if (sprite.render) sprite.render(context, dirty);
+  var transformUpdate = false;
+
+  if (sprite.render) {
+    if (!transformUpdate) transformUpdate = TransformUpdate(context, sprite.matrix);
+    sprite.render(context, dirty);
+  }
 
   if (sprite.texture) {
-    var e = sprite.matrix.elements;
-    context.setTransform(e[0], e[1], e[4], e[5], e[12], e[13]);
+    if (!transformUpdate) transformUpdate = TransformUpdate(context, sprite.matrix);
     if (!sprite.builder) sprite.builder = [];
     sprite.builder.length = 0;
     sprite.builder.push(sprite.texture.source);
