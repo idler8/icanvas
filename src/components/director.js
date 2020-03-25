@@ -42,12 +42,12 @@ export default class Director extends Container {
 	go(scene) {
 		let type = Object.prototype.toString.call(scene);
 		if (type == '[object String]') {
-			if (this.scenes[scene]) this.clear().add(new this.scenes[scene](...Array.prototype.splice(1)));
+			if (this.scenes[scene]) this.clear().add(new this.scenes[scene](...Array.prototype.splice.call(arguments, 1)));
 		} else if (type == '[object Function]') {
 			if (scene.constructor) {
-				this.clear().add(new scene(...Array.prototype.splice(1)));
+				this.clear().add(new scene(...Array.prototype.splice.call(arguments, 1)));
 			} else {
-				let res = scene(...Array.prototype.splice(1));
+				let res = scene(...Array.prototype.splice.call(arguments, 1));
 				if (res instanceof Container) this.clear().add(res);
 			}
 		} else if (type == '[object Object]') {

@@ -1945,12 +1945,12 @@ function (_Container) {
       var type = Object.prototype.toString.call(scene);
 
       if (type == '[object String]') {
-        if (this.scenes[scene]) this.clear().add(_construct(this.scenes[scene], _toConsumableArray(Array.prototype.splice(1))));
+        if (this.scenes[scene]) this.clear().add(_construct(this.scenes[scene], _toConsumableArray(Array.prototype.splice.call(arguments, 1))));
       } else if (type == '[object Function]') {
         if (scene.constructor) {
-          this.clear().add(_construct(scene, _toConsumableArray(Array.prototype.splice(1))));
+          this.clear().add(_construct(scene, _toConsumableArray(Array.prototype.splice.call(arguments, 1))));
         } else {
-          var res = scene.apply(void 0, _toConsumableArray(Array.prototype.splice(1)));
+          var res = scene.apply(void 0, _toConsumableArray(Array.prototype.splice.call(arguments, 1)));
           if (res instanceof Container) this.clear().add(res);
         }
       } else if (type == '[object Object]') {
