@@ -27,6 +27,12 @@ export default class Container extends Event {
 			for (let i = 0; i < this.children.length; i++) this.children[i].emit('destroy');
 		});
 	}
+	get alpha() {
+		return this.color.alpha;
+	}
+	set alpha(a) {
+		this.color.alpha = a;
+	}
 	updateTransform(trace = true) {
 		if (this.parent) {
 			if (trace) this.parent.updateTransform(trace);
@@ -161,6 +167,7 @@ export default class Container extends Event {
 	pushTo(array = [], opacity = 1) {
 		if (!this.visible) return array;
 		if (this.preUpdate && this.preUpdate(array)) return array;
+		this.emit('preUpdate');
 		this.updateTransform(false);
 		this._opacity = this.opacity == 1 ? opacity : this.opacity;
 		array.push(this);

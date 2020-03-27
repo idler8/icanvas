@@ -1967,6 +1967,7 @@
         var opacity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
         if (!this.visible) return array;
         if (this.preUpdate && this.preUpdate(array)) return array;
+        this.emit('preUpdate');
         this.updateTransform(false);
         this._opacity = this.opacity == 1 ? opacity : this.opacity;
         array.push(this);
@@ -1976,6 +1977,14 @@
         }
 
         return array;
+      }
+    }, {
+      key: "alpha",
+      get: function get() {
+        return this.color.alpha;
+      },
+      set: function set(a) {
+        this.color.alpha = a;
       }
     }, {
       key: "x",
