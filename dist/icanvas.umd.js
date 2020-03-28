@@ -2277,8 +2277,8 @@
       key: "checkPoint",
       value: function checkPoint(vector) {
         this.updateTransformInvert();
-        vector.multiplyMatrix4(this.invertMatrix);
-        return vector.x >= -this.width / 2 && vector.y >= -this.height / 2 && vector.x <= this.width / 2 && vector.y <= this.height / 2;
+        vector.multiplyMatrix4(this.invertMatrix).add(this.anchorX, this.anchorY).add(this.width / 2, this.height / 2);
+        return vector.x >= 0 && vector.y >= 0 && vector.x <= this.width && vector.y <= this.height;
       }
     }, {
       key: "texture",
@@ -2729,25 +2729,25 @@
     Circle: function Circle(sprite, vetices) {
       var length = (sprite.width + sprite.height) / 20 | 0;
       var radian = 2 * Math.PI / length;
-      var cx1 = 0.5;
-      var cy1 = 0.5;
-      var rx1 = 0.5;
-      var ry1 = 0.5;
+      var cx = 0.5;
+      var cy = 0.5;
+      var rx = 0.5;
+      var ry = 0.5;
 
       if (sprite.clip) {
-        cx1 = sprite.clip[0] / sprite.texture.width;
-        cy1 = sprite.clip[1] / sprite.texture.height;
-        rx1 = sprite.clip[2] / sprite.texture.width / 2;
-        ry1 = sprite.clip[3] / sprite.texture.height / 2;
+        rx = sprite.clip[2] / 2 / sprite.texture.width;
+        ry = sprite.clip[3] / 2 / sprite.texture.height;
+        cx = sprite.clip[0] / sprite.texture.width + rx;
+        cy = sprite.clip[1] / sprite.texture.height + ry;
       }
 
-      vetices.push(0, 0, cx1, cy1);
+      vetices.push(0, 0, cx, cy);
 
       for (var i = 0; i <= length; i++) {
         var r = i * radian;
         var cos = Math.cos(r);
         var sin = Math.sin(r);
-        vetices.push(0.5 * cos, 0.5 * sin, rx1 * cos + cx1, ry1 * sin + cy1);
+        vetices.push(0.5 * cos, 0.5 * sin, rx * cos + cx, ry * sin + cy);
       }
     },
     Rectangle: function Rectangle(sprite, vetices) {
@@ -2845,7 +2845,7 @@
         this.vetices.length = 0;
         Shape[sprite.morph] ? Shape[sprite.morph](sprite, this.vetices) : Shape.Rectangle(sprite, this.vetices);
         this.bufferLength = this.vetices.length / 4;
-        this.drawType = gl.TRIANGLE_STRIP;
+        this.drawType = sprite.morph == 'Circle' ? gl.TRIANGLE_FAN : gl.TRIANGLE_STRIP;
         if (!this.buffer) this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vetices), gl.STATIC_DRAW);
