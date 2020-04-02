@@ -21,6 +21,7 @@ function Render(sprite, context, dirty) {
 		sprite.builder.push(sprite.left, sprite.top, sprite.width, sprite.height);
 		if (sprite.morph == 'Cricle') {
 			context.save(); // 保存当前ctx的状态
+			context.beginPath();
 			context.arc(-sprite.anchorX, -sprite.anchorY, Math.min(sprite.width, sprite.height) * 0.5, 0, 2 * Math.PI); //画出圆
 			context.clip(); //裁剪上面的圆形
 		}
