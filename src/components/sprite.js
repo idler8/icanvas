@@ -80,11 +80,14 @@ export default class Sprite extends Container {
 	}
 	checkPoint(vector) {
 		this.updateTransformInvert();
-		vector
-			.multiplyMatrix4(this.invertMatrix)
-			.add(this.anchorX, this.anchorY)
-			.add(this.width / 2, this.height / 2);
-		return vector.x >= 0 && vector.y >= 0 && vector.x <= this.width && vector.y <= this.height;
+		vector.multiplyMatrix4(this.invertMatrix).add(this.anchorX, this.anchorY);
+		let center = this.width / 2;
+		let middle = this.height / 2;
+		if (this.morph == 'Circle') {
+			return Math.pow(vector.x / this.width, 2) + Math.pow(vector.y / this.height, 2) <= 1;
+		} else {
+			return vector.x >= -center && vector.y >= -middle && vector.x <= center && vector.y <= middle;
+		}
 	}
 	get left() {
 		return -this.size.x / 2 - this.anchor.x;

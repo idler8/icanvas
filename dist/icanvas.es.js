@@ -2070,8 +2070,15 @@ function (_Container) {
     key: "checkPoint",
     value: function checkPoint(vector) {
       this.updateTransformInvert();
-      vector.multiplyMatrix4(this.invertMatrix).add(this.anchorX, this.anchorY).add(this.width / 2, this.height / 2);
-      return vector.x >= 0 && vector.y >= 0 && vector.x <= this.width && vector.y <= this.height;
+      vector.multiplyMatrix4(this.invertMatrix).add(this.anchorX, this.anchorY);
+      var center = this.width / 2;
+      var middle = this.height / 2;
+
+      if (this.morph == 'Circle') {
+        return Math.pow(vector.x / this.width, 2) + Math.pow(vector.y / this.height, 2) <= 1;
+      } else {
+        return vector.x >= -center && vector.y >= -middle && vector.x <= center && vector.y <= middle;
+      }
     }
   }, {
     key: "texture",
@@ -2496,7 +2503,7 @@ function Render(sprite, context, dirty) {
     if (sprite.clip) Array.prototype.push.apply(sprite.builder, sprite.clip);
     sprite.builder.push(sprite.left, sprite.top, sprite.width, sprite.height);
 
-    if (sprite.morph == 'Cricle') {
+    if (sprite.morph == 'Circle') {
       context.save(); // 保存当前ctx的状态
 
       context.beginPath();
@@ -2507,7 +2514,7 @@ function Render(sprite, context, dirty) {
 
     context.drawImage.apply(context, sprite.builder); //绘制元素
 
-    if (sprite.morph == 'Cricle') context.restore(); // 还原状态
+    if (sprite.morph == 'Circle') context.restore(); // 还原状态
   }
 }
 
