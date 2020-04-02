@@ -2075,7 +2075,7 @@ function (_Container) {
       var middle = this.height / 2;
 
       if (this.morph == 'Circle') {
-        return Math.pow(vector.x / this.width, 2) + Math.pow(vector.y / this.height, 2) <= 1;
+        return Math.pow(vector.x / center, 2) + Math.pow(vector.y / middle, 2) <= 1;
       } else {
         return vector.x >= -center && vector.y >= -middle && vector.x <= center && vector.y <= middle;
       }
